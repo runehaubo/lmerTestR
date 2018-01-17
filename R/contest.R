@@ -113,9 +113,12 @@ contestMD <- function(L, model, eps=sqrt(.Machine$double.eps)) {
                "F value"=Fvalue, "Pr(>F)"=pvalue, check.names = FALSE)
   }
   stopifnot(is.matrix(L), is.numeric(L),
-            ncol(L) == length(model@parlist$beta),
-            nrow(L) >= 1)
-  if(nrow(L) == 1) { # 1D case:
+            ncol(L) == length(model@parlist$beta))
+  if(nrow(L) == 0L) { # May happen if there are no fixed effects
+    x <- numeric(0L)
+    return(mk_Ftable(x, x, x, x))
+  }
+  if(nrow(L) == 1L) { # 1D case:
     res <- contest1D(drop(L), model)
     return(mk_Ftable(Fvalue=res[["t value"]]^2, ndf=1L, ddf=res$df,
                      sigma=model@parlist$sigma))
@@ -130,7 +133,8 @@ contestMD <- function(L, model, eps=sqrt(.Machine$double.eps)) {
   d <- eig_VLbeta$values
   PtL <- crossprod(P, L)[1:q, ]
   if(q <= 0) { # shouldn't happen if L is a proper contrast
-    return(mk_Ftable(NA, NA, NA, NA))
+    x <- numeric(0L)
+    return(mk_Ftable(x, x, x, x))
   }
   if(q == 1) { # 1D case:
     res <- contest1D(PtL, model)

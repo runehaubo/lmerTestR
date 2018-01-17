@@ -121,6 +121,7 @@ single_anova <- function(object, type = c("I", "II", "III", "1", "2", "3"),
 #' @keywords internal
 get_contrasts_type1 <- function(X, terms, keep_intercept = FALSE) {
   p <- ncol(X)
+  if(p == 0L) return(list(matrix(numeric(0L), nrow=0L)))
   # Compute 'normalized' doolittle factorization of XtX:
   # L <- t(doolittle(crossprod(X)))
   L <- normalized_doolittle(crossprod(X))
