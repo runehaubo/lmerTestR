@@ -86,7 +86,7 @@ stopifnot(nrow(an) == 2L,
 # t-statistics also agree:
 coef(summary(m))
 Lmat <- diag(length(fixef(m)))
-rbindall(lapply(1:nrow(Lmat), function(i) contest1D(Lmat[i, ], m)))
+lmerTestR:::rbindall(lapply(1:nrow(Lmat), function(i) contest1D(Lmat[i, ], m)))
 
 # Example with >1 fixef and intercept:
 m <- lmer(Reaction ~ Days + I(Days^2) + (Days | Subject), sleepstudy)
