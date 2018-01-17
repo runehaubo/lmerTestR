@@ -1,11 +1,20 @@
 # utils.R - Utility functions
 
+#' Doolittle Decomposition
+#'
+#' @param x a numeric square matrix with at least 2 columns/rows.
+#' @param eps numerical tolerance on the whether to normalize with components
+#' in \code{L} with the diagonal elements of \code{U}.
+#'
+#' @return a list with two matrices of the same dimension as \code{x}:
+#' \item{L}{lower-left unit-triangular matrix}
+#' \item{U}{upper-right triangular matrix (\emph{not} unit-triangular)}
+#'
+#' @keywords internal
 doolittle <- function(x, eps = 1e-6) {
-  if(!is.matrix(x)) stop("argument 'x' is not a matrix")
-  if(ncol(x) != nrow(x))
-    stop("argument x is not a square matrix")
-  if (!is.numeric(x) )
-    stop("argument x is not numeric")
+  if(!is.matrix(x) || ncol(x) != nrow(x) || !is.numeric(x))
+    stop("argument 'x' should be a numeric square matrix")
+  stopifnot(ncol(x) > 1L)
   n <- nrow(x)
   L <- U <- matrix(0, nrow=n, ncol=n)
   diag(L) <- rep(1, n)
