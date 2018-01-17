@@ -45,20 +45,29 @@
 #' contest1D(c(0, 1), fm) # Test for Days
 #'
 contest1D <- function(L, model) {
+  mk_ttable <- function(estimate, se, ddf) {
+    tstat <- estimate/se
+    pvalue <- 2 * pt(abs(tstat), df = ddf, lower.tail = FALSE)
+    data.frame("Estimate"=estimate, "Std. Error"=se, "df"=ddf,
+               "t value"=tstat, "Pr(>|t|)"=pvalue, check.names=FALSE)
+  }
   if(is.matrix(L)) L <- drop(L)
   stopifnot(is.numeric(L),
             length(L) == length(model@parlist$beta))
+  if(length(L) == 0L) {
+    o <- numeric(0L)
+    return(mk_ttable(o, o, o))
+  }
+  # Contrast estimate and its variance:
   estimate <- sum(L * model@parlist$beta)
+  var_con <- qform(L, model@parlist$vcov_beta)
+  # Compute deninator DF:
   grad_var_con <-
     vapply(model@Jac_list, function(x) qform(L, x), numeric(1L)) # = {L' Jac L}_i
-  var_con <- qform(L, model@parlist$vcov_beta)
-  se.estimate <- sqrt(var_con)
   satt_denom <- qform(grad_var_con, model@A) # g'Ag
   ddf <- drop(2 * var_con^2 / satt_denom) # denominator DF
-  tstat <- estimate/se.estimate
-  pvalue <- 2 * pt(abs(tstat), df = ddf, lower.tail = FALSE)
-  data.frame("Estimate"=estimate, "Std. Error"=se.estimate, "df"=ddf,
-             "t value"=tstat, "Pr(>|t|)"=pvalue, check.names=FALSE)
+  # return t-table:
+  mk_ttable(estimate, sqrt(var_con), ddf)
 }
 
 ##############################################

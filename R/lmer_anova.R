@@ -121,20 +121,22 @@ single_anova <- function(object, type = c("I", "II", "III", "1", "2", "3"),
 #' @keywords internal
 get_contrasts_type1 <- function(X, terms, keep_intercept = FALSE) {
   p <- ncol(X)
-  if(p == 0L) return(list(matrix(numeric(0L), nrow=0L)))
+  if(p == 0L) return(list(matrix(numeric(0L), nrow=0L))) # no fixef
+  if(p == 1L && attr(terms, "intercept")) # intercept-only model
+    return(list(matrix(numeric(0L), ncol=1L)))
   # Compute 'normalized' doolittle factorization of XtX:
   # L <- t(doolittle(crossprod(X)))
-  L <- normalized_doolittle(crossprod(X))
+  L <- if(p == 1L) matrix(1L) else normalized_doolittle(crossprod(X))
   # Determine which rows of L belong to which term:
   asgn <- attr(X, "assign")
   stopifnot(!is.null(asgn))
   term_labels <- attr(terms, "term.labels")
-  term_names <- if(attr(terms, "intercept"))
-    c("(Intercept)", term_labels) else term_labels
+  term_names <- c("(Intercept)", term_labels)
   term_names <- term_names[1 + unique(asgn)] # order appropriately
   # Compute list of row indicators for L matrix:
   ind.list <- setNames(split(1L:p, asgn), nm=term_names)
   ind.list <- ind.list[term_labels] # rm intercept if present
+  # if(length(ind.list) == 0L) return(list(matrix(numeric(0L), nrow=0L)))
   lapply(ind.list, function(rows) L[rows, , drop=FALSE])
 }
 
