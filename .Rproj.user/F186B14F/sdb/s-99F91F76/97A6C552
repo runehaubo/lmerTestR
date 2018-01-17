@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "# utils.R - Utility functions\n\ndoolittle <- function(x, eps = 1e-6) {\n  if(!is.matrix(x)) stop(\"argument 'x' is not a matrix\")\n  if(ncol(x) != nrow(x))\n    stop(\"argument x is not a square matrix\")\n  if (!is.numeric(x) )\n    stop(\"argument x is not numeric\")\n  n <- nrow(x)\n  L <- U <- matrix(0, nrow=n, ncol=n)\n  diag(L) <- rep(1, n)\n  for(i in 1:n) {\n    ip1 <- i + 1\n    im1 <- i - 1\n    for(j in 1:n) {\n      U[i,j] <- x[i,j]\n      if (im1 > 0) {\n        for(k in 1:im1) {\n          U[i,j] <- U[i,j] - L[i,k] * U[k,j]\n        }\n      }\n    }\n    if ( ip1 <= n ) {\n      for ( j in ip1:n ) {\n        L[j,i] <- x[j,i]\n        if ( im1 > 0 ) {\n          for ( k in 1:im1 ) {\n            L[j,i] <- L[j,i] - L[j,k] * U[k,i]\n          }\n        }\n        L[j, i] <- if(abs(U[i, i]) < eps) 0 else L[j,i] / U[i,i]\n      }\n    }\n  }\n  L[abs(L) < eps] <- 0\n  U[abs(U) < eps] <- 0\n  list( L=L, U=U )\n}\n\nnormalized_doolittle <- function(X, eps=eps) {\n  U <- doolittle(X)$U\n  d <- diag(U)\n  for(i in 1:nrow(U))\n    if(d[i] > 0) U[i, ] <- U[i, ] / d[i]\n  U\n}\n\n\n##############################################\n######## qform\n##############################################\n\n#' Compute Quadratic Form\n#'\n#' Efficiently computes \\eqn{x' A x} - or in R-notation:\n#'\n#' Length of \\code{x} should equal the number of rows and columns of \\code{A}.\n#'\n#' @param x a numeric vector\n#' @param A a symmetric numeric matrix\n#'\n#' @return a numerical scalar\n#' @keywords internal\nqform <- function(x, A) {\n  sum(x * (A %*% x)) # quadratic form: x'Ax\n}\n\n##############################################\n######## rbindall\n##############################################\n\n#' \\code{rbind} Multiple Objects\n#'\n#' @param ... objects to be \\code{rbind}'ed - typically matrices or vectors\n#'\n#' @keywords internal\nrbindall <- function(...) do.call(rbind, ...)\n\n##############################################\n######## cond\n##############################################\ncond <- function(X) with(eigen(X, only.values=TRUE), max(values) / min(values))\n\n",
+    "created" : 1516176792365.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "4120845790",
+    "id" : "97A6C552",
+    "lastKnownWriteTime" : 1516201745,
+    "last_content_update" : 1516201745348,
+    "path" : "~/Documents/Rpackages/lmerTestR/pkg/R/utils.R",
+    "project_path" : "R/utils.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 7,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
