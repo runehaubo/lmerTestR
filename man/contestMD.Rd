@@ -4,7 +4,8 @@
 \alias{contestMD}
 \title{Multiple Degrees-of-Freedom Contrast Tests}
 \usage{
-contestMD(L, model, eps = sqrt(.Machine$double.eps))
+contestMD(L, model, ddf = c("Satterthwaite", "KR"),
+  eps = sqrt(.Machine$double.eps))
 }
 \arguments{
 \item{L}{a contrast matrix with nrow >= 1 and ncol ==
@@ -12,6 +13,9 @@ contestMD(L, model, eps = sqrt(.Machine$double.eps))
 
 \item{model}{a model object fitted with \code{lmer} from package
 \pkg{lmerTestR}, i.e., an object of class \code{\link{lmerModLmerTest}}.}
+
+\item{ddf}{the method for computing the denominator degrees of freedom and
+F-statistics. \code{ddf="KR"} uses Kenward-Roger's method.}
 
 \item{eps}{tolerance on eigenvalues to determine if an eigenvalue is
 positive. The number of positive eigenvalues determine the rank of

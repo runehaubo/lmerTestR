@@ -8,9 +8,13 @@ NULL
 ##############################################
 #' ANOVA Tables for Linear Mixed Models
 #'
-#' ANOVA table with F-tests and p-values using Satterthwaite's method for
-#' denominator degrees-of-freedom. Models should be fitted with
+#' ANOVA table with F-tests and p-values using Satterthwaite's or
+#' Kenward-Roger's method for denominator degrees-of-freedom and F-statistic.
+#' Models should be fitted with
 #' \code{\link{lmer}} from the \pkg{lmerTestR}-package.
+#'
+#' The \code{"KR"} method calls \code{pbkrtest::KRmodcomp} internally and
+#' reports scaled F-statistics and associated denominator degrees-of-freedom.
 #'
 #' @param object an \code{lmerModLmerTest} object; the result of \code{lmer()}
 #' after loading the \pkg{lmerTestR}-package.
@@ -19,13 +23,15 @@ NULL
 #' ignored.
 #' @param type the type of ANOVA table requested (using SAS terminology)
 #' with Type I being the familiar sequential ANOVA table.
-#' @param ddf the method for computing the denominator degrees of freedom.
+#' @param ddf the method for computing the denominator degrees of freedom and
+#' F-statistics. \code{ddf="KR"} uses Kenward-Roger's method,
 #' \code{ddf = "lme4"} returns the lme4-anova table, i.e., using the anova
 #' method for \code{lmerMod} objects as defined in the \pkg{lme4}-package and
 #' ignores the \code{type} argument.
 #'
 #' @return an ANOVA table
-#' @seealso \code{\link{contestMD}} for multi degree-of-freedom contrast tests.
+#' @seealso \code{\link{contestMD}} for multi degree-of-freedom contrast tests
+#' and \code{\link[pbkrtest]{KRmodcomp}} for the \code{"KR"} method.
 #' @author Rune Haubo B. Christensen
 #' @importFrom methods is callNextMethod
 #' @export
@@ -75,25 +81,25 @@ single_anova <- function(object, type = c("I", "II", "III", "1", "2", "3"),
                          ddf=c("Satterthwaite", "KR")) {
   if(!inherits(object, "lmerModLmerTest"))
     warning("calling anova(<fake-lmerModLmerTest-object>) ...")
+  if(!is.character(type)) type <- as.character(type)
   type <- as.integer(as.roman(match.arg(type)))
   if(type > 1L) {
     warning("Type II and III anova tables are not yet implemented; returning type I")
     type <- 1L
   }
   ddf <- match.arg(ddf)
-  if(ddf == "KR")
-    warning("KR method not yet implemented. Using Satterthwaite instead",
-            call.=FALSE)
   # Get list of contrast matrices (L) - one for each model term:
   L_list <- get_contrasts_type1(model.matrix(object), terms(object))
   # Get F-test for each term and collect in table:
-  table <- rbindall(lapply(L_list, contestMD, model=object))
+  table <- rbindall(lapply(L_list, contestMD, model=object, ddf=ddf))
   # Format ANOVA table and return:
   rownames(table) <- names(L_list)
   response_name <- deparse(formula(object)[[2L]], width.cutoff = 500L)
+  method <- switch(ddf, "Satterthwaite" = "Satterthwaite's",
+                   "KR" = "Kenward-Roger's")
   attr(table, "heading") <-
     paste("Type", as.roman(type), "Analysis of Variance Table",
-          "with", paste0(ddf, "\'s"), "method")
+          "with", method, "method")
   class(table) <- c("anova", "data.frame")
   table
 }

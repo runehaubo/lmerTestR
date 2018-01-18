@@ -4,7 +4,7 @@
 \alias{contest1D}
 \title{Contrast Tests in 1D}
 \usage{
-contest1D(L, model)
+contest1D(L, model, ddf = c("Satterthwaite", "KR"))
 }
 \arguments{
 \item{L}{a numeric (contrast) vector of the same length as
@@ -12,6 +12,9 @@ contest1D(L, model)
 
 \item{model}{a model object fitted with \code{lmer} from package
 \pkg{lmerTestR}, i.e., an object of class \code{\link{lmerModLmerTest}}.}
+
+\item{ddf}{the method for computing the denominator degrees of freedom.
+\code{ddf="KR"} uses Kenward-Roger's method.}
 }
 \value{
 A \code{data.frame} with one row and columns with \code{"Estimate"},

@@ -19,7 +19,8 @@ ignored.}
 \item{type}{the type of ANOVA table requested (using SAS terminology)
 with Type I being the familiar sequential ANOVA table.}
 
-\item{ddf}{the method for computing the denominator degrees of freedom.
+\item{ddf}{the method for computing the denominator degrees of freedom and
+F-statistics. \code{ddf="KR"} uses Kenward-Roger's method,
 \code{ddf = "lme4"} returns the lme4-anova table, i.e., using the anova
 method for \code{lmerMod} objects as defined in the \pkg{lme4}-package and
 ignores the \code{type} argument.}
@@ -28,9 +29,14 @@ ignores the \code{type} argument.}
 an ANOVA table
 }
 \description{
-ANOVA table with F-tests and p-values using Satterthwaite's method for
-denominator degrees-of-freedom. Models should be fitted with
+ANOVA table with F-tests and p-values using Satterthwaite's or
+Kenward-Roger's method for denominator degrees-of-freedom and F-statistic.
+Models should be fitted with
 \code{\link{lmer}} from the \pkg{lmerTestR}-package.
+}
+\details{
+The \code{"KR"} method calls \code{pbkrtest::KRmodcomp} internally and
+reports scaled F-statistics and associated denominator degrees-of-freedom.
 }
 \examples{
 
@@ -41,7 +47,8 @@ anova(m, ddf="lme4")
 
 }
 \seealso{
-\code{\link{contestMD}} for multi degree-of-freedom contrast tests.
+\code{\link{contestMD}} for multi degree-of-freedom contrast tests
+and \code{\link[pbkrtest]{KRmodcomp}} for the \code{"KR"} method.
 }
 \author{
 Rune Haubo B. Christensen

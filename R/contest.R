@@ -25,6 +25,8 @@
 #' \code{fixef(model)}.
 #' @param model a model object fitted with \code{lmer} from package
 #' \pkg{lmerTestR}, i.e., an object of class \code{\link{lmerModLmerTest}}.
+#' @param ddf the method for computing the denominator degrees of freedom.
+#' \code{ddf="KR"} uses Kenward-Roger's method.
 #'
 #' @return A \code{data.frame} with one row and columns with \code{"Estimate"},
 #' \code{"Std. Error"}, \code{"t value"}, \code{"df"}, and \code{"Pr(>|t|)"}
@@ -44,13 +46,15 @@
 #' contest1D(c(1, 0), fm) # Test for Intercept
 #' contest1D(c(0, 1), fm) # Test for Days
 #'
-contest1D <- function(L, model) {
+contest1D <- function(L, model, ddf=c("Satterthwaite", "KR")) {
   mk_ttable <- function(estimate, se, ddf) {
     tstat <- estimate/se
     pvalue <- 2 * pt(abs(tstat), df = ddf, lower.tail = FALSE)
     data.frame("Estimate"=estimate, "Std. Error"=se, "df"=ddf,
                "t value"=tstat, "Pr(>|t|)"=pvalue, check.names=FALSE)
   }
+  if(!inherits(model, "lmerModLmerTest"))
+    stop("'model' has to be of class lmerModLmerTest")
   if(is.matrix(L)) L <- drop(L)
   stopifnot(is.numeric(L),
             length(L) == length(model@parlist$beta))
@@ -58,16 +62,42 @@ contest1D <- function(L, model) {
     o <- numeric(0L)
     return(mk_ttable(o, o, o))
   }
-  # Contrast estimate and its variance:
-  estimate <- sum(L * model@parlist$beta)
-  var_con <- qform(L, model@parlist$vcov_beta)
-  # Compute deninator DF:
+  method <- match.arg(ddf)
+  estimate <- sum(L * model@parlist$beta) # contrast estimate
+  if(method == "KR") { # Handle KR method:
+    ans <- get_KR1D(L, model) # get var(contrast) and ddf
+    if(!ans$error) {
+      return(mk_ttable(estimate=estimate, se=sqrt(ans$var_con), ddf=ans$ddf))
+    } else {
+      warning("Unable to compute Kenward-Roger t-test: using Satterthwaite instead",
+              call.=FALSE)
+    }
+  } # method == "Satterthwaite" proceeds:
+  var_con <- qform(L, model@parlist$vcov_beta) # variance of contrast
+  # Compute denominator DF:
   grad_var_con <-
     vapply(model@Jac_list, function(x) qform(L, x), numeric(1L)) # = {L' Jac L}_i
   satt_denom <- qform(grad_var_con, model@A) # g'Ag
   ddf <- drop(2 * var_con^2 / satt_denom) # denominator DF
   # return t-table:
   mk_ttable(estimate, sqrt(var_con), ddf)
+}
+
+get_KR1D <- function(L, model) {
+  # Compute var(contrast) and ddf using KR-method via the pbkrtest package
+  if(!getME(model, "is_REML"))
+    stop("Kenward-Roger's method is only available for REML model fits",
+         call.=FALSE)
+  if(!requireNamespace("pbkrtest", quietly = TRUE))
+    stop("pbkrtest package required for Kenward-Roger's method",
+         call.=FALSE)
+  vcov_beta_adj <- try(pbkrtest::vcovAdj(model), silent=TRUE) # Adjusted vcov(beta)
+  if(inherits(vcov_beta_adj, "try-error")) return(list(error=TRUE))
+  var_con_adj <- qform(L, as.matrix(vcov_beta_adj)) # variance of contrast
+  ddf <- try(pbkrtest::Lb_ddf(L=L, V0=model@parlist$vcov_beta,
+                              Vadj=vcov_beta_adj), silent=TRUE) # vcov_beta_adj need to be dgeMatrix!
+  if(inherits(ddf, "try-error")) return(list(error=TRUE))
+  list(var_con=var_con_adj, ddf=ddf, error=FALSE)
 }
 
 ##############################################
@@ -87,6 +117,8 @@ contest1D <- function(L, model) {
 #' \code{length(fixef(model))}.
 #' @param model a model object fitted with \code{lmer} from package
 #' \pkg{lmerTestR}, i.e., an object of class \code{\link{lmerModLmerTest}}.
+#' @param ddf the method for computing the denominator degrees of freedom and
+#' F-statistics. \code{ddf="KR"} uses Kenward-Roger's method.
 #' @param eps tolerance on eigenvalues to determine if an eigenvalue is
 #' positive. The number of positive eigenvalues determine the rank of
 #' L and the numerator df of the F-test.
@@ -114,19 +146,48 @@ contest1D <- function(L, model) {
 #' # Same test, but now as a t-test instead:
 #' contest1D(L[2, , drop=TRUE], fm)
 #'
-contestMD <- function(L, model, eps=sqrt(.Machine$double.eps)) {
-  mk_Ftable <- function(Fvalue, ndf, ddf, sigma) {
+contestMD <- function(L, model, ddf=c("Satterthwaite", "KR"),
+                      eps=sqrt(.Machine$double.eps)) {
+  mk_Ftable <- function(Fvalue, ndf, ddf, sigma, Fscale=1) {
     MS <- Fvalue * sigma^2
+    Fvalue <- Fvalue * Fscale
     pvalue <- pf(q=Fvalue, df1=ndf, df2=ddf, lower.tail=FALSE)
     data.frame("Sum Sq"=MS*ndf, "Mean Sq"=MS, "NumDF"=ndf, "DenDF"=ddf,
                "F value"=Fvalue, "Pr(>F)"=pvalue, check.names = FALSE)
   }
+  if(!inherits(model, "lmerModLmerTest"))
+    stop("'model' has to be of class lmerModLmerTest")
+  # if(!is.matrix(L)) L <- matrix(L, nrow=1L)
+  if(!is.matrix(L)) L <- matrix(L, ncol=length(L))
   stopifnot(is.matrix(L), is.numeric(L),
             ncol(L) == length(model@parlist$beta))
+  method <- match.arg(ddf)
   if(nrow(L) == 0L) { # May happen if there are no fixed effects
     x <- numeric(0L)
     return(mk_Ftable(x, x, x, x))
   }
+  if(method == "KR") {
+    if(!getME(model, "is_REML"))
+      stop("Kenward-Roger's method is only available for REML model fits",
+           call.=FALSE)
+    if(!requireNamespace("pbkrtest", quietly = TRUE))
+      stop("pbkrtest package required for Kenward-Roger's method",
+           call.=FALSE)
+    x <- try(pbkrtest::KRmodcomp(model, L)$test, silent = TRUE)
+    if(inherits(x, "try-error")) { # Handle try-error
+      warning("Unable to compute Kenward-Roger F-test: using Satterthwaite instead",
+              call.=FALSE)
+    } else { # return F-table if we can compute the KR F-test:
+      return(mk_Ftable(Fvalue=x["FtestU", "stat"], ndf=x[1L, "ndf"],
+                       ddf=x[1L, "ddf"], sigma=model@parlist$sigma,
+                       Fscale=x["Ftest", "F.scaling"]))
+    }
+    # NOTE on the KR method:
+    # It seems there is no easy way to calculate the scaling of the F-value,
+    # so we will have to resort to "KRmodcomp(model, L)" for each of the k terms in
+    # the anova table. This is highly ineffective since the same vcovAdj(model)
+    # has to be compute k times.
+  } # method == "Satterthwaite" proceeds:
   if(nrow(L) == 1L) { # 1D case:
     res <- contest1D(drop(L), model)
     return(mk_Ftable(Fvalue=res[["t value"]]^2, ndf=1L, ddf=res$df,
@@ -164,6 +225,7 @@ contestMD <- function(L, model, eps=sqrt(.Machine$double.eps)) {
   ddf <- get_Fstat_ddf(nu_m, tol=1e-8)
   mk_Ftable(Fvalue, ndf=q, ddf=ddf, sigma=model@parlist$sigma)
 }
+
 
 ##############################################
 ######## get_Fstat_ddf()
