@@ -116,8 +116,6 @@ lmer <- function(formula, data = NULL, REML = TRUE,
 boost_lmer <- function(model, tol=1e-8) {
   if(!inherits(model, "lmerMod"))
     stop("'model' should be the result of lme4::lmer(), ie., an 'lmerMod'-object")
-  # if(!require(numDeriv)) stop("package numDeriv is required")
-  # res <- list(model=model)
   res <- list()
   res$parlist <- list(beta=fixef(model),
                       theta=getME(model, "theta"),
@@ -133,15 +131,19 @@ boost_lmer <- function(model, tol=1e-8) {
   if(any(eig_h$values < -tol))
     stop("Model did not converge: Hessian has negative eigenvalues")
   if(any(abs(eig_h$values) < tol))
-    warning("Hessian is singular: model may not have converged")
+    warning("Model may not have converged: Hessian is singular")
   # Compute vcov(varpar):
-  h_inv <- with(eig_h, vectors %*% diag(1/values) %*% t(vectors))
-  res$A <- 2 * h_inv
+  pos <- eig_h$values > tol
+  q <- sum(pos)
+  # Using the Moore-Penrose generalized inverse for h:
+  h_inv <- with(eig_h, {
+    vectors[, pos, drop=FALSE] %*% diag(1/values[pos], nrow=q) %*%
+      t(vectors[, pos, drop=FALSE]) })
+  res$A <- 2 * h_inv # vcov(varpar)
   # Compute Jacobian of cov(beta) for each varpar and save in list:
-  Jac <- jacobian(func=get_covbeta, x=varpar_opt, devfun=devfun)
+  Jac <- numDeriv::jacobian(func=get_covbeta, x=varpar_opt, devfun=devfun)
   res$Jac_list <- lapply(1:ncol(Jac), function(i)
     array(Jac[, i], dim=rep(length(res$parlist$beta), 2))) # k-list of jacobian matrices
-  # class(res) <- "boostler"
   res
 }
 
@@ -172,7 +174,7 @@ devfun_vp <- function(varpar, devfun, reml) {
   dev <- df_envir$pp$ldL2() + (df_envir$resp$wrss() + df_envir$pp$sqrL(1))/sigma2 +
     n * log(2 * pi * sigma2)
   if(!reml) return(dev)
-  # Adjust of REML is used:
+  # Adjust if REML is used:
   RX <- df_envir$pp$RX() # X'V^{-1}X ~ crossprod(RX^{-1}) = cov(beta)^{-1} / sigma^2
   dev + 2*c(determinant(RX)$modulus) - ncol(RX) * log(2 * pi * sigma2)
 }
