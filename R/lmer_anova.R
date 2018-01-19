@@ -1,4 +1,4 @@
-# anova_lmer.R - anova method for lmerModLmerTest objects
+# lmer_anova.R - anova method for lmerModLmerTest objects
 
 #' @include lmer.R
 NULL
@@ -24,10 +24,11 @@ NULL
 #' @param type the type of ANOVA table requested (using SAS terminology)
 #' with Type I being the familiar sequential ANOVA table.
 #' @param ddf the method for computing the denominator degrees of freedom and
-#' F-statistics. \code{ddf="KR"} uses Kenward-Roger's method,
+#' F-statistics. \code{ddf="Satterthwaite"} (default) uses Satterthwaite's method;
+#' \code{ddf="KR"} uses Kenward-Roger's method,
 #' \code{ddf = "lme4"} returns the lme4-anova table, i.e., using the anova
 #' method for \code{lmerMod} objects as defined in the \pkg{lme4}-package and
-#' ignores the \code{type} argument.
+#' ignores the \code{type} argument. Partial matching is allowed.
 #'
 #' @return an ANOVA table
 #' @seealso \code{\link{contestMD}} for multi degree-of-freedom contrast tests
@@ -47,7 +48,6 @@ setMethod("anova",
           signature(object="lmerModLmerTest"),
           function(object, ..., type = c("I", "II", "III", "1", "2", "3"),
                    ddf=c("Satterthwaite", "KR", "lme4")) {
-            mCall <- match.call(expand.dots = TRUE)
             dots <- list(...)
             models <- if(length(dots))
               sapply(dots, is, "merModLmerTest") | sapply(dots, is, "merMod") |

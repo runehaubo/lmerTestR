@@ -20,10 +20,11 @@ ignored.}
 with Type I being the familiar sequential ANOVA table.}
 
 \item{ddf}{the method for computing the denominator degrees of freedom and
-F-statistics. \code{ddf="KR"} uses Kenward-Roger's method,
+F-statistics. \code{ddf="Satterthwaite"} (default) uses Satterthwaite's method;
+\code{ddf="KR"} uses Kenward-Roger's method,
 \code{ddf = "lme4"} returns the lme4-anova table, i.e., using the anova
 method for \code{lmerMod} objects as defined in the \pkg{lme4}-package and
-ignores the \code{type} argument.}
+ignores the \code{type} argument. Partial matching is allowed.}
 }
 \value{
 an ANOVA table
