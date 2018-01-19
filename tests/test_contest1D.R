@@ -38,7 +38,7 @@ Lmat <- diag(length(fixef(fm)))
   contest1D(Lmat[i, ], fm))))
 (coef_mat_KR <- lmerTestR:::rbindall(lapply(1:ncol(Lmat), function(i)
   contest1D(Lmat[i, ], fm, ddf="KR"))))
-(coef_mat_lme4 <- coef(summary(fm)))
+(coef_mat_lme4 <- coef(summary(fm, ddf="lme4")))
 rownames(coef_mat_KR) <- rownames(coef_mat) <- rownames(coef_mat_lme4)
 stopifnot(isTRUE(
   all.equal(as.data.frame(coef_mat_lme4),

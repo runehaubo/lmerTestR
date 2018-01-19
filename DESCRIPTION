@@ -18,4 +18,5 @@ Collate:
     'contest.R'
     'lmer.R'
     'lmer_anova.R'
+    'lmer_summary.R'
     'utils.R'
