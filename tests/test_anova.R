@@ -1,8 +1,14 @@
 # test_anova.R
 library(lmerTestR)
-stopifnot(require(tools)) # For assertError and assertWarning
+
+# WRE says "using if(requireNamespace("pkgname")) is preferred, if possible."
+# even in tests:
+assertError <- function(expr, ...)
+  if(requireNamespace("tools")) tools::assertError(expr, ...) else invisible()
+assertWarning <- function(expr, ...)
+  if(requireNamespace("tools")) tools::assertWarning(expr, ...) else invisible()
+
 data("sleepstudy", package="lme4")
-data("cake", package="lme4")
 
 ####################################
 ## Basic anova tests
@@ -13,6 +19,7 @@ m <- lmer(Reaction ~ Days + (Days | Subject), sleepstudy)
 ####### ddf argument:
 (an1 <- anova(m)) # Also testing print method.
 (an2 <- anova(m, ddf="Satterthwaite"))
+(an2b <- anova(m, ddf="Satterthwaite", type=3))
 stopifnot(isTRUE(
   all.equal(an1, an2)
 ))
@@ -21,7 +28,12 @@ stopifnot(isTRUE(
   all.equal(an1, an3)
 ))
 (anova(m, ddf="KR"))
-(anova(m, ddf="lme4"))
+(anova(m, ddf="KR", type=3))
+(an1 <- anova(m, ddf="lme4"))
+(an2 <- anova(m, ddf="lme4", type=3)) # 'type' is ignored with ddf="lme4"
+stopifnot(isTRUE(
+  all.equal(an1, an2)
+))
 assertError(anova(m, ddf="Ken")) ## Error on incorrect arg.
 
 ## lme4 method:
@@ -41,6 +53,16 @@ stopifnot(isTRUE(
 stopifnot(isTRUE(
   all.equal(an1, an3)
 ))
+
+(an1 <- anova(m, type="3")) # valid type arg.
+(an2 <- anova(m, type="III")) # same
+stopifnot(isTRUE(
+  all.equal(an1, an2)
+))
+(an3 <- anova(m, type=3)) # Not strictly valid, but accepted
+stopifnot(isTRUE(
+  all.equal(an1, an3)
+))
 assertError(anova(m, type=0)) # Not valid arg.
 assertError(anova(m, type="i")) # Not valid arg.
 
@@ -49,7 +71,8 @@ assertError(anova(m, type="i")) # Not valid arg.
 ####################################
 
 ## 'temp' is continuous, 'temperature' an ordered factor with 6 levels
-m <- lmer(angle ~ recipe * temperature + (1|recipe:replicate), cake)
+data("cake", package="lme4")
+m <- lmer(angle ~ recipe * temp + (1|recipe:replicate), cake)
 (an <- anova(m))
 (an_KR <- anova(m, ddf="KR"))
 (an_lme4 <- anova(m, ddf="lme4"))
@@ -60,11 +83,27 @@ res <- all.equal(an[, c("Sum Sq", "Mean Sq", "F value")],
                  an_KR[, c("Sum Sq", "Mean Sq", "F value")])
 stopifnot(isTRUE(res))
 
+stopifnot(all.equal(c(2, 1, 2), an$NumDF, tol=1e-6),
+          all.equal(c(42, 222, 222), an$DenDF, tol=1e-6))
+
+# Using an ordered factor:
+m <- lmer(angle ~ recipe * temperature + (1|recipe:replicate), cake)
+(an <- anova(m))
+# Type 3 is not available with ordered factors:
+assertError(anova(m, type=3))
+(an_KR <- anova(m, ddf="KR"))
+(an_lme4 <- anova(m, ddf="lme4"))
+res <- all.equal(an[, c("Sum Sq", "Mean Sq", "F value")],
+                 an_lme4[, c("Sum Sq", "Mean Sq", "F value")])
+stopifnot(isTRUE(res))
+res <- all.equal(an[, c("Sum Sq", "Mean Sq", "F value")],
+                 an_KR[, c("Sum Sq", "Mean Sq", "F value")])
+stopifnot(isTRUE(res))
 stopifnot(all.equal(c(2, 5, 10), an$NumDF),
           all.equal(c(42, 210, 210), an$DenDF))
 
 # No intercept:
-m <- lmer(angle ~ 0 + recipe * temperature + (1|recipe:replicate), cake)
+m <- lmer(angle ~ 0 + recipe * temp + (1|recipe:replicate), cake)
 (an <- anova(m))
 (an_KR <- anova(m, ddf="KR"))
 (an_lme4 <- anova(m, ddf="lme4"))
@@ -73,9 +112,23 @@ res <- all.equal(an[, c("Sum Sq", "Mean Sq", "F value")],
 stopifnot(isTRUE(res))
 
 # ML-fit:
-m <- lmer(angle ~ recipe * temperature + (1|recipe:replicate), cake, REML=FALSE)
+m <- lmer(angle ~ recipe * temp + (1|recipe:replicate), cake, REML=FALSE)
 (an <- anova(m))
 assertError(an <- anova(m, ddf="KR")) # KR fits should be REML
+(an_lme4 <- anova(m, ddf="lme4"))
+res <- all.equal(an[, c("Sum Sq", "Mean Sq", "F value")],
+                 an_lme4[, c("Sum Sq", "Mean Sq", "F value")])
+stopifnot(isTRUE(res))
+
+####################################
+## Using contr.sum:
+####################################
+
+m <- lmer(angle ~ recipe * temp + (1|recipe:replicate), cake,
+          contrasts = list('recipe' = "contr.sum"))
+(an <- anova(m))
+assertError(an2 <- anova(m, type=3))
+(an_KR <- anova(m, ddf="KR"))
 (an_lme4 <- anova(m, ddf="lme4"))
 res <- all.equal(an[, c("Sum Sq", "Mean Sq", "F value")],
                  an_lme4[, c("Sum Sq", "Mean Sq", "F value")])
@@ -90,9 +143,11 @@ stopifnot(isTRUE(res))
 m <- lmer(Reaction ~ -1 + (Days | Subject), sleepstudy)
 # m <- lmer(Reaction ~ 0 + (Days | Subject), sleepstudy) # alternative
 stopifnot(length(fixef(m)) == 0L)
-an <- anova(m)
-an_KR <- anova(m, ddf="KR")
+(an <- anova(m, type=1))
+(an_3 <- anova(m, type=3))
+(an_KR <- anova(m, ddf="KR"))
 stopifnot(nrow(an) == 0L,
+          nrow(an_3) == 0L,
           nrow(an_KR) == 0L)
 # anova(m, ddf="lme4") # Bug in lme4 it seems
 
@@ -102,9 +157,11 @@ m <- lmer(Reaction ~ (Days | Subject), sleepstudy)
 stopifnot(length(fixef(m)) == 1L,
           names(fixef(m)) == "(Intercept)")
 (an <- anova(m))
+(an_3 <- anova(m, type=3))
 (an_KR <- anova(m, ddf="KR"))
 (an_lme4 <- anova(m, ddf="lme4"))
 stopifnot(nrow(an) == 0L,
+          nrow(an_3) == 0L,
           nrow(an_lme4) == 0L,
           nrow(an_KR) == 0L)
 
@@ -114,10 +171,12 @@ m <- lmer(Reaction ~ Days - 1 + (Days | Subject), sleepstudy)
 stopifnot(length(fixef(m)) == 1L,
           names(fixef(m)) == "Days")
 (an <- anova(m))
+(an_3 <- anova(m, type=3))
 (an_KR <- anova(m, ddf="KR"))
 (an_lme4 <- anova(m, ddf="lme4"))
 
 stopifnot(nrow(an) == 1L,
+          nrow(an_3) == 1L,
           nrow(an_KR) == 1L,
           nrow(an_lme4) == 1L)
 res <- all.equal(an[, c("Sum Sq", "Mean Sq", "F value")],
@@ -133,9 +192,11 @@ m <- lmer(Reaction ~ Days - 1 + I(Days^2) + (Days | Subject), sleepstudy)
 stopifnot(length(fixef(m)) == 2L,
           names(fixef(m)) == c("Days", "I(Days^2)"))
 (an <- anova(m))
+(an_3 <- anova(m, type=3))
 (an_KR <- anova(m, ddf="KR"))
 (an_lme4 <- anova(m, ddf="lme4"))
 stopifnot(nrow(an) == 2L,
+          nrow(an_3) == 2L,
           nrow(an_KR) == 2L,
           nrow(an_lme4) == 2L)
 # Here is a diff in SSQ which doesn't seem well-defined anyway...
@@ -149,6 +210,7 @@ lmerTestR:::rbindall(lapply(1:nrow(Lmat), function(i) contest1D(Lmat[i, ], m)))
 m <- lmer(Reaction ~ Days + I(Days^2) + (Days | Subject), sleepstudy)
 stopifnot(length(fixef(m)) == 3L)
 (an <- anova(m))
+(an_3 <- anova(m, type=3))
 (an_KR <- anova(m, ddf="KR"))
 (an_lme4 <- anova(m, ddf="lme4"))
 res <- all.equal(an[, c("Sum Sq", "Mean Sq", "F value")],

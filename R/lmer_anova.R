@@ -56,6 +56,7 @@ setMethod("anova",
             ddf <- match.arg(ddf)
             # type <- match.arg(type) # not actually needed
             if(ddf=="lme4") return(callNextMethod())
+            # FIXME: Warn that 'type' is ignored when ddf="lme4"
             single_anova(object=object, type=type, ddf=ddf)
           })
 
@@ -80,16 +81,20 @@ setMethod("anova",
 single_anova <- function(object, type = c("I", "II", "III", "1", "2", "3"),
                          ddf=c("Satterthwaite", "KR")) {
   if(!inherits(object, "lmerModLmerTest"))
-    warning("calling anova(<fake-lmerModLmerTest-object>) ...")
+    warning("calling single_anova(<fake-lmerModLmerTest-object>) ...")
   if(!is.character(type)) type <- as.character(type)
   type <- as.integer(as.roman(match.arg(type)))
-  if(type > 1L) {
-    warning("Type II and III anova tables are not yet implemented; returning type I")
-    type <- 1L
+  if(type == 2L) {
+    warning("Type II anova tables are not yet implemented; returning type III")
+    type <- 3L
   }
   ddf <- match.arg(ddf)
   # Get list of contrast matrices (L) - one for each model term:
-  L_list <- get_contrasts_type1(model.matrix(object), terms(object))
+  L_list <- if(type == 1L) {
+    get_contrasts_type1(model.matrix(object), terms(object))
+  } else if(type == 3L) {
+    get_contrasts_type3(object)
+  }
   # Get F-test for each term and collect in table:
   table <- rbindall(lapply(L_list, contestMD, model=object, ddf=ddf))
   # Format ANOVA table and return:
