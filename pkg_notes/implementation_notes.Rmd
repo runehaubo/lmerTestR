@@ -1,0 +1,29 @@
+---
+title: "Notes on the implementation in lmerTest and lmerTestR"
+author: "Rune Haubo B Christensen"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: TRUE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# On the the use of `contr.SAS` in **lmerTest**
+
+When computing type III ANOVA tables, **lmerTest** refits the model using `contr.SAS`, i.e., SAS-type contrasts for all factors. This has the following consequences:
+
+Draw backs:
+
+1. The same model has to be refit once more thus wasting time and computational recourses. 
+1. The coding of ordered factors is changed from `contr.poly` to `contr.SAS`. What is the meaning of type III tests for ordered factors? How does SAS handle these?
+1. There could be cases where the numerical behaviour of the models differ when SAS contrasts are used. For example the model might not converge proporly after changing to SAS contrasts.
+
+Advantages:
+
+1. Irrespective of the contrasts used, type III tests for all terms are produced. This obviously includes the usual `contr.treatment` but also `contr.sum`, `contr.helmert` and `contr.poly` which generates orthogonal polynomials for ordered factors.
+1. Whether `contr.treatment` or `contr.SAS` are used usually does not matter - only the interpretation of coefficients (which are never seen anyway) changes.
+1. The `L`-matrix (containing the general contrast structure) has a particular and known structure. 
+

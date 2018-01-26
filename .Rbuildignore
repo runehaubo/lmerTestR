@@ -5,6 +5,7 @@
 .*~$
 README.md
 ^build$
+^pkg_notes$
 TODO.md
 .Rhistory
 ^.*\.Rproj$
