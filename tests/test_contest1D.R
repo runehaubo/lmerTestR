@@ -1,6 +1,13 @@
 # test_contest1D.R
 library(lmerTestR)
-stopifnot(require(tools)) # For assertError and assertWarning
+
+# WRE says "using if(requireNamespace("pkgname")) is preferred, if possible."
+# even in tests:
+assertError <- function(expr, ...)
+  if(requireNamespace("tools")) tools::assertError(expr, ...) else invisible()
+assertWarning <- function(expr, ...)
+  if(requireNamespace("tools")) tools::assertWarning(expr, ...) else invisible()
+
 data("sleepstudy", package="lme4")
 
 ####################################

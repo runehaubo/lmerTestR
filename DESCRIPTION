@@ -6,7 +6,7 @@ Authors@R: c(person("Rune", "Haubo Bojesen Christensen", role =  c("aut", "cre")
 		   email = "Rune@ChristensenStatistics.dk"))
 Depends: lme4 (>= 1.0), stats, methods
 Imports: numDeriv
-Suggests: pbkrtest
+Suggests: pbkrtest tools
 Description: Rune's lmerTest package (Revised). 
     anova and summary methods for linear mixed models with p-values for F and 
     t-tests using Satterthwaite's method for denominator degrees of freedom.
@@ -19,4 +19,5 @@ Collate:
     'lmer.R'
     'lmer_anova.R'
     'lmer_summary.R'
+    'type3.R'
     'utils.R'
