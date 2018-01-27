@@ -4,4 +4,5 @@ http://htmlpreview.github.io/
 
 or directly prepend as in the following links:
 
+o  http://htmlpreview.github.io/?https://github.com/runehaubo/lmerTestR/blob/master/pkg_notes/implementation.html
 o  http://htmlpreview.github.io/?https://github.com/runehaubo/lmerTestR/blob/master/pkg_notes/implementation_notes.html

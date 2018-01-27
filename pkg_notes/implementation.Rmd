@@ -1,0 +1,74 @@
+---
+title: "Implementation in package lmerTestR"
+author: "Rune Haubo B Christensen"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: TRUE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## `lmer` fitting linear mixed models
+
+**lmerTestR** overloads `lmer` from **lme4** in order to facilitate the computation of summary tables, anova tabels and tests of costum contrasts with $t$ and $F$ tests using the Satterthwaite method for computation of denominator degrees of freedom.
+
+1. `lmerTestR::lmer` produces an object of class `lmerModLmerTest` extending class `lmerMod` (as produced by `lme4::lmer`)
+1. `lmerTestR::lmer` adds slots containing the covariance matrix of the variance-covariance parameters in the model and the gradient of the covariance matrix of the fixed effect parameters, $\beta$ (and a few other things) which are required for the computation of Satterthwaite degrees of freedom.
+1. The covariance matrix of the variance-covariance parameters in the model and the gradient of the covariance matrix of the fixed effect parameters are computed numerically using `hessian` and `jacobian` functions from the **numDeriv** package utilizing the accurate Richardson extrapolation method.
+
+## Satterthwaite's method for denominator degrees of freedom
+
+Satterthwaite's method is implemented for one-df contrasts as well as for multi-df contrasts in two functions respectively:
+
+1. `contest1D` takes a contrast-vector (or 1D row-matrix) and produces a `data.frame` with $t$-tests in the form similar to a summary coefficient table. This function is used by the `summary` method for `lmer` fits to compute the $p$-values for $t$-tests of the model coefficients.
+1. `contestMD` takes a contrast-matrix (or a vector) and produces a `data.frame` with sums of squares, mean squares, $F$-values, numerator and denominator degrees of freedom and $p$-values in a form similar to that of an ANOVA table. This function is used by the `anova` method for `lmer` fits.
+
+The computations involved in the Satterthwaite's method are described in a separate document/vignette.
+
+## Kenward-Roger's (KR) method
+
+1. The KR method is facilitated via the implementation in the **pbkrtest** package (**lmerTestR** _suggests_ this package) 
+1. The KR method not only involves an estimate of the denominator df (as does the Satterthwaite method) but also an adjusted covariance matrix of $\beta$ as well as a scaling of the $F$-statistic. 
+1. In simple cases the adjusted covariance matrix of $\beta$ equals the standard one and scaling of the $F$-statistics may be neutral. 
+1. As a consequence of the adjusted covariance matrix of fixed effect parameters, the standard errors and $t$-values of model coefficients (as in `summary` tables) may be respectively larger and smaller.
+1. The potential scaling applied to $F$-statistics is not applied to $t$-statistics. (I am not sure if $F$-tests on one numerator df will never be scaled -- that may be the case.)
+1. The KR $t$-tests are implemented by computing the adjusted covariance matrix of the fixed effect parameters with `pbkrtest::vcovAdj` and the KR df with `pbkrtest::Lb_ddf`. Computing the KR $t$-tests for a whole set of one-df contrasts (as in a summary table) therefore only involves calculating the adjusted covariance matrix once.
+1. The KR $F$-tests are implemented by passing a contrast matrix to `pbkrtest::KRmodcomp`. When computing $F$-tests for a series of terms (as is done in ANOVA tables) `pbkrtest::KRmodcomp` is called multiple times in each case evaluating the same adjusted covariance matrix of $\beta$ (the computationally time consuming part). We have not found a way to decompose the computations in `pbkrtest::KRmodcomp` so that `pbkrtest::vcovAdj` could be called just once instead. The culprit is the calculation of the scaling of the $F$-value for which **pbkrtest** does not appear to export a low-level (direct) method.
+1. The KR-method is not available for ML-fits and attempts to use ML-fits causes functions in **lmerTestR** to throw an error.
+
+## ANOVA tables using the `anova` method
+
+1. Produces an ANOVA table if called with a single model as argument - the internal function `single_anova` handles this.
+1. Produces a comparison of models if more than one model is passed to `anova`. This is not implemented in **lmerTestR**; `callNextMethod` is applied.
+1. `single_anova` computes the appropriate contrast matrices (corresponding to type I, II, or III ANOVA tables) and then uses `contestMD` to compute the relevant SSQ, MS, $F$-values etc.
+
+### Type I ANOVA tables
+
+1. The type I (sequential) ANOVA contrasts are produced by `get_contrasts_type1` which forms the contrasts using the Doolittle decomposition of $X^\top X$ where $X$ is the standard full-rank (column rank) design matrix.
+
+
+### Type II ANOVA tables
+
+1. Not yet implemented
+
+
+### Type III ANOVA tables
+
+1. Type III ANOVA contrasts are produces by `get_contrasts_type3` which uses a SAS-type algorithm based on the 'full' rank-deficient design matrix (produced by `get_rdX`) and a 'general' contrast matrix 'L' (produced by `general_L`). 
+1. The algorithm only works when the standard `contr.treatment` or `contr.SAS` is used for coding of factors in the design matrix. Using other "contrasts", for example `contr.sum` or `contr.poly`, which is used by default for ordered factors produces an error.
+
+
+## The `summary` method for `lmer` model fits
+
+The summary method does two things to a `lme4::lmer` summary table before it is returned. The `lme4::print.summary.merMod` print method takes care of printing.
+
+1. The summary method appends a title to model fit describing which method was used for $t$-tests: Satterthwaite or Kenward-Roger
+1. The summary method computes the coefficient table with (denominator) degrees of freedom and $p$-values for the $t$-statistics by passing the rows of a unit-diagonal matrix with as many rows as there are coefficients to `contest1D`.
+
+
+
+
+
