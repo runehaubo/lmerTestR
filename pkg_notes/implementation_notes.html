@@ -144,6 +144,11 @@ $(document).ready(function () {
 <li>Whether <code>contr.treatment</code> or <code>contr.SAS</code> are used usually does not matter - only the interpretation of coefficients (which are never seen anyway) changes.</li>
 <li>The <code>L</code>-matrix (containing the general contrast structure) has a particular and known structure.</li>
 </ol>
+<p>Notes:</p>
+<ol style="list-style-type: decimal">
+<li>It seems that even though models are refitted with <code>contr.SAS</code>, that the code also works when <code>contr.treatment</code> is used. This means that when the default <code>contr.treatment</code> have been used, there should be no reason to refit the models with <code>contr.SAS</code>.</li>
+</ol>
+<p><strong>lmerTestR</strong> takes a different approach since it doesn’t refit the models and so throws an error if <code>contr.treatment</code> or <code>contr.SAS</code> has not been used. Essentially this requires the user to refit the models with one of these contrasts. This will probably rarely be the case, but can come into play if <code>contr.sum</code> has been set for some odd reason, or if ordered factors are used in which case <code>contr.poly</code> will be used by default.</p>
 </div>
 
 

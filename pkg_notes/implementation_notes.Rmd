@@ -27,3 +27,9 @@ Advantages:
 1. Whether `contr.treatment` or `contr.SAS` are used usually does not matter - only the interpretation of coefficients (which are never seen anyway) changes.
 1. The `L`-matrix (containing the general contrast structure) has a particular and known structure. 
 
+Notes:
+
+1. It seems that even though models are refitted with `contr.SAS`, that the code also works when `contr.treatment` is used. This means that when the default `contr.treatment` have been used, there should be no reason to refit the models with `contr.SAS`. 
+
+**lmerTestR** takes a different approach since it doesn't refit the models and so throws an error if `contr.treatment` or `contr.SAS` has not been used. Essentially this requires the user to refit the models with one of these contrasts. This will probably rarely be the case, but can come into play if `contr.sum` has been set for some odd reason, or if ordered factors are used in which case `contr.poly` will be used by default.
+
