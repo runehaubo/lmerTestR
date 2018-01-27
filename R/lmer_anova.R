@@ -147,7 +147,6 @@ get_contrasts_type1 <- function(X, terms, keep_intercept = FALSE) {
   # Compute list of row indicators for L matrix:
   ind.list <- setNames(split(1L:p, asgn), nm=term_names)
   ind.list <- ind.list[term_labels] # rm intercept if present
-  # if(length(ind.list) == 0L) return(list(matrix(numeric(0L), nrow=0L)))
   lapply(ind.list, function(rows) L[rows, , drop=FALSE])
 }
 

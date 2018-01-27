@@ -83,7 +83,7 @@ lmer <- function(formula, data = NULL, REML = TRUE,
 ##############################################
 ######## boost_lmer()
 ##############################################
-#' Boost an lmer model-object
+#' Boost an lmer Model-Object
 #'
 #' Boosting an lme4::lmer model-object involves computing the covariance
 #' matrix of the variance parameters and the gradient (Jacobian) of cov(beta)
@@ -150,7 +150,7 @@ boost_lmer <- function(model, tol=1e-8) {
 ##############################################
 ######## devfun_vp()
 ##############################################
-#' Compute deviance of an LMM as a function of variance parameters
+#' Compute Deviance of an LMM as a Function of Variance Parameters
 #'
 #' This function is used for extracting the asymptotic variance-covariance matrix
 #'   of the variance parameters.
@@ -182,7 +182,7 @@ devfun_vp <- function(varpar, devfun, reml) {
 ##############################################
 ######## get_covbeta()
 ##############################################
-#' Compute cov(beta) as a function of varpar of an LMM
+#' Compute cov(beta) as a Function of varpar of an LMM
 #'
 #' At the optimum cov(beta) is available as vcov(lmer-model). This function
 #' computes cov(beta) at non (RE)ML estimates of \code{varpar}.
