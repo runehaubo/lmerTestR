@@ -136,8 +136,7 @@ get_contrasts_type1 <- function(X, terms, keep_intercept = FALSE) {
   if(p == 1L && attr(terms, "intercept")) # intercept-only model
     return(list(matrix(numeric(0L), ncol=1L)))
   # Compute 'normalized' doolittle factorization of XtX:
-  # L <- t(doolittle(crossprod(X)))
-  L <- if(p == 1L) matrix(1L) else normalized_doolittle(crossprod(X))
+  L <- if(p == 1L) matrix(1L) else t(doolittle(crossprod(X))$L)
   # Determine which rows of L belong to which term:
   asgn <- attr(X, "assign")
   stopifnot(!is.null(asgn))

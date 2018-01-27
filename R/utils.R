@@ -46,15 +46,6 @@ doolittle <- function(x, eps = 1e-6) {
   list( L=L, U=U )
 }
 
-normalized_doolittle <- function(X, eps=eps) {
-  U <- doolittle(X)$U
-  d <- diag(U)
-  for(i in 1:nrow(U))
-    if(d[i] > 0) U[i, ] <- U[i, ] / d[i]
-  U
-}
-
-
 ##############################################
 ######## qform
 ##############################################
