@@ -2,7 +2,7 @@
 % Please edit documentation in R/lmer.R
 \name{boost_lmer}
 \alias{boost_lmer}
-\title{Boost an lmer model-object}
+\title{Boost an lmer Model-Object}
 \usage{
 boost_lmer(model, tol = 1e-08)
 }

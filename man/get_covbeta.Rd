@@ -2,7 +2,7 @@
 % Please edit documentation in R/lmer.R
 \name{get_covbeta}
 \alias{get_covbeta}
-\title{Compute cov(beta) as a function of varpar of an LMM}
+\title{Compute cov(beta) as a Function of varpar of an LMM}
 \usage{
 get_covbeta(varpar, devfun)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/lmer.R
 \name{devfun_vp}
 \alias{devfun_vp}
-\title{Compute deviance of an LMM as a function of variance parameters}
+\title{Compute Deviance of an LMM as a Function of Variance Parameters}
 \usage{
 devfun_vp(varpar, devfun, reml)
 }
