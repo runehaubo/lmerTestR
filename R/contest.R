@@ -157,7 +157,6 @@ contestMD <- function(L, model, ddf=c("Satterthwaite", "KR"),
   }
   if(!inherits(model, "lmerModLmerTest"))
     stop("'model' has to be of class lmerModLmerTest")
-  # if(!is.matrix(L)) L <- matrix(L, nrow=1L)
   if(!is.matrix(L)) L <- matrix(L, ncol=length(L))
   stopifnot(is.matrix(L), is.numeric(L),
             ncol(L) == length(model@parlist$beta))
@@ -201,11 +200,11 @@ contestMD <- function(L, model, ddf=c("Satterthwaite", "KR"),
   q <- sum(pos) # rank(VLbeta)
   P <- eig_VLbeta$vectors
   d <- eig_VLbeta$values
-  PtL <- crossprod(P, L)[1:q, ]
   if(q <= 0) { # shouldn't happen if L is a proper contrast
     x <- numeric(0L)
     return(mk_Ftable(x, x, x, x))
   }
+  PtL <- crossprod(P, L)[1:q, ]
   if(q == 1) { # 1D case:
     res <- contest1D(PtL, model)
     return(mk_Ftable(Fvalue=res[["t value"]]^2, ndf=q, ddf=res$df,
