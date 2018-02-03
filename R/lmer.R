@@ -60,7 +60,7 @@ lmerModLmerTest <-
 #'
 #' data("sleepstudy", package="lme4")
 #' m <- lmer(Reaction ~ Days + (Days | Subject), sleepstudy)
-#' class(m)
+#' class(m) # lmerModLmerTest
 #'
 lmer <- function(formula, data = NULL, REML = TRUE,
                  control = lmerControl(), start = NULL, verbose = 0L,
@@ -69,37 +69,36 @@ lmer <- function(formula, data = NULL, REML = TRUE,
   mc <- match.call()
   mc[[1]] <- quote(lme4::lmer)
   model <- eval.parent(mc)
-  if(!inherits(model, "lmerMod")) stop("A problem occured")
   # Make an lmerModLmerTest object:
-  mm <- as(model, "lmerModLmerTest")
-  # Assign relevant objects to slots:
-  bm <- boost_lmer(model)
-  mm@parlist <- bm$parlist
-  mm@A <- bm$A
-  mm@Jac_list <- bm$Jac_list
-  return(mm)
+  return(as_lmerModLmerTest(model))
 }
 
 ##############################################
-######## boost_lmer()
+######## as_lmerModLmerTest()
 ##############################################
-#' Boost an lmer Model-Object
+#' Coerce lmerMod Objects to lmerModLmerTest
 #'
-#' Boosting an lme4::lmer model-object involves computing the covariance
+#' Coercing an lme4::lmer model-object (of class 'lmerMod') to a model-object
+#' of class 'lmerModLmerTest' involves computing the covariance
 #' matrix of the variance parameters and the gradient (Jacobian) of cov(beta)
 #' with respect to the variance parameters.
 #'
-#' @param model and lmer model-object -- the result of a call to \code{lme4::lmer()}
+#' @param model and lmer model-object (of class 'lmerMod') -- the result of a
+#' call to \code{lme4::lmer()}
 #' @param tol tolerance for determining of eigenvalues are negative, zero or
 #' positive
 #'
-#' @return a list with components
+#' @return an object of class \code{'lmerModLmerTest'} which sets the following
+#' slots:
 #' \item{parlist}{list of parameter estimates including beta,
 #' theta, sigma (vectors) and vcov(beta) (matrix)}
 #' \item{A}{the asymptotic covariance matrix of the variance parameters
 #' (theta, sigma)}
 #' \item{Jac_list}{list of Jacobian matrices; gradients of vcov(beta) with
 #' respect to the variance parameters }
+#'
+#' @seealso the class definition in \code{\link{lmerModLmerTest}}) and
+#' \code{\link{lmer}}
 #'
 #' @importFrom numDeriv hessian jacobian
 #' @importFrom stats vcov update sigma
@@ -109,23 +108,27 @@ lmer <- function(formula, data = NULL, REML = TRUE,
 #'
 #' @examples
 #' m <- lme4::lmer(Reaction ~ Days + (Days | Subject), sleepstudy)
-#' bm <- lmerTestR:::boost_lmer(m)
-#' names(bm)
+#' bm <- lmerTestR:::as_lmerModLmerTest(m)
+#' slotNames(bm)
 #'
 #' @keywords internal
-boost_lmer <- function(model, tol=1e-8) {
+as_lmerModLmerTest <- function(model, tol=1e-8) {
   if(!inherits(model, "lmerMod"))
-    stop("'model' should be the result of lme4::lmer(), ie., an 'lmerMod'-object")
-  res <- list()
-  res$parlist <- list(beta=fixef(model),
-                      theta=getME(model, "theta"),
-                      sigma=sigma(model),
-                      vcov_beta = as.matrix(vcov(model)))
+    stop("model not of class 'lmerMod': cannot coerce to class 'lmerModLmerTest")
+  # Extract deviance function and REML indicator
   devfun <- update(model, devFunOnly=TRUE)
   is_reml <- getME(model, "is_REML")
-  varpar_opt <- unname(c(res$parlist$theta, res$parlist$sigma))
+  # Coerce 'lme4-model' to 'lmerModLmerTest':
+  res <- as(model, "lmerModLmerTest")
+  # Set relevant slots of the new model object:
+  res@parlist <- list(beta=fixef(model), # model@beta
+                      theta=getME(model, "theta"), # model@theta
+                      sigma=sigma(model),
+                      vcov_beta = as.matrix(vcov(model)))
+  varpar_opt <- unname(c(res@theta, res@parlist$sigma))
   # Compute Hessian:
-  h <- numDeriv::hessian(func=devfun_vp, x=varpar_opt, devfun=devfun, reml=is_reml)
+  h <- numDeriv::hessian(func=devfun_vp, x=varpar_opt, devfun=devfun,
+                         reml=is_reml)
   # Eigen decompose the Hessian:
   eig_h <- eigen(h, symmetric=TRUE)
   if(any(eig_h$values < -tol))
@@ -139,12 +142,12 @@ boost_lmer <- function(model, tol=1e-8) {
   h_inv <- with(eig_h, {
     vectors[, pos, drop=FALSE] %*% diag(1/values[pos], nrow=q) %*%
       t(vectors[, pos, drop=FALSE]) })
-  res$A <- 2 * h_inv # vcov(varpar)
+  res@A <- 2 * h_inv # vcov(varpar)
   # Compute Jacobian of cov(beta) for each varpar and save in list:
   Jac <- numDeriv::jacobian(func=get_covbeta, x=varpar_opt, devfun=devfun)
-  res$Jac_list <- lapply(1:ncol(Jac), function(i)
-    array(Jac[, i], dim=rep(length(res$parlist$beta), 2))) # k-list of jacobian matrices
-  res
+  res@Jac_list <- lapply(1:ncol(Jac), function(i)
+    array(Jac[, i], dim=rep(length(res@parlist$beta), 2))) # k-list of jacobian matrices
+  return(res)
 }
 
 ##############################################
