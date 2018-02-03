@@ -66,6 +66,23 @@ stopifnot(isTRUE(
 assertError(anova(m, type=0)) # Not valid arg.
 assertError(anova(m, type="i")) # Not valid arg.
 
+####### Model comparison:
+fm <- lm(Reaction ~ Days, sleepstudy)
+(an <- anova(m, fm))
+str(an)
+stopifnot(
+  nrow(an) == 2L,
+  rownames(an)[2] == "object"
+)
+
+m2 <- lmer(Reaction ~ Days + I(Days^2) + (Days | Subject), sleepstudy)
+(an <- anova(m, m2, refit=FALSE))
+stopifnot(
+  nrow(an) == 2L,
+  rownames(an)[1] == "object"
+)
+
+
 ####################################
 ## Example with factor fixef:
 ####################################
@@ -220,3 +237,6 @@ stopifnot(isTRUE(res))
 res <- all.equal(an[, c("Sum Sq", "Mean Sq", "DenDF", "F value")],
                  an_KR[, c("Sum Sq", "Mean Sq", "DenDF", "F value")], tol=1e-6)
 stopifnot(isTRUE(res))
+
+## FIXME: Test the use of refit arg to lme4:::anova.merMod
+## FIXME: Test that model comparison works properly
