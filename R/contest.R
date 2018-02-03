@@ -57,13 +57,13 @@ contest1D <- function(L, model, ddf=c("Satterthwaite", "KR")) {
     stop("'model' has to be of class lmerModLmerTest")
   if(is.matrix(L)) L <- drop(L)
   stopifnot(is.numeric(L),
-            length(L) == length(model@parlist$beta))
+            length(L) == length(model@beta))
   if(length(L) == 0L) {
     o <- numeric(0L)
     return(mk_ttable(o, o, o))
   }
   method <- match.arg(ddf)
-  estimate <- sum(L * model@parlist$beta) # contrast estimate
+  estimate <- sum(L * model@beta) # contrast estimate
   if(method == "KR") { # Handle KR method:
     ans <- get_KR1D(L, model) # get var(contrast) and ddf
     if(!ans$error) {
@@ -73,11 +73,11 @@ contest1D <- function(L, model, ddf=c("Satterthwaite", "KR")) {
               call.=FALSE)
     }
   } # method == "Satterthwaite" proceeds:
-  var_con <- qform(L, model@parlist$vcov_beta) # variance of contrast
+  var_con <- qform(L, model@vcov_beta) # variance of contrast
   # Compute denominator DF:
   grad_var_con <-
     vapply(model@Jac_list, function(x) qform(L, x), numeric(1L)) # = {L' Jac L}_i
-  satt_denom <- qform(grad_var_con, model@A) # g'Ag
+  satt_denom <- qform(grad_var_con, model@vcov_varpar) # g'Ag
   ddf <- drop(2 * var_con^2 / satt_denom) # denominator DF
   # return t-table:
   mk_ttable(estimate, sqrt(var_con), ddf)
@@ -94,7 +94,7 @@ get_KR1D <- function(L, model) {
   vcov_beta_adj <- try(pbkrtest::vcovAdj(model), silent=TRUE) # Adjusted vcov(beta)
   if(inherits(vcov_beta_adj, "try-error")) return(list(error=TRUE))
   var_con_adj <- qform(L, as.matrix(vcov_beta_adj)) # variance of contrast
-  ddf <- try(pbkrtest::Lb_ddf(L=L, V0=model@parlist$vcov_beta,
+  ddf <- try(pbkrtest::Lb_ddf(L=L, V0=model@vcov_beta,
                               Vadj=vcov_beta_adj), silent=TRUE) # vcov_beta_adj need to be dgeMatrix!
   if(inherits(ddf, "try-error")) return(list(error=TRUE))
   list(var_con=var_con_adj, ddf=ddf, error=FALSE)
@@ -159,7 +159,7 @@ contestMD <- function(L, model, ddf=c("Satterthwaite", "KR"),
     stop("'model' has to be of class lmerModLmerTest")
   if(!is.matrix(L)) L <- matrix(L, ncol=length(L))
   stopifnot(is.matrix(L), is.numeric(L),
-            ncol(L) == length(model@parlist$beta))
+            ncol(L) == length(model@beta))
   method <- match.arg(ddf)
   if(nrow(L) == 0L) { # May happen if there are no fixed effects
     x <- numeric(0L)
@@ -178,7 +178,7 @@ contestMD <- function(L, model, ddf=c("Satterthwaite", "KR"),
               call.=FALSE)
     } else { # return F-table if we can compute the KR F-test:
       return(mk_Ftable(Fvalue=x["FtestU", "stat"], ndf=x[1L, "ndf"],
-                       ddf=x[1L, "ddf"], sigma=model@parlist$sigma,
+                       ddf=x[1L, "ddf"], sigma=model@sigma,
                        Fscale=x["Ftest", "F.scaling"]))
     }
     # NOTE on the KR method:
@@ -190,10 +190,10 @@ contestMD <- function(L, model, ddf=c("Satterthwaite", "KR"),
   if(nrow(L) == 1L) { # 1D case:
     res <- contest1D(drop(L), model)
     return(mk_Ftable(Fvalue=res[["t value"]]^2, ndf=1L, ddf=res$df,
-                     sigma=model@parlist$sigma))
+                     sigma=model@sigma))
   } # multi-D case proceeds:
   # Compute Var(L beta) and eigen-decompose:
-  VLbeta <- L %*% model@parlist$vcov_beta %*% t(L) # Var(contrast) = Var(Lbeta)
+  VLbeta <- L %*% model@vcov_beta %*% t(L) # Var(contrast) = Var(Lbeta)
   eig_VLbeta <- eigen(VLbeta)
   tol <- max(eps * eig_VLbeta$values[1], 0)
   pos <- eig_VLbeta$values > tol
@@ -208,10 +208,10 @@ contestMD <- function(L, model, ddf=c("Satterthwaite", "KR"),
   if(q == 1) { # 1D case:
     res <- contest1D(PtL, model)
     return(mk_Ftable(Fvalue=res[["t value"]]^2, ndf=q, ddf=res$df,
-                     sigma=model@parlist$sigma))
+                     sigma=model@sigma))
   } # multi-D case proceeds:
   # Compute t-squared values and F-value:
-  t2 <- drop(PtL %*% model@parlist$beta)^2 / d[1:q]
+  t2 <- drop(PtL %*% model@beta)^2 / d[1:q]
   Fvalue <- sum(t2) / q
   # Compute q-list of gradients of (PtL)' cov(beta) (PtL) wrt. varpar vector:
   grad_PLcov <- lapply(1:q, function(m) {
@@ -219,10 +219,10 @@ contestMD <- function(L, model, ddf=c("Satterthwaite", "KR"),
   })
   # Compute degrees of freedom for the q t-statistics:
   nu_m <- vapply(1:q, function(m) {
-    2*(d[m])^2 / qform(grad_PLcov[[m]], model@A) }, numeric(1L)) # 2D_m^2 / g'Ag
+    2*(d[m])^2 / qform(grad_PLcov[[m]], model@vcov_varpar) }, numeric(1L)) # 2D_m^2 / g'Ag
   # Compute ddf for the F-value:
   ddf <- get_Fstat_ddf(nu_m, tol=1e-8)
-  mk_Ftable(Fvalue, ndf=q, ddf=ddf, sigma=model@parlist$sigma)
+  mk_Ftable(Fvalue, ndf=q, ddf=ddf, sigma=model@sigma)
 }
 
 

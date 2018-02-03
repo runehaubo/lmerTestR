@@ -16,12 +16,13 @@ positive}
 \value{
 an object of class \code{'lmerModLmerTest'} which sets the following
 slots:
-\item{parlist}{list of parameter estimates including beta,
-theta, sigma (vectors) and vcov(beta) (matrix)}
-\item{A}{the asymptotic covariance matrix of the variance parameters
-(theta, sigma)}
+\item{vcov_varpar}{the asymptotic covariance matrix of the variance parameters
+(theta, sigma).}
 \item{Jac_list}{list of Jacobian matrices; gradients of vcov(beta) with
-respect to the variance parameters }
+respect to the variance parameters.}
+\item{vcov_beta}{the asymptotic covariance matrix of the fixed-effect
+regression parameters (beta; vcov(beta)).}
+\item{sigma}{the residual standard deviation.}
 }
 \description{
 Coercing an lme4::lmer model-object (of class 'lmerMod') to a model-object

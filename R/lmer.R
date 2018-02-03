@@ -7,13 +7,14 @@
 #' The \code{lmerModLmerTest} class extends \code{lmerMod} (which extends
 #' \code{merMod}) from the \pkg{lme4}-package.
 #'
-#' @slot A a numeric matrix holding the asymptotic variance-covariance matrix
-#' of the variance paramters (including sigma).
+#' @slot vcov_varpar a numeric matrix holding the asymptotic variance-covariance
+#' matrix of the variance parameters (including sigma).
 #' @slot Jac_list a list of gradient matrices (Jacobians) for the gradient of
 #' the variance-covariance of beta with respect to the variance parameters,
 #' where beta are the mean-value parameters available in \code{fixef(object)}.
-#' @slot parlist a list of parameters used internally in \pkg{lmerTestR} for
-#' computing Satterthwaite's denominator degrees-of-freedom.
+#' @slot vcov_beta a numeric matrix holding the asymptotic variance-covariance
+#' matrix of the fixed-effect regression parameters (beta).
+#' @slot sigma the residual standard deviation.
 #'
 #' @seealso \code{\link[lme4]{lmer}} and \code{\link[lme4]{merMod}}
 #' @author Rune Haubo B. Christensen
@@ -25,9 +26,10 @@
 lmerModLmerTest <-
   setClass("lmerModLmerTest",
            contains = c("lmerMod"),
-           representation = representation(A = "matrix",
+           representation = representation(vcov_varpar = "matrix",
                                            Jac_list = "list",
-                                           parlist = "list"))
+                                           vcov_beta = "matrix",
+                                           sigma = "numeric"))
 
 ##############################################
 ######## lmer()
@@ -90,19 +92,20 @@ lmer <- function(formula, data = NULL, REML = TRUE,
 #'
 #' @return an object of class \code{'lmerModLmerTest'} which sets the following
 #' slots:
-#' \item{parlist}{list of parameter estimates including beta,
-#' theta, sigma (vectors) and vcov(beta) (matrix)}
-#' \item{A}{the asymptotic covariance matrix of the variance parameters
-#' (theta, sigma)}
+#' \item{vcov_varpar}{the asymptotic covariance matrix of the variance parameters
+#' (theta, sigma).}
 #' \item{Jac_list}{list of Jacobian matrices; gradients of vcov(beta) with
-#' respect to the variance parameters }
+#' respect to the variance parameters.}
+#' \item{vcov_beta}{the asymptotic covariance matrix of the fixed-effect
+#' regression parameters (beta; vcov(beta)).}
+#' \item{sigma}{the residual standard deviation.}
 #'
 #' @seealso the class definition in \code{\link{lmerModLmerTest}}) and
 #' \code{\link{lmer}}
 #'
 #' @importFrom numDeriv hessian jacobian
 #' @importFrom stats vcov update sigma
-#' @importFrom lme4 getME fixef
+#' @importFrom lme4 getME
 #'
 #' @author Rune Haubo B. Christensen
 #'
@@ -121,11 +124,9 @@ as_lmerModLmerTest <- function(model, tol=1e-8) {
   # Coerce 'lme4-model' to 'lmerModLmerTest':
   res <- as(model, "lmerModLmerTest")
   # Set relevant slots of the new model object:
-  res@parlist <- list(beta=fixef(model), # model@beta
-                      theta=getME(model, "theta"), # model@theta
-                      sigma=sigma(model),
-                      vcov_beta = as.matrix(vcov(model)))
-  varpar_opt <- unname(c(res@theta, res@parlist$sigma))
+  res@sigma <- sigma(model)
+  res@vcov_beta <- as.matrix(vcov(model))
+  varpar_opt <- unname(c(res@theta, res@sigma))
   # Compute Hessian:
   h <- numDeriv::hessian(func=devfun_vp, x=varpar_opt, devfun=devfun,
                          reml=is_reml)
@@ -142,11 +143,11 @@ as_lmerModLmerTest <- function(model, tol=1e-8) {
   h_inv <- with(eig_h, {
     vectors[, pos, drop=FALSE] %*% diag(1/values[pos], nrow=q) %*%
       t(vectors[, pos, drop=FALSE]) })
-  res@A <- 2 * h_inv # vcov(varpar)
+  res@vcov_varpar <- 2 * h_inv # vcov(varpar)
   # Compute Jacobian of cov(beta) for each varpar and save in list:
   Jac <- numDeriv::jacobian(func=get_covbeta, x=varpar_opt, devfun=devfun)
   res@Jac_list <- lapply(1:ncol(Jac), function(i)
-    array(Jac[, i], dim=rep(length(res@parlist$beta), 2))) # k-list of jacobian matrices
+    array(Jac[, i], dim=rep(length(res@beta), 2))) # k-list of jacobian matrices
   return(res)
 }
 

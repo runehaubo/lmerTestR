@@ -22,7 +22,7 @@ stopifnot(isTRUE(
 ))
 # The hessian/vcov is actually positive definite:
 stopifnot(isTRUE(
-  all(eigen(m@A, only.values = TRUE)$values > 0)
+  all(eigen(m@vcov_varpar, only.values = TRUE)$values > 0)
 ))
 
 # Check that ANOVA tables are the same:
