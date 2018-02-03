@@ -50,12 +50,13 @@ setMethod("anova",
                    ddf=c("Satterthwaite", "KR", "lme4")) {
             dots <- list(...)
             models <- if(length(dots))
-              sapply(dots, is, "merModLmerTest") | sapply(dots, is, "merMod") |
+              sapply(dots, is, "lmerModLmerTest") | sapply(dots, is, "merMod") |
               sapply(dots, is, "lm") else logical(0)
-            if(any(models)) return(callNextMethod())
+            if(any(models)) return(callNextMethod()) # return(anova(as(object, "lmerMod"), ...))
+            # Note: Need 'callNextMethod' here to get printing from anova.merMod right.
             ddf <- match.arg(ddf)
             # type <- match.arg(type) # not actually needed
-            if(ddf=="lme4") return(callNextMethod())
+            if(ddf=="lme4") return(anova(as(object, "lmerMod"), ...)) # return(callNextMethod())
             # FIXME: Warn that 'type' is ignored when ddf="lme4"
             single_anova(object=object, type=type, ddf=ddf)
           })

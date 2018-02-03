@@ -119,7 +119,7 @@ Satterthwaite df fails, the \code{lmerMod} object is returned - not an
 
 data("sleepstudy", package="lme4")
 m <- lmer(Reaction ~ Days + (Days | Subject), sleepstudy)
-class(m)
+class(m) # lmerModLmerTest
 
 }
 \seealso{
