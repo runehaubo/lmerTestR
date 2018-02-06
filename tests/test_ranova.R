@@ -40,6 +40,23 @@ stopifnot(
   all.equal(an[2L, "LRT"], LRT)
 )
 
+## _NULL_ model:
+fm <- lmer(Reaction ~ -1 + (1|Subject), sleepstudy)
+ranova(fm)
+lm1 <- lm(Reaction ~ 0, data=sleepstudy)
+LRT <- 2*c(logLik(fm, REML=FALSE) - logLik(lm1, REML=FALSE))
+
+## Tests of ML-fits agree with anova():
+fm1 <- lmer(Reaction ~ Days + (1|Subject), sleepstudy, REML=FALSE)
+lm2 <- lm(Reaction ~ Days, sleepstudy)
+(an1 <- ranova(fm1))
+(an2 <- anova(fm1, lm2))
+stopifnot(
+  all.equal(an1[2, "LRT"], an2[2, "Chisq"]),
+  all.equal(an1[2, "Df"], an2[2, "Df"]),
+  all.equal(an1[1:2, "logLik"], an2[2:1, "logLik"])
+)
+
 check_nrow <- function(obj, expect_nrow) {
   stopifnot(
     is.numeric(expect_nrow),
@@ -67,14 +84,12 @@ stopifnot(
   an2[2L, "Pr(>Chisq)"] == 1
 )
 ranova(fm1, reduce.terms = FALSE)
-# lmerTest:::rand(fm1) # Seems to remove the whole term
 
 fm1 <- lmer(Reaction ~ Days + (-1 + Days|Subject), sleepstudy)
 (an3 <- ranova(fm1)) # no test of non-nested models
 stopifnot(
   all.equal(an, an3, check.attributes=FALSE)
 )
-#  lmerTest:::rand(fm1) # Error
 
 # Example where comparison of non-nested models is generated
 fm <- lmer(Reaction ~ poly(Days, 2) + (0 + poly(Days, 2) | Subject), sleepstudy)
@@ -109,8 +124,24 @@ stopifnot(
   all.equal(an1, an2, check.attributes=FALSE)
 )
 
+#####################################################################
 # Test evaluation within functions, i.e. in other environments etc.
+attach(sleepstudy)
+fm <- lmer(Reaction ~ Days + (Days|Subject))
+ranova(fm) # OK
+detach(sleepstudy)
 
+# Evaluating in a function leads to an error:
+f <- function(form, data) lmer(form, data=data)
+form <- formula("Reaction ~ Days + (Days|Subject)")
+fm <- f(form, data=sleepstudy)
+assertError(ranova(fm))
+
+# Evaluating in parent environment does not help:
+f <- function(form, data) eval.parent(lmer(form, data=data))
+form <- formula("Reaction ~ Days + (Days|Subject)")
+fm <- f(form, data=sleepstudy)
+assertError(ranova(fm))
 
 #####################################################################
 # Model with 2 ranef covarites:
