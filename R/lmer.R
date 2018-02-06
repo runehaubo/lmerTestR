@@ -132,10 +132,24 @@ as_lmerModLmerTest <- function(model, tol=1e-8) {
                          reml=is_reml)
   # Eigen decompose the Hessian:
   eig_h <- eigen(h, symmetric=TRUE)
-  if(any(eig_h$values < -tol))
-    stop("Model did not converge: Hessian has negative eigenvalues")
-  if(any(abs(eig_h$values) < tol))
-    warning("Model may not have converged: Hessian is singular")
+  evals <- eig_h$values
+  neg <- evals < -tol
+  pos <- evals > tol
+  zero <- evals > -tol & evals < tol
+  if(sum(neg) > 0) { # negative eigenvalues
+    eval_chr <- if(sum(neg) > 1) "eigenvalues" else "eigenvalue"
+    evals_num <- paste(sprintf("%1.1e", evals[neg]), collapse = " ")
+    warning(sprintf("Model failed to converge with %d negative %s: %s",
+                    sum(neg), eval_chr, evals_num), call.=FALSE)
+  }
+  # Note: we warn about negative AND zero eigenvalues:
+  if(sum(zero) > 0) { # some eigenvalues are zero
+    eval_chr <- if(sum(zero) > 1) "eigenvalues" else "eigenvalue"
+    evals_num <- paste(sprintf("%1.1e", evals[zero]), collapse = " ")
+    warning(sprintf("Model may not have converged with %d %s close to zero: %s",
+                    sum(zero), eval_chr, evals_num))
+
+  }
   # Compute vcov(varpar):
   pos <- eig_h$values > tol
   q <- sum(pos)
