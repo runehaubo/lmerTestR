@@ -81,3 +81,21 @@ rbindall <- function(...) do.call(rbind, ...)
 ##############################################
 cond <- function(X) with(eigen(X, only.values=TRUE), max(values) / min(values))
 
+safeDeparse <- function(expr, width.cutoff=500L, backtick = mode(expr) %in%
+                          c("call", "expression", "(", "function"),
+                        control = c("keepInteger","showAttributes", "keepNA"),
+                        nlines = -1L) {
+  deparse(expr=expr, width.cutoff=width.cutoff, backtick=backtick,
+          control=control, nlines=nlines)
+}
+
+# Checks:
+# deparse_args <- formals(deparse)
+# safeDeparse_args <- formals(safeDeparse)
+# all.equal(names(deparse_args), names(safeDeparse_args))
+# all.equal(deparse_args[!names(deparse_args) %in% "width.cutoff"],
+#           safeDeparse_args[!names(safeDeparse_args) %in% "width.cutoff"])
+# all.equal(deparse_args[["width.cutoff"]], 60L)
+# all.equal(safeDeparse_args[["width.cutoff"]], 500L)
+
+
