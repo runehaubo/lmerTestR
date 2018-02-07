@@ -85,14 +85,13 @@ single_anova <- function(object, type = c("I", "II", "III", "1", "2", "3"),
     warning("calling single_anova(<fake-lmerModLmerTest-object>) ...")
   if(!is.character(type)) type <- as.character(type)
   type <- as.integer(as.roman(match.arg(type)))
-  if(type == 2L) {
-    warning("Type II anova tables are not yet implemented; returning type III")
-    type <- 3L
-  }
   ddf <- match.arg(ddf)
   # Get list of contrast matrices (L) - one for each model term:
   L_list <- if(type == 1L) {
     get_contrasts_type1(model.matrix(object), terms(object))
+  } else if(type == 2L) {
+    data_classes <- attr(terms(object, fixed.only=FALSE), "dataClasses")
+    get_contrasts_type2(model.matrix(object), terms(object), data_classes)
   } else if(type == 3L) {
     get_contrasts_type3(object)
   }
@@ -100,53 +99,13 @@ single_anova <- function(object, type = c("I", "II", "III", "1", "2", "3"),
   table <- rbindall(lapply(L_list, contestMD, model=object, ddf=ddf))
   # Format ANOVA table and return:
   rownames(table) <- names(L_list)
-  response_name <- deparse(formula(object)[[2L]], width.cutoff = 500L)
   method <- switch(ddf, "Satterthwaite" = "Satterthwaite's",
                    "KR" = "Kenward-Roger's")
   attr(table, "heading") <-
     paste("Type", as.roman(type), "Analysis of Variance Table",
           "with", method, "method")
+  attr(table, "hypotheses") <- L_list
   class(table) <- c("anova", "data.frame")
   table
-}
-
-###############################################################################
-######## Type I anova functions below
-###############################################################################
-
-##############################################
-######## get_contrasts_type1
-##############################################
-
-#' Type I ANOVA table contrasts
-#'
-#' @param X a design matrix - usually from \code{model.matrix}. \code{X} must
-#' have an \code{assign} attribute.
-#' @param terms a terms object.
-#' @param keep_intercept defaults to \code{FALSE}. If \code{TRUE} a contrast
-#' for the intercept is included in the returned list of contrast matrices.
-#'
-#' @return List of contrast matrices - one contrast matrix for each model term.
-#' @importFrom stats setNames
-#' @author Rune Haubo B. Christensen
-#'
-#' @keywords internal
-get_contrasts_type1 <- function(X, terms, keep_intercept = FALSE) {
-  p <- ncol(X)
-  if(p == 0L) return(list(matrix(numeric(0L), nrow=0L))) # no fixef
-  if(p == 1L && attr(terms, "intercept")) # intercept-only model
-    return(list(matrix(numeric(0L), ncol=1L)))
-  # Compute 'normalized' doolittle factorization of XtX:
-  L <- if(p == 1L) matrix(1L) else t(doolittle(crossprod(X))$L)
-  # Determine which rows of L belong to which term:
-  asgn <- attr(X, "assign")
-  stopifnot(!is.null(asgn))
-  term_labels <- attr(terms, "term.labels")
-  term_names <- c("(Intercept)", term_labels)
-  term_names <- term_names[1 + unique(asgn)] # order appropriately
-  # Compute list of row indicators for L matrix:
-  ind.list <- setNames(split(1L:p, asgn), nm=term_names)
-  ind.list <- ind.list[term_labels] # rm intercept if present
-  lapply(ind.list, function(rows) L[rows, , drop=FALSE])
 }
 

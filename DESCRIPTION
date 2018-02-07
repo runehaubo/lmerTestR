@@ -16,9 +16,11 @@ LazyData: true
 RoxygenNote: 6.0.1
 Collate: 
     'contest.R'
+    'lm_methods.R'
     'lmer.R'
     'lmer_anova.R'
     'lmer_summary.R'
     'ranova.R'
+    'type12.R'
     'type3.R'
     'utils.R'
