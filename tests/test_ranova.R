@@ -53,7 +53,7 @@ lm2 <- lm(Reaction ~ Days, sleepstudy)
 (an2 <- anova(fm1, lm2))
 stopifnot(
   all.equal(an1[2, "LRT"], an2[2, "Chisq"]),
-  all.equal(an1[2, "Df"], an2[2, "Df"]),
+  all.equal(an1[2, "Df"], an2[2, "Chi Df"]),
   all.equal(an1[1:2, "logLik"], an2[2:1, "logLik"])
 )
 
