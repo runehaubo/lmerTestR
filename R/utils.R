@@ -49,20 +49,3 @@ safeDeparse <- function(expr, width.cutoff=500L, backtick = mode(expr) %in%
           control=control, nlines=nlines)
 }
 
-##############################################
-######## containment
-##############################################
-containment <- function(object) { # lm or merMod
-  # For all terms 'T' in object compute the terms
-  # Return a list:
-  #   for each term 'T' a vector of terms that contain 'T'.
-  terms <- terms(object)
-  data_classes <- attr(terms(object, fixed.only=FALSE), "dataClasses")
-  # Note: need fixed.only for merMod objects to get dataClasses
-  term_names <- attr(terms, "term.labels")
-  factor_mat <- attr(terms, "factors")
-  setNames(lapply(term_names, function(term) {
-    term_names[relatives(data_classes, term, term_names, factor_mat)]
-  }), term_names)
-}
-

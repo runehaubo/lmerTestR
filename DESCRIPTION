@@ -1,7 +1,7 @@
 Package: lmerTestR
 Type: Package
 Title: Tests in Linear Mixed Effects Models 
-Version: 0.1.0.9005
+Version: 0.1.0.9006
 Authors@R: c(person("Rune", "Haubo Bojesen Christensen", role =  c("aut", "cre"),
 		   email = "Rune@ChristensenStatistics.dk"))
 Depends: lme4 (>= 1.0), stats, methods
@@ -15,13 +15,14 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1
 Collate: 
+    'anova_contrasts.R'
     'contest.R'
+    'contrast_utils.R'
     'estimability.R'
     'lm_methods.R'
     'lmer.R'
     'lmer_anova.R'
     'lmer_summary.R'
     'ranova.R'
-    'type12.R'
-    'type3.R'
+    'terms_utils.R'
     'utils.R'

@@ -1,5 +1,9 @@
 # lmer_anova.R - anova method for lmerModLmerTest objects
 
+# anova - lmerModLmerTest
+# single_anova
+# show_tests
+
 #' @include lmer.R
 NULL
 
@@ -63,7 +67,7 @@ setMethod("anova",
 
 
 ##############################################
-######## anova function for single models
+######## single_anova()
 ##############################################
 #' ANOVA Tables for Linear Mixed Models
 #'
@@ -80,7 +84,7 @@ setMethod("anova",
 #'
 #' @keywords internal
 single_anova <- function(object,
-                         type = c("I", "II", "III", "1", "2", "2b", "3", "3b", "3c", "marginal"),
+                         type = c("I", "II", "III", "1", "2", "3", "yates", "marginal", "2b", "3b", "3c"),
                          ddf=c("Satterthwaite", "KR")) {
   if(!inherits(object, "lmerModLmerTest"))
     warning("calling single_anova(<fake-lmerModLmerTest-object>) ...")
@@ -99,10 +103,10 @@ single_anova <- function(object,
     get_contrasts_type2(object)
   } else if(type == "3") {
     get_contrasts_type3(object)
-  # } else if(type == "3b") {
-  #   get_contrasts_type3b(object)
-  # } else if(type == "3c") {
-  #   get_contrasts_type3c(object)
+  } else if(type == "3b" || type == "yates") {
+    get_contrasts_type3b(object)
+  } else if(type == "3c") {
+    get_contrasts_type3old(object)
   } else if(type == "marginal") {
     get_contrasts_marginal(object)
   } else {
@@ -117,6 +121,8 @@ single_anova <- function(object,
   # Format 'type':
   type <- if(type == "marginal") {
     "Marginal"
+  } else if (type == "yates" || type == "3b") {
+    "Yates"
   } else if(grepl("b|c", type)) {
     alph <- gsub("[0-9]", "", type)
     paste0("Type ", as.roman(as.integer(gsub("b|c", "", type))), alph)
@@ -129,7 +135,7 @@ single_anova <- function(object,
 }
 
 ##############################################
-######## show_tests
+######## show_tests()
 ##############################################
 #' Show Hypothesis Tests in ANOVA Tables
 #'

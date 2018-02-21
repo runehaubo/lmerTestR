@@ -70,3 +70,56 @@ contest_lm <- function(L, model, eps=1e-8) {
   # Compute q-list of gradients of (PtL)' cov(beta) (PtL) wrt. varpar vector:
   mk_Ftable(Fvalue, ndf=q, ddf=model$df.residual, RSS=sum(model$residuals^2))
 }
+
+
+get_D <- function(rdX) {
+  # Compute the general Dependency matrix - aka. 'general form of estimable
+  # functions' in SAS terminology.
+  # This implementation uses the Moore-Penrose generalized inverse.
+  D <- array(0, dim=c(ncol(rdX), ncol(rdX)))
+  dimnames(D) <- list(names(attr(rdX, "param")), names(attr(rdX, "param")))
+  D[1, 1] <- 1
+  set <- 1
+  for(i in 2:ncol(D)) {
+    y <- rdX[, i]
+    xx <- rdX[, set]
+    b <- MASS::ginv(xx) %*% y
+    resid <- y - xx %*% b
+    RSS <- sum(resid^2)
+    if(RSS < 1e-8) {
+      b[abs(b) < 1e-8] <- 0
+      D[i, set] <- b
+    } else {
+      D[i, i] <- 1
+      set <- c(set, i)
+    }
+  }
+  zapsmall(D)
+}
+
+#' @importFrom stats lm residuals
+get_D2 <- function(rdX) {
+  # Compute the general Dependency matrix - aka. 'general form of estimable
+  # functions' in SAS terminology.
+  # This implementation uses QR via lm().
+  D <- array(0, dim=c(ncol(rdX), ncol(rdX)))
+  dimnames(D) <- list(names(attr(rdX, "param")), names(attr(rdX, "param")))
+  D[1, 1] <- 1
+  set <- 1
+  for(i in 2:ncol(D)) {
+    y <- rdX[, i]
+    xx <- rdX[, set]
+    m <- lm(y ~ 0 + xx)
+    b <- coef(m)
+    RSS <- sum(residuals(m)^2)
+    if(RSS < 1e-8) {
+      b[abs(b) < 1e-8] <- 0
+      D[i, set] <- b
+    } else {
+      D[i, i] <- 1
+      set <- c(set, i)
+    }
+  }
+  zapsmall(D)
+}
+
