@@ -4,10 +4,17 @@
 \alias{get_rdX}
 \title{Compute the 'Full' Rank-Deficient Design Matrix}
 \usage{
-get_rdX(model)
+get_rdX(model, do.warn = TRUE, use_contrasts = FALSE)
 }
 \arguments{
-\item{model}{a model object; lmerMod or lmerModLmerTest}
+\item{model}{a model object; lmerMod or lmerModLmerTest.}
+
+\item{do.warn}{throw a warning if there is no data for some factor
+combinations.}
+
+\item{use_contrasts}{if \code{TRUE} contrasts coding from the original design
+matrix will be used. If \code{FALSE} the settings in \code{options()$contrasts}
+will be used.}
 }
 \value{
 the rank-deficien design matrix, \code{rdX} with attributes

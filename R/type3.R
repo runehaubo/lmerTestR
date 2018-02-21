@@ -42,13 +42,15 @@ get_contrasts_type3 <- function(model) {
   L <- general_L(rdX, is_coef)
   # Compute Type 3 Lc for each term:
   data_classes <- attr(terms(model, fixed.only=FALSE), "dataClasses")
+  term_names <- setNames(as.list(term_names), term_names)
   Lc_list <- lapply(term_names, function(nm) {
     Lc <- contrast_type3SAS(nm, Terms, data_classes, L)
-    if(!is.matrix(Lc)) Lc <- matrix(Lc, ncol=length(Lc))
-    Lc[, is_coef, drop=FALSE]
+    if(!is.matrix(Lc)) Lc <- matrix(Lc, ncol=length(Lc),
+                                    dimnames = list(NULL, names(Lc)))
+    Lc <- Lc[, is_coef, drop=FALSE]
+    colnames(Lc) <- colnames(X)
+    Lc
   })
-  names(Lc_list) <- term_names
-  Lc_list
 }
 
 ##############################################
@@ -58,7 +60,12 @@ get_contrasts_type3 <- function(model) {
 #'
 #' Experimental - not extensively tested.
 #'
-#' @param model a model object; lmerMod or lmerModLmerTest
+#' @param model a model object; lmerMod or lmerModLmerTest.
+#' @param do.warn throw a warning if there is no data for some factor
+#' combinations.
+#' @param use_contrasts if \code{TRUE} contrasts coding from the original design
+#' matrix will be used. If \code{FALSE} the settings in \code{options()$contrasts}
+#' will be used.
 #'
 #' @return the rank-deficien design matrix, \code{rdX} with attributes
 #' \item{param}{a vector of _parameters_ in the over-parameterized model
@@ -71,7 +78,7 @@ get_contrasts_type3 <- function(model) {
 #'
 #' @importFrom stats as.formula model.frame terms model.matrix setNames
 #' @importFrom lme4 fixef
-get_rdX <- function(model) {
+get_rdX <- function(model, do.warn=TRUE, use_contrasts=FALSE) {
   # Compute rank-deficient design-matrix X:
   #
   # model: terms(model), model.frame(model), fixef(model)
@@ -81,8 +88,18 @@ get_rdX <- function(model) {
   df <- model.frame(model)
   # Compute rank-deficient (full) design-matrix, X:
   # FIXME: Consider models without terms.
-  rdXi <- lapply(term_names, function(trm)
-    model.matrix(as.formula(paste0("~ 0 + ", trm)), data=df))
+  if(!use_contrasts) {
+    rdXi <- lapply(term_names, function(trm)
+      model.matrix(as.formula(paste0("~ 0 + ", trm)), data=df))
+  } else {
+    contrasts <- attr(model.matrix(model), "contrasts")
+    rdXi <- lapply(term_names, function(trm) {
+      form <- as.formula(paste0("~ 0 + ", trm))
+      Contrast <- if(!is.null(contrasts) && trm %in% names(contrasts))
+        contrasts[trm] else NULL
+      model.matrix(form, contrasts.arg = Contrast, data=df)
+    })
+  }
   # FIXME: Appears not to do the right thing for interactions with ordered factors.
   rdX <- do.call(cbind, rdXi)
   param_names <- unlist(lapply(rdXi, colnames))
@@ -94,9 +111,9 @@ get_rdX <- function(model) {
     param_names <- c("(Intercept)", param_names)
   }
   # Warn if there are cells without data:
-  if(any(colSums(rdX) == 0))
-    warning("Missing cells for some factor levels:\n,
-            Interpret type III hypotheses with care")
+  if(do.warn && any(colSums(rdX) == 0))
+    warning("Missing cells for some factor levels:\n",
+            "Interpret type III hypotheses with care")
   # FIXME: mention name of offending factor-level in warning.
   # Add param and is_coef attributes to rdX and return:
   param <- setNames(numeric(ncol(rdX)), param_names)
@@ -192,6 +209,8 @@ contrast_type3SAS <- function(term, terms, data_classes, L, eps=1e-8) {
   }
 
   # For each column among those which are unrelated 'name':
+  # Seems to orthogonalize all terms that are not T and does not contain T
+  #  relative to T:
   for(colnum in colnums) {
     # pivots are the non-zero entries in L[, colnum]
     pivots <- which(abs(L[, colnum]) > eps)
@@ -199,7 +218,7 @@ contrast_type3SAS <- function(term, terms, data_classes, L, eps=1e-8) {
       # Normalize the L[pivots[1L], ] with L[pivots[1], colnum]
       L[pivots[1], ] <- L[pivots[1], ] / L[pivots[1], colnum]
       nonzeros <- setdiff(pivots, pivots[1])
-      if(length(nonzeros) != 0) {
+      if(length(nonzeros) > 0) {
         for(nonzero in nonzeros) {
           L[nonzero, ] <- L[nonzero, ]-L[nonzero, colnum]*L[pivots[1], ]
         }
@@ -210,9 +229,9 @@ contrast_type3SAS <- function(term, terms, data_classes, L, eps=1e-8) {
 
   # Select the non-zero rows in L:
   nums <- which(apply(L, 1, function(y) sum(abs(y))) != 0)
-  L <- L[nums,]
+  L <- L[nums, , drop=FALSE]
   # If L is a vector then return, otherwise proceed to orthogonalization:
-  if(is.vector(L)) return(L)
+  if(nrow(L) <= 1L) return(L)
 
   # Orthogonalization:
   if(length(term_cols) > 1)
@@ -235,7 +254,7 @@ contrast_type3SAS <- function(term, terms, data_classes, L, eps=1e-8) {
   L[abs(L) < 1e-6] <- 0
   # Keep non-zero rows:
   nonzero <- which(apply(L, 1, function(y) sum(abs(y))) != 0)
-  L <- L[nonzero, ]
+  L <- L[nonzero, , drop=FALSE]
   L
 }
 
