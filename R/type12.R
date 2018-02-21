@@ -9,9 +9,7 @@
 ##############################################
 #' Type I ANOVA table contrasts
 #'
-#' @param X a design matrix - usually from \code{model.matrix}. \code{X} must
-#' have an \code{assign} attribute.
-#' @param terms a terms object.
+#' @param model a model object with \code{terms} and \code{model.matrix} methods.
 #' @param keep_intercept defaults to \code{FALSE}. If \code{TRUE} a contrast
 #' for the intercept is included in the returned list of contrast matrices.
 #'
@@ -20,13 +18,16 @@
 #' @author Rune Haubo B. Christensen
 #'
 #' @keywords internal
-get_contrasts_type1 <- function(X, terms, keep_intercept = FALSE) {
+get_contrasts_type1 <- function(model, keep_intercept = FALSE) {
+  terms <- terms(model)
+  X <- model.matrix(model)
   p <- ncol(X)
   if(p == 0L) return(list(matrix(numeric(0L), nrow=0L))) # no fixef
   if(p == 1L && attr(terms, "intercept")) # intercept-only model
     return(list(matrix(numeric(0L), ncol=1L)))
   # Compute 'normalized' doolittle factorization of XtX:
   L <- if(p == 1L) matrix(1L) else t(doolittle(crossprod(X))$L)
+  dimnames(L) <- list(colnames(X), colnames(X))
   # Determine which rows of L belong to which term:
   asgn <- attr(X, "assign")
   stopifnot(!is.null(asgn))
@@ -37,7 +38,7 @@ get_contrasts_type1 <- function(X, terms, keep_intercept = FALSE) {
   ind.list <- setNames(split(1L:p, asgn), nm=term_names)
   ind.list <- ind.list[term_labels] # rm intercept if present
   lapply(ind.list, function(rows) L[rows, , drop=FALSE])
-  # FIXME: implement keep_intercept = TRUE
+  # FIXME: implement keep_intercept = TRUE. Do we need it, want it?
 }
 
 ##############################################
@@ -96,11 +97,23 @@ doolittle <- function(x, eps = 1e-6) {
 ##############################################
 ######## get_contrasts_type2
 ##############################################
-get_contrasts_type2 <- function(X, terms, data_classes) {
-  # If model has at most one term return Type I contrasts:
+get_contrasts_type2 <- function(model, which=NULL) {
+  # Computes the type 2 contrasts - either for all terms or for those
+  # included in 'which' (a chr vector naming model terms).
+  # returns a list
+  X <- model.matrix(model)
+  terms <- terms(model)
+  data_classes <- attr(terms(model, fixed.only=FALSE), "dataClasses")
+  if(is.null(asgn <- attr(X, "assign")))
+    stop("design matrix 'X' should have a non-null 'assign' attribute")
   term_names <- attr(terms, "term.labels")
-  if(ncol(X) <= 1L || length(term_names) <= 1L)
-    return(get_contrasts_type1(X, terms))
+  if(is.null(which)) {
+    which <- term_names
+    # If model has at most one term return Type I contrasts:
+    if(ncol(X) <= 1L || length(term_names) <= 1L)
+      return(get_contrasts_type1(model))
+  } else stopifnot(is.character(which), all(which %in% term_names))
+  which <- setNames(as.list(which), which)
 
   # Compute containment:
   factor_mat <- attr(terms, "factors")
@@ -111,8 +124,6 @@ get_contrasts_type2 <- function(X, terms, data_classes) {
 
   # Compute term asignment list: map from terms to columns in X
   has_intercept <- attr(terms, "intercept") > 0
-  if(is.null(asgn <- attr(X, "assign")))
-    stop("design matrix 'X' should have a non-null 'assign' attribute")
   col_terms <- if(has_intercept) c("(Intercept)", term_names)[asgn + 1] else
     term_names[asgn[asgn > 0]]
   if(!length(col_terms) == ncol(X)) # should never happen.
@@ -120,7 +131,7 @@ get_contrasts_type2 <- function(X, terms, data_classes) {
   term2colX <- split(seq_along(col_terms), col_terms)[unique(col_terms)]
 
   # Compute contrast for each term - return as named list:
-  lapply(setNames(as.list(term_names), term_names), function(term) {
+  lapply(which, function(term) {
     # Reorder the cols in X to [, unrelated_to_term, term, contained_in_term]
     cols_term <- unlist(term2colX[c(term, contained_in[[term]])])
     Xnew <- cbind(X[, -cols_term, drop=FALSE], X[, cols_term, drop=FALSE])
@@ -132,5 +143,77 @@ get_contrasts_type2 <- function(X, terms, data_classes) {
     # Extract rows for term and get original order of columns:
     Lc[newXcol_terms == term, colnames(X), drop=FALSE]
   })
+}
+
+#' @importFrom stats model.matrix terms
+get_contrasts_type2_unfolded <- function(model, which=NULL) {
+  # Computes the 'genuine type II contrast' for all terms that are
+  # contained in other terms. For all terms which are not contained in other
+  # terms, the simple marginal contrast is computed.
+  X <- model.matrix(model)
+  Terms <- terms(model)
+  term_names <- attr(Terms, "term.labels")
+  if(is.null(which)) {
+    which <- term_names
+    # If model has at most one term return Type I contrasts:
+    if(ncol(X) <= 1L || length(term_names) <= 1L)
+      return(get_contrasts_type1(model))
+  } else stopifnot(is.character(which), all(which %in% term_names))
+
+  is_contained <- containment(model)
+  do_marginal <- names(is_contained)[sapply(is_contained, length) == 0L]
+  do_type2 <- setdiff(term_names, do_marginal)
+
+  if(!length(do_marginal)) list() else
+    Llist <- get_contrasts_marginal(model, which=do_marginal)
+  if(length(do_type2))
+    Llist <- c(Llist, get_contrasts_type2(model, which=do_type2))
+  Llist[term_names]
+}
+
+#' @importFrom stats model.matrix terms
+get_contrasts_marginal <- function(model, which=NULL) {
+  # Computes marginal contrasts.
+  #
+  # No tests of conformity with coefficients are implemented
+  #
+  # returns a list
+  X <- model.matrix(model)
+  terms <- terms(model)
+  term_names <- attr(terms, "term.labels")
+  if(is.null(which)) {
+    which <- term_names
+    # If model has at most one term return Type I contrasts:
+    if(ncol(X) <= 1L || length(term_names) <= 1L)
+      return(get_contrasts_type1(model))
+  } else stopifnot(is.character(which), all(which %in% term_names))
+  ## FIXME: test use of 'which' arg.
+
+  # Compute map from terms to columns in X and contrasts matrix
+  term2colX <- term2colX(terms, X)
+  L <- structure(diag(ncol(X)), dimnames = list(colnames(X), colnames(X)))
+
+  # Extract contrast for each term - return as named list:
+  which <- setNames(as.list(which), which)
+  lapply(which, function(term) {
+    L[term2colX[[term]], , drop=FALSE]
+  })
+}
+
+term2colX <- function(terms, X) {
+  # Compute map from terms to columns in X using the assign attribute of X.
+  # Returns a list with one element for each term containing indices of columns
+  #   in X belonging to that term.
+  if(is.null(asgn <- attr(X, "assign")))
+    stop("Invalid design matrix:",
+         "design matrix 'X' should have a non-null 'assign' attribute",
+         call. = FALSE)
+  term_names <- attr(terms, "term.labels")
+  has_intercept <- attr(terms, "intercept") > 0
+  col_terms <- if(has_intercept) c("(Intercept)", term_names)[asgn + 1] else
+    term_names[asgn[asgn > 0]]
+  if(!length(col_terms) == ncol(X)) # should never happen.
+    stop("An error happended when mapping terms to columns of X")
+  split(seq_along(col_terms), col_terms)[unique(col_terms)]
 }
 

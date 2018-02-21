@@ -1,11 +1,11 @@
 Package: lmerTestR
 Type: Package
 Title: Tests in Linear Mixed Effects Models 
-Version: 0.1.0.9004
+Version: 0.1.0.9005
 Authors@R: c(person("Rune", "Haubo Bojesen Christensen", role =  c("aut", "cre"),
 		   email = "Rune@ChristensenStatistics.dk"))
 Depends: lme4 (>= 1.0), stats, methods
-Imports: numDeriv
+Imports: numDeriv, MASS
 Suggests: pbkrtest, tools, lmerTest
 Description: Rune's lmerTest package (Revised). 
     anova and summary methods for linear mixed models with p-values for F and 

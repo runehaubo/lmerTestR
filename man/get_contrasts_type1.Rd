@@ -4,13 +4,10 @@
 \alias{get_contrasts_type1}
 \title{Type I ANOVA table contrasts}
 \usage{
-get_contrasts_type1(X, terms, keep_intercept = FALSE)
+get_contrasts_type1(model, keep_intercept = FALSE)
 }
 \arguments{
-\item{X}{a design matrix - usually from \code{model.matrix}. \code{X} must
-have an \code{assign} attribute.}
-
-\item{terms}{a terms object.}
+\item{model}{a model object with \code{terms} and \code{model.matrix} methods.}
 
 \item{keep_intercept}{defaults to \code{FALSE}. If \code{TRUE} a contrast
 for the intercept is included in the returned list of contrast matrices.}

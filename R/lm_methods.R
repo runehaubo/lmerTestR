@@ -7,7 +7,7 @@
 anova2 <- function(object) {
   Terms <- terms(object)
   data_classes <- attr(Terms, "dataClasses")
-  Llist <- get_contrasts_type2(model.matrix(object), Terms, data_classes)
+  Llist <- get_contrasts_type2(object)
   table <- do.call("rbind", lapply(Llist, contest_lm, model=object))
   ## Add row for residuals:
   df <- object$df.residual

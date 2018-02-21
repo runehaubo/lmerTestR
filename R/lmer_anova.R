@@ -79,21 +79,34 @@ setMethod("anova",
 #' @author Rune Haubo B. Christensen
 #'
 #' @keywords internal
-single_anova <- function(object, type = c("I", "II", "III", "1", "2", "3"),
+single_anova <- function(object,
+                         type = c("I", "II", "III", "1", "2", "2b", "3", "3b", "3c", "marginal"),
                          ddf=c("Satterthwaite", "KR")) {
   if(!inherits(object, "lmerModLmerTest"))
     warning("calling single_anova(<fake-lmerModLmerTest-object>) ...")
+  type <- type[1L]
   if(!is.character(type)) type <- as.character(type)
-  type <- as.integer(as.roman(match.arg(type)))
+  type <- match.arg(type)
+  if(type %in% c("I", "II", "III"))
+    type <- as.character(as.integer(as.roman(type)))
   ddf <- match.arg(ddf)
   # Get list of contrast matrices (L) - one for each model term:
-  L_list <- if(type == 1L) {
-    get_contrasts_type1(model.matrix(object), terms(object))
-  } else if(type == 2L) {
-    data_classes <- attr(terms(object, fixed.only=FALSE), "dataClasses")
-    get_contrasts_type2(model.matrix(object), terms(object), data_classes)
-  } else if(type == 3L) {
+  L_list <- if(type == "1") {
+    get_contrasts_type1(object)
+  } else if(type == "2") {
+    get_contrasts_type2_unfolded(object)
+  } else if(type == "2b") {
+    get_contrasts_type2(object)
+  } else if(type == "3") {
     get_contrasts_type3(object)
+  # } else if(type == "3b") {
+  #   get_contrasts_type3b(object)
+  # } else if(type == "3c") {
+  #   get_contrasts_type3c(object)
+  } else if(type == "marginal") {
+    get_contrasts_marginal(object)
+  } else {
+    stop("'type' not recognized")
   }
   # Get F-test for each term and collect in table:
   table <- rbindall(lapply(L_list, contestMD, model=object, ddf=ddf))
@@ -101,11 +114,58 @@ single_anova <- function(object, type = c("I", "II", "III", "1", "2", "3"),
   rownames(table) <- names(L_list)
   method <- switch(ddf, "Satterthwaite" = "Satterthwaite's",
                    "KR" = "Kenward-Roger's")
+  # Format 'type':
+  type <- if(type == "marginal") {
+    "Marginal"
+  } else if(grepl("b|c", type)) {
+    alph <- gsub("[0-9]", "", type)
+    paste0("Type ", as.roman(as.integer(gsub("b|c", "", type))), alph)
+  } else paste("Type", as.roman(as.integer(type)))
   attr(table, "heading") <-
-    paste("Type", as.roman(type), "Analysis of Variance Table",
-          "with", method, "method")
+    paste(type, "Analysis of Variance Table", "with", method, "method")
   attr(table, "hypotheses") <- L_list
   class(table) <- c("anova", "data.frame")
   table
 }
 
+##############################################
+######## show_tests
+##############################################
+#' Show Hypothesis Tests in ANOVA Tables
+#'
+#' Extracts hypothesis matrices for terms in ANOVA tables detailing exactly which
+#' functions of the parameters are being tested in anova tables.
+#'
+#' @param object an anova table with a \code{"hypotheses"} attribute.
+#' @param fractions Display entries in the hypothesis matrices as fractions?
+#' @param names if \code{FALSE} column and row names of the hypothesis matrices
+#' are suppressed.
+#'
+#' @return a list of hypothesis matrices.
+#' @importFrom MASS fractions
+#' @author Rune Haubo B. Christensen
+#' @export
+#'
+#' @examples
+#'
+#' # Fit basic model to the 'cake' data:
+#' data("cake", package="lme4")
+#' fm1 <- lmer(angle ~ recipe * temp + (1|recipe:replicate), cake)
+#'
+#' # Type 3 anova table:
+#' (an <- anova(fm1, type="3"))
+#'
+#' # Display tests/hypotheses for type 1, 2, and 3 ANOVA tables:
+#' # (and illustrate effects of 'fractions' and 'names' arguments)
+#' show_tests(anova(fm1, type="1"))
+#' show_tests(anova(fm1, type="2"), fractions=TRUE, names=FALSE)
+#' show_tests(an, fractions=TRUE)
+#'
+show_tests <- function(object, fractions=FALSE, names=TRUE) {
+  tests <- attr(object, "hypotheses")
+  # FIXME: Maybe this should be a generic with a method for anova objects?
+  if(is.null(tests))
+    stop("'object' does not have an 'hypotheses' attribute")
+  if(fractions) tests <- lapply(tests, MASS::fractions)
+  if(names) tests else lapply(tests, unname)
+}
