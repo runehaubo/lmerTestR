@@ -31,6 +31,8 @@ qform <- function(x, A) {
 #' @keywords internal
 rbindall <- function(...) do.call(rbind, ...)
 
+cbindall <- function(...) do.call(cbind, ...)
+
 ##############################################
 ######## cond
 ##############################################
@@ -63,5 +65,4 @@ containment <- function(object) { # lm or merMod
     term_names[relatives(data_classes, term, term_names, factor_mat)]
   }), term_names)
 }
-
 
