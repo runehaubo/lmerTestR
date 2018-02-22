@@ -1,0 +1,156 @@
+
+
+##############################################
+######## lsmeansLT
+##############################################
+#' LS-means for lmerTest Model Fits
+#'
+#' Computes LS-means for all factors in a linear mixed model.
+#'
+#' Confidence intervals and p-values are based on the t-distribution using
+#' degrees of freedom based on Satterthwaites or Kenward-Roger methods.
+#'
+#' LS-means is SAS terminology for predicted/estimated marginal means, i.e. means
+#' for levels of factors which are averaged over the levels of other factors in
+#' the model. A flat (i.e. unweighted) average is taken which gives equal weight
+#' to all levels of each of the other factors. Numeric/continuous variables are
+#' set at their mean values. See \pkg{emmeans} package
+#' for more options and greater flexibility.
+#'
+#' LS-means contrasts are checked for estimability and unestimable contrasts appear
+#' as \code{NA}s in the resulting table.
+#'
+#' LS-means objects (of class \code{"lsmeansLT"} have a print method).
+#'
+#' @param model a model object fitted with \code{\link{lmer}} (of class
+#' \code{"lmerModLmerTest"}).
+#' @param which optional character vector naming factors for which LS-means should
+#' be computed. If \code{NULL} (default) LS-means for all factors are computed.
+#' @param level confidence level.
+#' @param ddf method for computation of denominator degrees of freedom.
+#'
+#' @return An LS-means table in the form of a \code{data.frame}. Formally an object
+#' of class \code{c("lsmeansLT", "data.frame")} with a number of attributes set.
+#' @author Rune Haubo B. Christensen
+#' @seealso \code{\link{show_contrasts}} for display of the underlying LS-means
+#' contrasts.
+#' @export
+#'
+#' @examples
+#'
+#' data("cake", package="lme4")
+#' model <- lmer(angle ~ recipe * temp + (1|recipe:replicate), cake)
+#' lsmeansLT(model)
+#'
+lsmeansLT <- function(model, which=NULL, level=0.95,
+                      ddf=c("Satterthwaite", "KR")) {
+  # weights=list(), at=list()
+  stopifnot(inherits(model, "lmerModLmerTest"))
+  factor_terms <- attr(terms(model), "term.labels")[!numeric_terms(model)]
+  if(is.null(which)) which <- factor_terms
+  stopifnot(is.character(which), all(which %in% factor_terms))
+  which <- setNames(as.list(which), which)
+
+  X <- model.matrix(model)
+  var_list <- get_var_list(model)
+  vars <- names(var_list)
+  grid <- get_min_data(model)
+  form <- formula(model)[-2]
+  factor_mat <- attr(terms(model), "factors")
+  if(inherits(model, "lmerMod")) form <- nobars(form)
+  coef_nm <- if(inherits(model, "lmerMod")) colnames(X) else
+    names(coef(model))[!is.na(coef(model))]
+  uX <- model.matrix(form, data=grid, contrasts.arg=attr(X, "contrasts"))
+  Contrasts <- .getXlevels(terms(model), grid)
+  Contrasts[] <- "contr.treatment"
+
+  # Compute LS-means contrast:
+  Llist <- lapply(which, function(term) {
+    vars_in_term <- factor_mat[vars, term] == 1
+    Lt <- model.matrix(formula(paste0("~ 0 + ", term)), data=grid,
+                       contrasts.arg=Contrasts[vars_in_term])
+    wts <- 1/colSums(Lt)
+    # Lt * c(Lt %*% wts)
+    # L <- diag(wts) %*% t(Lt)
+    L <- t(sweep(Lt, 2, wts, "*"))
+    L %*% uX
+  })
+
+  # Need nullspace of _remade_ model matrix to check estimability:
+  XX <- get_model_matrix(model, type="remake", contrasts="restore")
+  nullspaceX <- nullspace(XX)
+
+  if(length(Llist) == 0) {
+    means <- contest1D(rep(NA_real_, length(coef_nm)), ddf=ddf, model=model,
+                       confint=TRUE, level=level)[0L, , drop=FALSE]
+  } else
+    means <- rbindall(lapply(names(Llist), function(var) {
+      L <- Llist[[var]]
+      # Check estimability before computing the contrast:
+      estim <- is_estimable(L, nullspace = nullspaceX)
+      L[!estim, ] <- NA_real_ # set unestimable contrasts to NA
+      L <- L[, coef_nm, drop=FALSE] # drop aliased coefs
+      # Evaluate contrasts:
+      tab <- rbindall(lapply(1:nrow(L), function(i)
+        contest1D(L[i, ], model=model, ddf=ddf, confint=TRUE, level=level)))
+      rownames(tab) <- rownames(L)
+      tab
+    }))
+  attr(means, "confidence_level") <- level
+  attr(means, "contrasts") <- Llist
+  attr(means, "heading") <- "Least Squares Means table:\n"
+  class(means) <- c("lsmeansLT", "data.frame")
+  means
+}
+
+##############################################
+######## print.lsmeansLT
+##############################################
+print.lsmeansLT <- function(x, digits = max(getOption("digits") - 2L, 3L),
+                            signif.stars = getOption("show.signif.stars"),
+                            ...) {
+  if(!is.null(heading <- attr(x, "heading")))
+    cat(heading, sep = "\n")
+  if(nrow(x) > 0) {
+    x[, ncol(x)] <- format.pval(x[, ncol(x)])
+    dig.df <- 1
+    x[, "df"] <- format(round(x[, "df"], dig.df), digits=dig.df)
+  }
+  print.data.frame(x, digits=digits, ...)
+  if(!is.null(ci_level <- attr(x, "confidence_level")))
+    cat(paste0("\n  Confidence level: ", format(100*ci_level, digits=2), "%\n"))
+  invisible(x)
+}
+
+##############################################
+######## show_contrasts
+##############################################
+#' Show LS-means Contrasts
+#'
+#' Extracts the contrasts which defines the LS-mean contrasts.
+#'
+#' @param object an \code{lsmeansLT} object.
+#' @param fractions display contrasts as fractions rather than decimal numbers?
+#' @param names include row and column names of the contrasts matrices?
+#'
+#' @return a list of contrast matrices; one matrix for each model term.
+#' @export
+#' @importFrom MASS fractions
+#' @seealso \code{\link{lsmeansLT}} for computation of LS-means.
+#'
+#' @examples
+#'
+#' data("cake", package="lme4")
+#' model <- lmer(angle ~ recipe * temp + (1|recipe:replicate), cake)
+#' (lsm <- lsmeansLT(model))
+#' show_contrasts(lsm)
+#'
+show_contrasts <- function(object, fractions=FALSE, names=TRUE) {
+  tests <- attr(object, "contrasts")
+  # FIXME: Maybe this should be a generic with a method for anova objects?
+  if(is.null(tests))
+    stop("'object' does not have an 'contrasts' attribute")
+  if(fractions) tests <- lapply(tests, MASS::fractions)
+  if(names) tests else lapply(tests, unname)
+}
+

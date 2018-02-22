@@ -23,6 +23,7 @@ Collate:
     'lmer.R'
     'lmer_anova.R'
     'lmer_summary.R'
+    'lsmeans.R'
     'ranova.R'
     'terms_utils.R'
     'utils.R'
