@@ -102,6 +102,7 @@ nullspace <- function(A, type = c("right", "left"),
   # using SVD.
   type <- match.arg(type)
   if(type == "left") return(nullspace(t(A), type="right", tol=tol))
+  if(length(A) == 0L) return(matrix(numeric(0L))) # length(A) == 0 if any(dim(A) == 0)
   svdA <- svd(A, nv = ncol(A))
   tol <- 1e-8
   positive <- svdA$d > max(tol * svdA$d[1L], 0)
