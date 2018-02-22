@@ -27,10 +27,13 @@
 #' \pkg{lmerTestR}, i.e., an object of class \code{\link{lmerModLmerTest}}.
 #' @param ddf the method for computing the denominator degrees of freedom.
 #' \code{ddf="KR"} uses Kenward-Roger's method.
+#' @param confint include columns for lower and upper confidence limits?
+#' @param level confidence level.
 #'
 #' @return A \code{data.frame} with one row and columns with \code{"Estimate"},
 #' \code{"Std. Error"}, \code{"t value"}, \code{"df"}, and \code{"Pr(>|t|)"}
-#' (p-value)
+#' (p-value). If \code{confint = TRUE} \code{"lower"} and \code{"upper"} columns
+#' are included before the p-value column.
 #' @export
 #' @seealso \code{\link{contestMD}} for multi degree-of-freedom contrast tests.
 #' @author Rune Haubo B. Christensen
@@ -46,28 +49,38 @@
 #' contest1D(c(1, 0), fm) # Test for Intercept
 #' contest1D(c(0, 1), fm) # Test for Days
 #'
-contest1D <- function(L, model, ddf=c("Satterthwaite", "KR")) {
-  mk_ttable <- function(estimate, se, ddf) {
+contest1D <- function(L, model, ddf=c("Satterthwaite", "KR"), confint=FALSE,
+                      level = 0.95) {
+  mk_ttable <- function(estimate, se, ddf, confint) {
     tstat <- estimate/se
     pvalue <- 2 * pt(abs(tstat), df = ddf, lower.tail = FALSE)
-    data.frame("Estimate"=estimate, "Std. Error"=se, "df"=ddf,
-               "t value"=tstat, "Pr(>|t|)"=pvalue, check.names=FALSE)
+    if(confint) {
+      ci <- waldCI(estimate, se, ddf, level=level)
+      data.frame("Estimate"=estimate, "Std. Error"=se, "df"=ddf,
+                 "t value"=tstat,
+                 lower=unname(ci[, "lower"]), upper=unname(ci[, "upper"]),
+                 "Pr(>|t|)"=pvalue, check.names=FALSE)
+    } else
+      data.frame("Estimate"=estimate, "Std. Error"=se, "df"=ddf,
+                 "t value"=tstat, "Pr(>|t|)"=pvalue, check.names=FALSE)
   }
   if(!inherits(model, "lmerModLmerTest"))
     stop("'model' has to be of class lmerModLmerTest")
+  method <- match.arg(ddf)
   if(is.matrix(L)) L <- drop(L)
   stopifnot(is.numeric(L),
             length(L) == length(model@beta))
   if(length(L) == 0L) {
     o <- numeric(0L)
-    return(mk_ttable(o, o, o))
+    return(mk_ttable(o, o, o, confint))
   }
-  method <- match.arg(ddf)
+  if(any(is.na(L))) return(mk_ttable(NA_real_, NA_real_, NA_real_, confint))
   estimate <- sum(L * model@beta) # contrast estimate
   if(method == "KR") { # Handle KR method:
     ans <- get_KR1D(L, model) # get var(contrast) and ddf
     if(!ans$error) {
-      return(mk_ttable(estimate=estimate, se=sqrt(ans$var_con), ddf=ans$ddf))
+      return(mk_ttable(estimate=estimate, se=sqrt(ans$var_con), ddf=ans$ddf,
+                       confint))
     } else {
       warning("Unable to compute Kenward-Roger t-test: using Satterthwaite instead",
               call.=FALSE)
@@ -80,7 +93,7 @@ contest1D <- function(L, model, ddf=c("Satterthwaite", "KR")) {
   satt_denom <- qform(grad_var_con, model@vcov_varpar) # g'Ag
   ddf <- drop(2 * var_con^2 / satt_denom) # denominator DF
   # return t-table:
-  mk_ttable(estimate, sqrt(var_con), ddf)
+  mk_ttable(estimate, sqrt(var_con), ddf, confint)
 }
 
 get_KR1D <- function(L, model) {

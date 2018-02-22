@@ -4,7 +4,8 @@
 \alias{contest1D}
 \title{Contrast Tests in 1D}
 \usage{
-contest1D(L, model, ddf = c("Satterthwaite", "KR"))
+contest1D(L, model, ddf = c("Satterthwaite", "KR"), confint = FALSE,
+  level = 0.95)
 }
 \arguments{
 \item{L}{a numeric (contrast) vector of the same length as
@@ -15,6 +16,10 @@ contest1D(L, model, ddf = c("Satterthwaite", "KR"))
 
 \item{ddf}{the method for computing the denominator degrees of freedom.
 \code{ddf="KR"} uses Kenward-Roger's method.}
+
+\item{confint}{include columns for lower and upper confidence limits?}
+
+\item{level}{confidence level.}
 }
 \value{
 A \code{data.frame} with one row and columns with \code{"Estimate"},

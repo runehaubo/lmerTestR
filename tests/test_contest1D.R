@@ -19,6 +19,8 @@ fm <- lmer(Reaction ~ Days + I(Days^2) + (1|Subject) + (0+Days|Subject),
 # Basic tests:
 L <- c(0, 1, 0)
 contest1D(L, fm)
+contest1D(L, fm, confint = TRUE)
+contest1D(L, fm, confint = TRUE, level=0.99)
 contest1D(L, fm, ddf="KR")
 
 # Test too long L

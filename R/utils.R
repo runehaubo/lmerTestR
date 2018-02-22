@@ -49,3 +49,22 @@ safeDeparse <- function(expr, width.cutoff=500L, backtick = mode(expr) %in%
           control=control, nlines=nlines)
 }
 
+##############################################
+######## waldCI
+##############################################
+#' @importFrom stats qt
+waldCI <- function(estimate, se, df=Inf, level=0.95) {
+  stopifnot(length(level) == 1,
+            is.numeric(level),
+            level > 0, level < 1)
+            # all(se > 0))
+  alpha <- (1 - level)/2
+  fac <- qt(alpha, df=df, lower.tail = FALSE)
+  res <- cbind(lower = estimate - se * fac,
+               upper = estimate + se * fac)
+  if(!is.null(names(estimate))) rownames(res) <- names(estimate)
+  res
+}
+
+# waldCI(setNames(1, "est"), .2)
+
