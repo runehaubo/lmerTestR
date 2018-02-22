@@ -18,13 +18,21 @@
 #' Compute the test of a one-dimensional (vector) contrast in a
 #' linear mixed model fitted with lmer from package \pkg{lmerTestR}.
 #' The contrast should specify a linear function of the
-#' mean-value parameters, beta. Satterthwaite's method is used to compute the
-#' denominator df for the t-test.
+#' mean-value parameters, beta. The Satterthwaite or Kenward-Roger method is
+#' used to compute the (denominator) df for the t-test.
+#'
+#' The t-value and associated p-value is for the hypothesis
+#' \eqn{L' \beta = \mathup{rhs}}{L' \beta = rhs} in which rhs may be non-zero
+#' and \eqn{\beta} is \code{fixef(model)}.
+#' The estimated value (\code{"Estimate"}) is \eqn{L' \beta} with associated
+#' standard error and (optionally) confidence interval.
 #'
 #' @param L a numeric (contrast) vector of the same length as
 #' \code{fixef(model)}.
 #' @param model a model object fitted with \code{lmer} from package
 #' \pkg{lmerTestR}, i.e., an object of class \code{\link{lmerModLmerTest}}.
+#' @param rhs right-hand-side of the statistical test, i.e. the hypothesized
+#' value (a numeric scalar).
 #' @param ddf the method for computing the denominator degrees of freedom.
 #' \code{ddf="KR"} uses Kenward-Roger's method.
 #' @param confint include columns for lower and upper confidence limits?
@@ -42,17 +50,24 @@
 #' @examples
 #'
 #' # Fit model using lmer with data from the lme4-package:
+#' data("sleepstudy", package="lme4")
 #' fm <- lmer(Reaction ~ Days + (1 + Days|Subject), sleepstudy)
-#' # Note that summary do not contain any tests/p-values:
-#' coef(summary(fm))
-#' # We can get these tests with:
-#' contest1D(c(1, 0), fm) # Test for Intercept
-#' contest1D(c(0, 1), fm) # Test for Days
 #'
-contest1D <- function(L, model, ddf=c("Satterthwaite", "KR"), confint=FALSE,
+#' # Tests and CI of model coefficients are obtained with:
+#' contest1D(c(1, 0), fm, confint=TRUE) # Test for Intercept
+#' contest1D(c(0, 1), fm, confint=TRUE) # Test for Days
+#'
+#' # Tests of coefficients are also part of:
+#' summary(fm)
+#'
+#' # Illustrate use of rhs argument:
+#' contest1D(c(0, 1), fm, confint=TRUE, rhs=10) # Test for Days-coef == 10
+#'
+#'
+contest1D <- function(L, model, rhs=0, ddf=c("Satterthwaite", "KR"), confint=FALSE,
                       level = 0.95) {
-  mk_ttable <- function(estimate, se, ddf, confint) {
-    tstat <- estimate/se
+  mk_ttable <- function(estimate, se, ddf) {
+    tstat <- (estimate - rhs)/se
     pvalue <- 2 * pt(abs(tstat), df = ddf, lower.tail = FALSE)
     if(confint) {
       ci <- waldCI(estimate, se, ddf, level=level)
@@ -68,19 +83,18 @@ contest1D <- function(L, model, ddf=c("Satterthwaite", "KR"), confint=FALSE,
     stop("'model' has to be of class lmerModLmerTest")
   method <- match.arg(ddf)
   if(is.matrix(L)) L <- drop(L)
-  stopifnot(is.numeric(L),
-            length(L) == length(model@beta))
+  stopifnot(is.numeric(L), length(L) == length(model@beta),
+            is.numeric(rhs), length(rhs) == 1L)
   if(length(L) == 0L) {
     o <- numeric(0L)
-    return(mk_ttable(o, o, o, confint))
+    return(mk_ttable(o, o, o))
   }
-  if(any(is.na(L))) return(mk_ttable(NA_real_, NA_real_, NA_real_, confint))
+  if(any(is.na(L))) return(mk_ttable(NA_real_, NA_real_, NA_real_))
   estimate <- sum(L * model@beta) # contrast estimate
   if(method == "KR") { # Handle KR method:
     ans <- get_KR1D(L, model) # get var(contrast) and ddf
     if(!ans$error) {
-      return(mk_ttable(estimate=estimate, se=sqrt(ans$var_con), ddf=ans$ddf,
-                       confint))
+      return(mk_ttable(estimate=estimate, se=sqrt(ans$var_con), ddf=ans$ddf))
     } else {
       warning("Unable to compute Kenward-Roger t-test: using Satterthwaite instead",
               call.=FALSE)
@@ -93,7 +107,7 @@ contest1D <- function(L, model, ddf=c("Satterthwaite", "KR"), confint=FALSE,
   satt_denom <- qform(grad_var_con, model@vcov_varpar) # g'Ag
   ddf <- drop(2 * var_con^2 / satt_denom) # denominator DF
   # return t-table:
-  mk_ttable(estimate, sqrt(var_con), ddf, confint)
+  mk_ttable(estimate, sqrt(var_con), ddf)
 }
 
 get_KR1D <- function(L, model) {
@@ -123,6 +137,10 @@ get_KR1D <- function(L, model) {
 #' mean-value parameters, beta. Satterthwaite's method is used to compute the
 #' denominator df for the F-test.
 #'
+#' The F-value and associated p-value is for the hypothesis
+#' \eqn{L \beta = \mathup{rhs}}{L \beta = rhs} in which rhs may be non-zero
+#' and \eqn{\beta} is \code{fixef(model)}.
+#'
 #' Note: NumDF = row-rank(L) is determined automatically so row rank-deficient L
 #' are allowed. One-dimensional contrasts are also allowed (L has 1 row).
 #'
@@ -130,6 +148,8 @@ get_KR1D <- function(L, model) {
 #' \code{length(fixef(model))}.
 #' @param model a model object fitted with \code{lmer} from package
 #' \pkg{lmerTestR}, i.e., an object of class \code{\link{lmerModLmerTest}}.
+#' @param rhs right-hand-side of the statistical test, i.e. the hypothesized
+#' value. A numeric vector of length \code{nrow(L)} or a numeric scalar.
 #' @param ddf the method for computing the denominator degrees of freedom and
 #' F-statistics. \code{ddf="KR"} uses Kenward-Roger's method.
 #' @param eps tolerance on eigenvalues to determine if an eigenvalue is
@@ -143,23 +163,31 @@ get_KR1D <- function(L, model) {
 #' @seealso \code{\link{contest1D}} for tests of 1-dimensional contrasts.
 #' @author Rune Haubo B. Christensen
 #' @importFrom stats pf
+#' @importFrom MASS ginv
 #'
 #' @examples
 #'
+#' data("sleepstudy", package="lme4")
 #' fm <- lmer(Reaction ~ Days + I(Days^2) + (1|Subject) + (0+Days|Subject),
 #'            sleepstudy)
+#'
 #' # Define 2-df contrast - since L has 2 (linearly independent) rows
 #' # the F-test is on 2 (numerator) df:
 #' L <- rbind(c(0, 1, 0), # Note: ncol(L) == length(fixef(fm))
 #'            c(0, 0, 1))
+#'
 #' # Make the 2-df F-test of any effect of Days:
 #' contestMD(L, fm)
+#'
+#' # Illustrate rhs argument:
+#' contestMD(L, fm, rhs=c(5, .1))
+#'
 #' # Make the 1-df F-test of the effect of Days^2:
 #' contestMD(L[2, , drop=FALSE], fm)
 #' # Same test, but now as a t-test instead:
 #' contest1D(L[2, , drop=TRUE], fm)
 #'
-contestMD <- function(L, model, ddf=c("Satterthwaite", "KR"),
+contestMD <- function(L, model, rhs=0, ddf=c("Satterthwaite", "KR"),
                       eps=sqrt(.Machine$double.eps)) {
   mk_Ftable <- function(Fvalue, ndf, ddf, sigma, Fscale=1) {
     MS <- Fvalue * sigma^2
@@ -173,6 +201,8 @@ contestMD <- function(L, model, ddf=c("Satterthwaite", "KR"),
   if(!is.matrix(L)) L <- matrix(L, ncol=length(L))
   stopifnot(is.matrix(L), is.numeric(L),
             ncol(L) == length(model@beta))
+  if(length(rhs) == 1L) rhs <- rep(rhs, nrow(L))
+  stopifnot(is.numeric(rhs), length(rhs) == nrow(L))
   method <- match.arg(ddf)
   if(nrow(L) == 0L) { # May happen if there are no fixed effects
     x <- numeric(0L)
@@ -185,7 +215,10 @@ contestMD <- function(L, model, ddf=c("Satterthwaite", "KR"),
     if(!requireNamespace("pbkrtest", quietly = TRUE))
       stop("pbkrtest package required for Kenward-Roger's method",
            call.=FALSE)
-    x <- try(pbkrtest::KRmodcomp(model, L)$test, silent = TRUE)
+    if(qr(L)$rank < nrow(L) && !all(rhs == 0))
+      warning("Contrast is rank deficient and test may be affected")
+    betaH <- if(all(rhs == 0)) 0 else drop(MASS::ginv(L) %*% rhs)
+    x <- try(pbkrtest::KRmodcomp(model, L, betaH=betaH)$test, silent = TRUE)
     if(inherits(x, "try-error")) { # Handle try-error
       warning("Unable to compute Kenward-Roger F-test: using Satterthwaite instead",
               call.=FALSE)
@@ -201,30 +234,35 @@ contestMD <- function(L, model, ddf=c("Satterthwaite", "KR"),
     # has to be compute k times.
   } # method == "Satterthwaite" proceeds:
   if(nrow(L) == 1L) { # 1D case:
-    res <- contest1D(drop(L), model)
+    res <- contest1D(drop(L), model, rhs=rhs, confint=FALSE)
     return(mk_Ftable(Fvalue=res[["t value"]]^2, ndf=1L, ddf=res$df,
                      sigma=model@sigma))
   } # multi-D case proceeds:
+  beta <- model@beta
+  # Adjust beta for rhs:
+  if(!all(rhs == 0)) beta <- beta - drop(MASS::ginv(L) %*% rhs)
   # Compute Var(L beta) and eigen-decompose:
   VLbeta <- L %*% model@vcov_beta %*% t(L) # Var(contrast) = Var(Lbeta)
   eig_VLbeta <- eigen(VLbeta)
-  tol <- max(eps * eig_VLbeta$values[1], 0)
-  pos <- eig_VLbeta$values > tol
-  q <- sum(pos) # rank(VLbeta)
   P <- eig_VLbeta$vectors
   d <- eig_VLbeta$values
+  tol <- max(eps * d[1], 0)
+  pos <- d > tol
+  q <- sum(pos) # rank(VLbeta)
+  if(q < nrow(L) && !all(rhs == 0))
+    warning("Contrast is rank deficient and test may be affected")
   if(q <= 0) { # shouldn't happen if L is a proper contrast
     x <- numeric(0L)
     return(mk_Ftable(x, x, x, x))
   }
   PtL <- crossprod(P, L)[1:q, ]
   if(q == 1) { # 1D case:
-    res <- contest1D(PtL, model)
+    res <- contest1D(PtL, model, rhs=rhs, confint=FALSE)
     return(mk_Ftable(Fvalue=res[["t value"]]^2, ndf=q, ddf=res$df,
                      sigma=model@sigma))
   } # multi-D case proceeds:
   # Compute t-squared values and F-value:
-  t2 <- drop(PtL %*% model@beta)^2 / d[1:q]
+  t2 <- drop(PtL %*% beta)^2 / d[1:q]
   Fvalue <- sum(t2) / q
   # Compute q-list of gradients of (PtL)' cov(beta) (PtL) wrt. varpar vector:
   grad_PLcov <- lapply(1:q, function(m) {

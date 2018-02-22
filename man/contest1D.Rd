@@ -4,8 +4,8 @@
 \alias{contest1D}
 \title{Contrast Tests in 1D}
 \usage{
-contest1D(L, model, ddf = c("Satterthwaite", "KR"), confint = FALSE,
-  level = 0.95)
+contest1D(L, model, rhs = 0, ddf = c("Satterthwaite", "KR"),
+  confint = FALSE, level = 0.95)
 }
 \arguments{
 \item{L}{a numeric (contrast) vector of the same length as
@@ -13,6 +13,9 @@ contest1D(L, model, ddf = c("Satterthwaite", "KR"), confint = FALSE,
 
 \item{model}{a model object fitted with \code{lmer} from package
 \pkg{lmerTestR}, i.e., an object of class \code{\link{lmerModLmerTest}}.}
+
+\item{rhs}{right-hand-side of the statistical test, i.e. the hypothesized
+value (a numeric scalar).}
 
 \item{ddf}{the method for computing the denominator degrees of freedom.
 \code{ddf="KR"} uses Kenward-Roger's method.}
@@ -31,18 +34,32 @@ are included before the p-value column.
 Compute the test of a one-dimensional (vector) contrast in a
 linear mixed model fitted with lmer from package \pkg{lmerTestR}.
 The contrast should specify a linear function of the
-mean-value parameters, beta. Satterthwaite's method is used to compute the
-denominator df for the t-test.
+mean-value parameters, beta. The Satterthwaite or Kenward-Roger method is
+used to compute the (denominator) df for the t-test.
+}
+\details{
+The t-value and associated p-value is for the hypothesis
+\eqn{L' \beta = \mathup{rhs}}{L' \beta = rhs} in which rhs may be non-zero
+and \eqn{\beta} is \code{fixef(model)}.
+The estimated value (\code{"Estimate"}) is \eqn{L' \beta} with associated
+standard error and (optionally) confidence interval.
 }
 \examples{
 
 # Fit model using lmer with data from the lme4-package:
+data("sleepstudy", package="lme4")
 fm <- lmer(Reaction ~ Days + (1 + Days|Subject), sleepstudy)
-# Note that summary do not contain any tests/p-values:
-coef(summary(fm))
-# We can get these tests with:
-contest1D(c(1, 0), fm) # Test for Intercept
-contest1D(c(0, 1), fm) # Test for Days
+
+# Tests and CI of model coefficients are obtained with:
+contest1D(c(1, 0), fm, confint=TRUE) # Test for Intercept
+contest1D(c(0, 1), fm, confint=TRUE) # Test for Days
+
+# Tests of coefficients are also part of:
+summary(fm)
+
+# Illustrate use of rhs argument:
+contest1D(c(0, 1), fm, confint=TRUE, rhs=10) # Test for Days-coef == 10
+
 
 }
 \seealso{

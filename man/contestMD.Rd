@@ -4,7 +4,7 @@
 \alias{contestMD}
 \title{Multiple Degrees-of-Freedom Contrast Tests}
 \usage{
-contestMD(L, model, ddf = c("Satterthwaite", "KR"),
+contestMD(L, model, rhs = 0, ddf = c("Satterthwaite", "KR"),
   eps = sqrt(.Machine$double.eps))
 }
 \arguments{
@@ -13,6 +13,9 @@ contestMD(L, model, ddf = c("Satterthwaite", "KR"),
 
 \item{model}{a model object fitted with \code{lmer} from package
 \pkg{lmerTestR}, i.e., an object of class \code{\link{lmerModLmerTest}}.}
+
+\item{rhs}{right-hand-side of the statistical test, i.e. the hypothesized
+value. A numeric vector of length \code{nrow(L)} or a numeric scalar.}
 
 \item{ddf}{the method for computing the denominator degrees of freedom and
 F-statistics. \code{ddf="KR"} uses Kenward-Roger's method.}
@@ -33,19 +36,30 @@ mean-value parameters, beta. Satterthwaite's method is used to compute the
 denominator df for the F-test.
 }
 \details{
+The F-value and associated p-value is for the hypothesis
+\eqn{L \beta = \mathup{rhs}}{L \beta = rhs} in which rhs may be non-zero
+and \eqn{\beta} is \code{fixef(model)}.
+
 Note: NumDF = row-rank(L) is determined automatically so row rank-deficient L
 are allowed. One-dimensional contrasts are also allowed (L has 1 row).
 }
 \examples{
 
+data("sleepstudy", package="lme4")
 fm <- lmer(Reaction ~ Days + I(Days^2) + (1|Subject) + (0+Days|Subject),
            sleepstudy)
+
 # Define 2-df contrast - since L has 2 (linearly independent) rows
 # the F-test is on 2 (numerator) df:
 L <- rbind(c(0, 1, 0), # Note: ncol(L) == length(fixef(fm))
            c(0, 0, 1))
+
 # Make the 2-df F-test of any effect of Days:
 contestMD(L, fm)
+
+# Illustrate rhs argument:
+contestMD(L, fm, rhs=c(5, .1))
+
 # Make the 1-df F-test of the effect of Days^2:
 contestMD(L[2, , drop=FALSE], fm)
 # Same test, but now as a t-test instead:

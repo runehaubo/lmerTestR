@@ -69,3 +69,18 @@ stopifnot(nrow(ans) == 0L)
 fm2 <- lme4::lmer(Reaction ~ Days + I(Days^2) + (1|Subject) + (0+Days|Subject),
                   sleepstudy)
 assertError(contest1D(c(0, 1, 0), fm2)) # fm2 is not of class "lmerModLmerTest"
+
+## Test rhs argument:
+fm <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy)
+contest1D(L=cbind(0, 1), fm)
+contest1D(L=cbind(0, 1), fm, ddf="KR")
+contest1D(L=cbind(0, 1), fm, rhs=10)
+contest1D(L=cbind(0, 1), fm, ddf="KR", rhs=10)
+
+contest1D(L=c(0, 1), fm, rhs = 10.467)
+
+(ct1 <- contest1D(L=cbind(c(0, 1)), fm, rhs = 10))
+(ct2 <- contestMD(L=rbind(c(0, 1)), fm, rhs = 10))
+stopifnot(
+  isTRUE(all.equal(ct1[, "t value"]^2, ct2[, "F value"]))
+)

@@ -87,3 +87,28 @@ fm2 <- lme4::lmer(Reaction ~ Days + I(Days^2) + (1|Subject) + (0+Days|Subject),
                   sleepstudy)
 assertError(contestMD(L[2:3, ], fm2)) # fm2 is not of class "lmerModLmerTest"
 
+## rhs argument:
+data("cake", package="lme4")
+model <- lmer(angle ~ recipe * temp + (1|recipe:replicate), cake)
+(L <- diag(length(fixef(model)))[2:3, ])
+(an <- anova(model, type="marginal"))
+
+ct <- contestMD(L, model, rhs = 0)
+ct2 <- contestMD(L, model, rhs = c(2, 2))
+stopifnot(
+  isTRUE(all.equal(ct[1, ], an[1, ], check.attributes=FALSE)),
+  ct[, "F value"] < ct2[, "F value"]
+)
+
+L2 <- rbind(L, L[1, ] + L[2, ]) # rank deficient!
+contestMD(L2, model, rhs = c(0, 0, 0)) # no warning
+assertWarning(contestMD(L2, model, rhs = c(2, 2, 2))) # warning since L2 is rank def.
+assertWarning(contestMD(L2, model, rhs = c(2, 2, 2), ddf="KR"))
+
+contestMD(L2, model, rhs = -c(-2, -2, -2))
+
+fm <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy)
+contestMD(L=cbind(0, 1), fm)
+contestMD(L=cbind(0, 1), fm, ddf="KR")
+contestMD(L=cbind(0, 1), fm, rhs=10)
+contestMD(L=cbind(0, 1), fm, ddf="KR", rhs=10)
