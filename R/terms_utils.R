@@ -70,6 +70,45 @@ numeric_terms <- function(model) {
   })
 }
 
+##############################################
+######## get_model_matrix()
+##############################################
+#' Extract or remake model matrix from model
+#'
+#' Extract or remake model matrix from model and potentially change the
+#' contrast coding
+#'
+#' @param model an \code{lm} or \code{lmerMod} model object.
+#' @param type extract or remake model matrix?
+#' @param contrasts contrasts settings. These may be restored to those in the
+#' model or they may be changed. If a length one character vector (e.g.
+#' \code{"contr.SAS"}) this is applied to all factors in the model, but it can
+#' also be a list naming factors for which the contrasts should be set as specified.
+#'
+#' @return the model (or 'design') matrix.
+#' @keywords internal
+#' @author Rune Haubo B Christensen
+get_model_matrix <- function(model, type=c("extract", "remake"),
+                             contrasts="restore") {
+  type <- match.arg(type)
+  stopifnot(inherits(model, "lm") || inherits(model, "lmerMod"))
+
+  X <- model.matrix(model)
+  if(type == "extract") return(X)
+  # Set appropriate contrasts:
+  Contrasts <- if(length(contrasts) == 1 && is.character(contrasts) &&
+                  contrasts == "restore") {
+    attr(X, "contrasts")
+  } else if(length(contrasts) == 1 && is.character(contrasts) &&
+            contrasts != "restore") {
+    Contrasts <- .getXlevels(terms(model), model.frame(model))
+    Contrasts[] <- contrasts
+    Contrasts
+  } else contrasts
+  model.matrix(terms(model), data=model.frame(model),
+               contrasts.arg = Contrasts)
+}
+
 
 get_min_data <- function(model, FUN=mean)
   # Get a minimum complete model.frame based on the variables in the model
@@ -81,9 +120,11 @@ get_var_list <- function(model, FUN=mean)
   c(get_fac_list(model), get_num_list(model, FUN=FUN))
 
 #' @importFrom stats .getXlevels
-get_fac_list <- function(model)
+get_fac_list <- function(model) {
   # Extract a named list of factor levels for each factor in the model
-  .getXlevels(Terms=terms(model), m=model.frame(model))
+  res <- .getXlevels(Terms=terms(model), m=model.frame(model))
+  if(is.null(res)) list() else res
+}
 
 get_num_list <- function(model, FUN=mean) { # FUN=function(x) mean(x, na.rm=TRUE)) {
   # Extract named list of mean/FUN values of numeric variables in model
@@ -93,11 +134,12 @@ get_num_list <- function(model, FUN=mean) { # FUN=function(x) mean(x, na.rm=TRUE
   xvars <- sapply(attr(Terms, "variables"), deparse2)[-1L]
   if((yvar <- attr(Terms, "response")) > 0)
     xvars <- xvars[-yvar]
-  if(!length(xvars)) return(NULL)
+  if(!length(xvars)) return(list())
   xlev <- lapply(mf[xvars], function(x) {
     if (is.numeric(x)) FUN(x) else NULL
   })
-  xlev[!vapply(xlev, is.null, NA)]
+  res <- xlev[!vapply(xlev, is.null, NA)]
+  if(is.null(res)) list() else res
 }
 
 #' @importFrom utils combn
