@@ -24,7 +24,8 @@ contest1D(L, model, ddf = c("Satterthwaite", "KR"), confint = FALSE,
 \value{
 A \code{data.frame} with one row and columns with \code{"Estimate"},
 \code{"Std. Error"}, \code{"t value"}, \code{"df"}, and \code{"Pr(>|t|)"}
-(p-value)
+(p-value). If \code{confint = TRUE} \code{"lower"} and \code{"upper"} columns
+are included before the p-value column.
 }
 \description{
 Compute the test of a one-dimensional (vector) contrast in a
