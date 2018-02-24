@@ -164,15 +164,28 @@ rand <- ranova
 ######## ranova utility functions below
 ##############################################
 
+#' Remove Terms from Formula
+#'
+#' Remove fixef or ranef terms from formula, return a list of modified formulae
+#' with environment restored to that of the original formula.
+#'
+#' @param terms character vector (or list) of terms to remove from
+#' \code{full_formula}
+#' @param full_formula formula
+#' @param random if \code{TRUE} names of the return list have parentheses around
+#' them.
+#'
 #' @importFrom stats update.formula
-rm_complete_terms <- function(reforms, full_formula) {
+#' @keywords internal
+rm_complete_terms <- function(terms, full_formula, random=TRUE) {
   # Remove random-effect formula terms from original model formula (full_formula)
-  forms <- lapply(reforms, function(reform) {
+  forms <- lapply(terms, function(reform) {
     form <- update.formula(full_formula, paste0("~.- (", reform, ")"))
     environment(form) <- environment(full_formula)
     form
   })
-  names(forms) <- sapply(reforms, function(form) paste0("(", form, ")"))
+  names(forms) <- if(!random) terms else
+    sapply(terms, function(form) paste0("(", form, ")"))
   forms
 }
 
