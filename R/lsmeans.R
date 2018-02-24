@@ -131,6 +131,7 @@ lsmeans_contrasts <- function(model, which=NULL) {
     L <- t(sweep(Lt, 2, wts, "*"))
     L %*% uX
   })
+  Llist
 }
 
 
@@ -145,7 +146,7 @@ print.lsmeans <- function(x, digits = max(getOption("digits") - 2L, 3L),
     cat(heading, sep = "\n")
   if(nrow(x) > 0) {
     dig.df <- 1
-    x[, "df"] <- format(round(x[, "df"], dig.df), nsmall=dig.df)
+    x[, "df"] <- round(x[, "df"], dig.df)
   }
   printCoefmat(x, digits=digits, signif.stars = signif.stars,
                has.Pvalue = TRUE, cs.ind=c(1:2, 5:6), tst.ind=4)
