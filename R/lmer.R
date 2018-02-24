@@ -165,6 +165,22 @@ as_lmerModLmerTest <- function(model, tol=1e-8) {
   return(res)
 }
 
+
+##############################################
+######## update.lmerModLmerTest()
+##############################################
+#' @importFrom stats update
+#' @importFrom methods as
+#' @method update lmerModLmerTest
+#' @export
+#' @keywords internal
+update.lmerModLmerTest <- function(object, formula., ..., evaluate=TRUE) {
+  model <- eval.parent(update(as(object, "lmerMod"), formula.=formula., ...,
+                              evaluate = evaluate))
+  return(as_lmerModLmerTest(model))
+}
+
+
 ##############################################
 ######## devfun_vp()
 ##############################################

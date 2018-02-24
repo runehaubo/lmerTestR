@@ -31,3 +31,19 @@ messages <- unlist(lapply(m, "[[", "message"))
 stopifnot(
   any(grepl("Model failed to converge with 1 negative eigenvalue", messages))
 )
+
+
+#####################################################################
+# Update method
+
+m <- lmer(Reaction ~ Days + (Days | Subject), sleepstudy)
+m1 <- update(m, ~.-Days)
+m2 <- lmer(Reaction ~ (Days | Subject), sleepstudy)
+
+stopifnot(
+  inherits(m, "lmerModLmerTest"),
+  inherits(m1, "lmerModLmerTest"),
+  inherits(m2, "lmerModLmerTest"),
+  all.equal(m1, m2)
+)
+
