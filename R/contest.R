@@ -1,14 +1,117 @@
 # contest.R - contrast tests using Satterthwaites df
 
-# contest <- function(L, model, joint=FALSE) {
-#   # Test a contrast L vector/matrix in model
-#   #
-#   # L - vector
-#   # L - matrix (joint = c(TRUE, FALSE))
-#   # L - list of vectors
-#   # L - list of matrices (joint = c(TRUE, FALSE))
-#
-# }
+#' Test of Contrasts
+#'
+#' Tests of vector or matrix contrasts for \code{\link{lmer}} model fits.
+#'
+#' If the design matrix is rank deficient, \code{lmer} drops columns for the
+#' aliased coefficients from the design matrix and excludes the corresponding
+#' aliased coefficients from \code{fixef(model)}. When estimability is checked
+#' the original rank-deficient design matrix is recontructed and therefore
+#' \code{L} contrast vectors need to include elements for the aliased
+#' coefficients. Similarly when \code{L} is a matrix, its number of columns
+#' needs to match that of the reconstructed rank-deficient design matrix.
+#'
+#' @param L a contrast vector or matrix or a list of these.
+#' The \code{length}/\code{ncol} of each contrasts should equal
+#' \code{length(fixef(model))}.
+#' @param model a model object fitted with \code{lmer} from package
+#' \pkg{lmerTestR}, i.e., an object of class \code{\link{lmerModLmerTest}}.
+#' @param rhs right-hand-side of the statistical test, i.e. the hypothesized
+#' value (a numeric scalar).
+#' @param ddf the method for computing the denominator degrees of freedom.
+#' \code{ddf="KR"} uses Kenward-Roger's method.
+#' @param confint include columns for lower and upper confidence limits? Applies
+#' when \code{joint} is \code{FALSE}.
+#' @param level confidence level.
+#' @param joint make an F-test of potentially several contrast vectors? If
+#' \code{FALSE} single DF t-tests are applied to each vector or each row of
+#' contrasts matrices.
+#' @param collect collect list of tests in a matrix?
+#' @param check_estimability check estimability of contrasts? Only single DF
+#' contrasts are checked for estimability thus requiring \code{joint = FALSE} to
+#' take effect. See details section for necessary adjustments to \code{L} when
+#' estimability is checked with rank deficient design matrices.
+#' @param ... passed to \code{\link{contestMD}}.
+#'
+#' @return a \code{data.frame} or a list of \code{data.frame}s.
+#' @export
+#' @seealso \code{\link{contestMD}} for multi degree-of-freedom contrast tests,
+#' and \code{\link{contest1D}} for tests of 1-dimensional contrasts.
+#' @author Rune Haubo B. Christensen
+#' @importFrom stats coef model.matrix setNames
+#'
+#' @examples
+#'
+#' data("sleepstudy", package="lme4")
+#' fm <- lmer(Reaction ~ Days + I(Days^2) + (1|Subject) + (0+Days|Subject),
+#'            sleepstudy)
+#' # F-test of third coeffcients - I(Days^2):
+#' contest(c(0, 0, 1), fm)
+#' # Equivalent t-test:
+#' contest(L=c(0, 0, 1), fm, joint=FALSE)
+#' # Test of 'Days + I(Days^2)':
+#' contest(L=diag(3)[2:3, ], fm)
+#' # Other options:
+#' contest(L=diag(3)[2:3, ], fm, joint=FALSE)
+#' contest(L=diag(3)[2:3, ], fm, joint=FALSE, collect=FALSE)
+#'
+#' # Illustrate a list argument:
+#' L <- list("First"=diag(3)[3, ], "Second"=diag(3)[-1, ])
+#' contest(L, fm)
+#' contest(L, fm, collect = FALSE)
+#' contest(L, fm, joint=FALSE, confint = FALSE)
+#' contest(L, fm, joint=FALSE, collect = FALSE, level=0.99)
+#'
+#' # Illustrate testing of estimability:
+#' # Consider the 'cake' dataset with a missing cell:
+#' data("cake", package="lme4")
+#' cake$temperature <- factor(cake$temperature, ordered=FALSE)
+#' cake <- droplevels(subset(cake, temperature %in% levels(cake$temperature)[1:2] &
+#'                             !(recipe == "C" & temperature == "185")))
+#' with(cake, table(recipe, temperature))
+#' fm <- lmer(angle ~ recipe * temperature + (1|recipe:replicate), cake)
+#' fixef(fm)
+#' # The coefficient for recipeC:temperature185 is dropped:
+#' attr(model.matrix(fm), "col.dropped")
+#' # so any contrast involving this coefficient is not estimable:
+#' Lmat <- diag(6)
+#' contest(Lmat, fm, joint=FALSE, check_estimability = TRUE)
+#'
+contest <- function(L, model, joint=TRUE, collect=TRUE, confint=TRUE,
+                    level=0.95, check_estimability=FALSE,
+                    ddf=c("Satterthwaite", "KR", "lme4"), rhs=0, ...) {
+  ddf <- match.arg(ddf)
+  if(!(is_list <- is.list(L))) L <- list(L)
+  if(joint) {
+    res <- lapply(L, function(l) contestMD(l, model, ddf=ddf, rhs=rhs, ...))
+  } else { # joint is FALSE:
+    if(check_estimability) {
+      coef_nm <- if(inherits(model, "lmerMod")) colnames(model.matrix(model)) else
+        names(coef(model))[!is.na(coef(model))]
+      XX <- get_model_matrix(model, type="remake", contrasts="restore")
+      keep_coef <- match(coef_nm, colnames(XX), 0L)
+      nullspaceX <- nullspace(XX)
+    }
+    res <- lapply(L, function(l) {
+      if(!is.matrix(l)) l <- matrix(l, ncol=length(l))
+      if(check_estimability) {
+        if(ncol(l) != ncol(XX))
+          stop(sprintf("Contrast has length/ncol %i, expecting length/ncol %i when checking estimability.",
+                       ncol(l), ncol(XX)))
+        estim <- is_estimable(l, nullspace = nullspaceX)
+        l[!estim, ] <- NA_real_ # set unestimable contrasts to NA
+        l <- l[, keep_coef, drop=FALSE] # drop aliased coefs
+      }
+      l <- lapply(setNames(1:nrow(l), rownames(l)), function(i) l[i, ])
+      rbindall(lapply(l, function(ll)
+        contest1D(ll, model, rhs=rhs, ddf=ddf, confint=confint,
+                  level=level)))
+    })
+  }
+  if(collect) rbindall(res) else res
+}
+
 
 ##############################################
 ######## contest1D()
@@ -208,6 +311,7 @@ contestMD <- function(L, model, rhs=0, ddf=c("Satterthwaite", "KR"),
     x <- numeric(0L)
     return(mk_Ftable(x, x, x, x))
   }
+  if(any(is.na(L))) return(mk_Ftable(NA_real_, NA_real_, NA_real_, NA_real_))
   if(method == "KR") {
     if(!getME(model, "is_REML"))
       stop("Kenward-Roger's method is only available for REML model fits",
