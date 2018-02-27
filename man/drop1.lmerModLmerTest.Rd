@@ -75,3 +75,6 @@ fm <- lmer(Reaction ~ poly(Days, 2) + (Days|Subject), sleepstudy)
 drop1(fm)
 
 }
+\seealso{
+\code{\link{ranova}} for tests of marginal random terms.
+}

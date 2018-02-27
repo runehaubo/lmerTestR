@@ -68,7 +68,9 @@
 #' @export
 #' @author Rune Haubo B. Christensen
 #'
-#' @importFrom stats formula nobs getCall update
+#' @seealso \code{\link{drop1}} for tests of marginal fixed-effect terms and
+#' \code{\link{anova}} for usual anova tables for fixed-effect terms.
+#' @importFrom stats formula nobs update
 #' @importFrom lme4 getME findbars nobars
 #'
 #' @examples
@@ -134,12 +136,8 @@ ranova <- function(model, reduce.terms=TRUE, ...) {
 
   for(nform in new_forms) { # For each new formula. nform <- new_forms[[1]]
     newfit <- if(!has_ranef(nform)) { # If no random effects: fit with lm
-      Call <- as.list(getCall(model))
-      notkeep <- c("control", "start", "verbose", "devFunOnly", "REML")
-      Call <- Call[!names(Call) %in% notkeep]
-      Call$formula <- nform
-      Call[[1]] <- as.name("lm")
-      eval.parent(as.call(Call))
+      lm_call <- get_lm_call(model, nform)
+      eval.parent(as.call(lm_call))
     } else eval.parent(update(model, formula=nform))
   # } else eval.parent(update(model, formula=nform, ...))
     # Check that models were fit to the same number of observations:
@@ -154,6 +152,7 @@ ranova <- function(model, reduce.terms=TRUE, ...) {
   rownames(aov) <- c("<none>", names(new_forms))
   head <- c("ANOVA-like table for random-effects: Single term deletions",
             "\nModel:", deparse(full_form))
+  attr(aov, "formulae") <- new_forms
   structure(aov, heading = head, class = c("anova", "data.frame"))
 }
 
@@ -188,6 +187,20 @@ rm_complete_terms <- function(terms, full_formula, random=TRUE) {
     sapply(terms, function(form) paste0("(", form, ")"))
   forms
 }
+
+
+#' @importFrom stats getCall
+get_lm_call <- function(object, formula) {
+  # object: lmerMod object
+  # formula: model formula without random effects
+  Call <- as.list(getCall(object))
+  notkeep <- c("control", "start", "verbose", "devFunOnly", "REML")
+  Call <- Call[!names(Call) %in% notkeep]
+  Call$formula <- formula
+  Call[[1]] <- as.name("lm")
+  Call
+}
+
 
 #' @importFrom stats update.formula drop.scope
 get_newforms <- function(form, full_formula) {
@@ -237,15 +250,19 @@ mk_LRtab <- function(x) {
   # Compute drop1-table with LR-tests
   # x: a 2-col data.frame with "Df" and "logLik"; 1st row is the full model
   chisq_pval <- function(q, df, ...) pchisq(q=q, ifelse(df > 0, df, NA_real_), ...)
-  stopifnot(is.data.frame(x), colnames(x) == c("Df", "logLik"), nrow(x) >= 2)
+  stopifnot(is.data.frame(x), colnames(x) == c("Df", "logLik"))
   res <- data.frame("npar" = x[, "Df"],
                     "logLik" = x[, "logLik"],
                     "AIC" = -2*x[, "logLik"] + 2*x[, "Df"],
-                    "LRT" = c(NA_real_, 2*(x[1, "logLik"] - x[-1, "logLik"])),
-                    "Df"  = c(NA_real_, x[1, "Df"] - x[-1, "Df"]),
+                    "LRT" = NA_real_,
+                    "Df"  = NA_real_,
                     "Pr(>Chisq)" = NA_real_, check.names = FALSE)
-  res[-1, "Pr(>Chisq)"] <-
-    chisq_pval(res[-1, "LRT"], res[-1, "Df"], lower.tail=FALSE)
+  if(nrow(x) >= 2) {
+    res[-1, "LRT"] <- 2*(x[1, "logLik"] - x[-1, "logLik"])
+    res[-1, "Df"] <- x[1, "Df"] - x[-1, "Df"]
+    res[-1, "Pr(>Chisq)"] <-
+      chisq_pval(res[-1, "LRT"], res[-1, "Df"], lower.tail=FALSE)
+  }
   rownames(res) <- rownames(x)
   res
 }

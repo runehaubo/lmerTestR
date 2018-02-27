@@ -33,6 +33,7 @@
 #' compared.
 #' @param ... currently not used.
 #'
+#' @seealso \code{\link{ranova}} for tests of marginal random terms.
 #' @return An anova-like table with F-tests of marginal terms.
 #' @export
 #'
@@ -105,6 +106,7 @@ drop1.lmerModLmerTest <- function(object, scope, ddf=c("Satterthwaite", "KR", "l
     c(paste("Single term deletions using", method, "method:"),
       "\nModel:", deparse(formula(object)))
   attr(aov, "hypotheses") <- Llist
+  attr(aov, "ddf") <- ddf
   class(aov) <- c("anova", "data.frame")
   aov
 }

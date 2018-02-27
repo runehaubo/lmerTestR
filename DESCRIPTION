@@ -26,5 +26,6 @@ Collate:
     'lmer_summary.R'
     'lsmeans.R'
     'ranova.R'
+    'step.R'
     'terms_utils.R'
     'utils.R'
