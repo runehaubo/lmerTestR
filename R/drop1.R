@@ -5,7 +5,7 @@
 ##############################################
 #' Drop Marginal Terms from Model
 #'
-#' Computes the F-test for all marginal terms, i.e. tersm that can be dropped
+#' Computes the F-test for all marginal terms, i.e. terms that can be dropped
 #' from the model while respecting the hierarchy of terms in the model.
 #'
 #' Simple marginal contrasts are used for all marginal terms unless the design

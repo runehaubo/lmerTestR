@@ -21,8 +21,8 @@ get_model(x, ...)
 \method{get_model}{step_list}(x, ...)
 }
 \arguments{
-\item{object}{an \code{\link{lmer}} model fit (of class
-\code{"lmerModLmerTest"}.)}
+\item{object}{a fitted model object. For the \code{lmerModLmerTest} method
+an \code{\link{lmer}} model fit (of class \code{"lmerModLmerTest"}.)}
 
 \item{...}{currently not used}
 
@@ -72,13 +72,24 @@ The step method for \code{\link{lmer}} fits has a print method.
 \examples{
 
 # Fit a model to the ham dataset:
-data("ham", package="lmerTest")
-m <- lmer(Informed.liking ~ Product*Information+
-            (1|Consumer) + (1|Product:Consumer)
-          + (1|Information:Consumer), data=ham)
+fm <- lmer(Informed.liking ~ Product*Information+
+             (1|Consumer) + (1|Product:Consumer)
+           + (1|Information:Consumer), data=ham)
 
 # Backward elimination using terms with default alpha-levels:
-(step_res <- step(m))
+(step_res <- step(fm))
+final <- get_model(step_res)
+anova(final)
+
+\dontrun{
+# Fit 'big' model:
+fm <- lmer(Informed.liking ~ Product*Information*Gender*Age +
+             + (1|Consumer) + (1|Consumer:Product) +
+             (1|Consumer:Information), data=ham)
+step_fm <- step(fm)
+step_fm # Display elimination results
+final_fm <- get_model(step_fm)
+}
 
 }
 \seealso{

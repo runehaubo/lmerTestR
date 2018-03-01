@@ -125,7 +125,7 @@ contest <- function(L, model, joint=TRUE, collect=TRUE, confint=TRUE,
 #' used to compute the (denominator) df for the t-test.
 #'
 #' The t-value and associated p-value is for the hypothesis
-#' \eqn{L' \beta = \mathup{rhs}}{L' \beta = rhs} in which rhs may be non-zero
+#' \eqn{L' \beta = \mathrm{rhs}}{L' \beta = rhs} in which rhs may be non-zero
 #' and \eqn{\beta} is \code{fixef(model)}.
 #' The estimated value (\code{"Estimate"}) is \eqn{L' \beta} with associated
 #' standard error and (optionally) confidence interval.
@@ -146,7 +146,10 @@ contest <- function(L, model, joint=TRUE, collect=TRUE, confint=TRUE,
 #' (p-value). If \code{confint = TRUE} \code{"lower"} and \code{"upper"} columns
 #' are included before the p-value column.
 #' @export
-#' @seealso \code{\link{contestMD}} for multi degree-of-freedom contrast tests.
+#' @seealso \code{\link{contest}} for a flexible and general interface to tests
+#' of contrasts among fixed-effect parameters.
+#' \code{\link{contestMD}} is also available as a direct interface for tests of
+#' multi degree-of-freedom contrast.
 #' @author Rune Haubo B. Christensen
 #' @importFrom stats pt
 #'
@@ -241,7 +244,7 @@ get_KR1D <- function(L, model) {
 #' denominator df for the F-test.
 #'
 #' The F-value and associated p-value is for the hypothesis
-#' \eqn{L \beta = \mathup{rhs}}{L \beta = rhs} in which rhs may be non-zero
+#' \eqn{L \beta = \mathrm{rhs}}{L \beta = rhs} in which rhs may be non-zero
 #' and \eqn{\beta} is \code{fixef(model)}.
 #'
 #' Note: NumDF = row-rank(L) is determined automatically so row rank-deficient L
@@ -263,7 +266,10 @@ get_KR1D <- function(L, model) {
 #' \code{"Mean Sq"}, \code{"F value"}, \code{"NumDF"} (numerator df),
 #' \code{"DenDF"} (denominator df) and \code{"Pr(>F)"} (p-value).
 #' @export
-#' @seealso \code{\link{contest1D}} for tests of 1-dimensional contrasts.
+#' @seealso \code{\link{contest}} for a flexible and general interface to tests
+#' of contrasts among fixed-effect parameters.
+#' \code{\link{contest1D}} is a direct interface for tests of 1-dimensional
+#' contrasts.
 #' @author Rune Haubo B. Christensen
 #' @importFrom stats pf
 #' @importFrom MASS ginv

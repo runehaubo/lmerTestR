@@ -39,7 +39,7 @@ used to compute the (denominator) df for the t-test.
 }
 \details{
 The t-value and associated p-value is for the hypothesis
-\eqn{L' \beta = \mathup{rhs}}{L' \beta = rhs} in which rhs may be non-zero
+\eqn{L' \beta = \mathrm{rhs}}{L' \beta = rhs} in which rhs may be non-zero
 and \eqn{\beta} is \code{fixef(model)}.
 The estimated value (\code{"Estimate"}) is \eqn{L' \beta} with associated
 standard error and (optionally) confidence interval.

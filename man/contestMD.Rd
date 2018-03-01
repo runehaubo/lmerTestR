@@ -37,7 +37,7 @@ denominator df for the F-test.
 }
 \details{
 The F-value and associated p-value is for the hypothesis
-\eqn{L \beta = \mathup{rhs}}{L \beta = rhs} in which rhs may be non-zero
+\eqn{L \beta = \mathrm{rhs}}{L \beta = rhs} in which rhs may be non-zero
 and \eqn{\beta} is \code{fixef(model)}.
 
 Note: NumDF = row-rank(L) is determined automatically so row rank-deficient L

@@ -1,3 +1,4 @@
+# step.R - implementation of backward elimination for lmerModLmerTest objects
 
 #' @rdname step.lmerModLmerTest
 #' @export
@@ -7,6 +8,9 @@ step <- function(object, ...) UseMethod("step")
 #' @export
 step.default <- function(object, ...) stats::step(object, ...)
 
+##############################################
+######## step.lmerModLmerTest()
+##############################################
 #' Backward Elimination for Linear Mixed Models
 #'
 #' Backward elimination of random-effect terms followed by backward elimination
@@ -18,8 +22,8 @@ step.default <- function(object, ...) stats::step(object, ...)
 #'
 #' The step method for \code{\link{lmer}} fits has a print method.
 #'
-#' @param object an \code{\link{lmer}} model fit (of class
-#' \code{"lmerModLmerTest"}.)
+#' @param object a fitted model object. For the \code{lmerModLmerTest} method
+#' an \code{\link{lmer}} model fit (of class \code{"lmerModLmerTest"}.)
 #' @param ddf the method for computing the denominator degrees of freedom and
 #' F-statistics. \code{ddf="Satterthwaite"} (default) uses Satterthwaite's method;
 #' \code{ddf="Kenward-Roger"} uses Kenward-Roger's method.
@@ -51,13 +55,24 @@ step.default <- function(object, ...) stats::step(object, ...)
 #' @examples
 #'
 #' # Fit a model to the ham dataset:
-#' data("ham", package="lmerTest")
-#' m <- lmer(Informed.liking ~ Product*Information+
-#'             (1|Consumer) + (1|Product:Consumer)
-#'           + (1|Information:Consumer), data=ham)
+#' fm <- lmer(Informed.liking ~ Product*Information+
+#'              (1|Consumer) + (1|Product:Consumer)
+#'            + (1|Information:Consumer), data=ham)
 #'
 #' # Backward elimination using terms with default alpha-levels:
-#' (step_res <- step(m))
+#' (step_res <- step(fm))
+#' final <- get_model(step_res)
+#' anova(final)
+#'
+#' \dontrun{
+#' # Fit 'big' model:
+#' fm <- lmer(Informed.liking ~ Product*Information*Gender*Age +
+#'              + (1|Consumer) + (1|Consumer:Product) +
+#'              (1|Consumer:Information), data=ham)
+#' step_fm <- step(fm)
+#' step_fm # Display elimination results
+#' final_fm <- get_model(step_fm)
+#' }
 #'
 step.lmerModLmerTest <- function(object, ddf=c("Satterthwaite", "Kenward-Roger"),
                                  alpha.random=0.1, alpha.fixed=0.05,
