@@ -13,28 +13,76 @@ step(object, ...)
 \method{step}{default}(object, ...)
 
 \method{step}{lmerModLmerTest}(object, ddf = c("Satterthwaite", "KR"),
-  alpha.random = 0.1, alpha.fixed = 0.05, ...)
+  alpha.random = 0.1, alpha.fixed = 0.05, reduce.fixed = TRUE,
+  reduce.random = TRUE, keep, ...)
 
 get_model(x, ...)
 
 \method{get_model}{step_list}(x, ...)
 }
 \arguments{
-\item{object}{the model}
+\item{object}{an \code{\link{lmer}} model fit (of class
+\code{"lmerModLmerTest"}.)}
 
 \item{...}{currently not used}
 
-\item{ddf}{degrees of freedom}
+\item{ddf}{the method for computing the denominator degrees of freedom and
+F-statistics. \code{ddf="Satterthwaite"} (default) uses Satterthwaite's method;
+\code{ddf="KR"} uses Kenward-Roger's method.}
 
-\item{alpha.random}{alpha for random effects}
+\item{alpha.random}{alpha for random effects elimination}
 
-\item{alpha.fixed}{alpha for fixed effects}
+\item{alpha.fixed}{alpha for fixed effects elimination}
+
+\item{reduce.fixed}{reduce fixed effect structure? \code{TRUE} by default.}
+
+\item{reduce.random}{reduce random effect structure? \code{TRUE} by default.}
+
+\item{keep}{an optional character vector of fixed effect terms which should
+not be considered for eliminated. Valid terms are given by
+\code{attr(terms(object), "term.labels")}. Terms that are marginal to terms
+in keep will also not be considered for eliminations.}
 
 \item{x}{a step object}
 }
 \value{
-a list ...
+\code{step} returns a list with elements \code{"random"} and
+\code{"fixed"} each
+containing anova-like elimination tables. The \code{"fixed"} table is
+based on \code{drop1} and the \code{"random"} table is
+based on \code{ranova} (a \code{drop1}-like table for random effects). Both
+tables have a column \code{"Eliminated"} indicating the order in which terms
+are eliminated from the model with zero (\code{0}) indicating that the term
+is not eliminated from the model.
+
+The \code{step} object also contains the final model as an attribute which
+is extractable with \code{get_model(<step_object>)}.
 }
 \description{
-Backward Elimination for Linear Mixed Models
+Backward elimination of random-effect terms followed by backward elimination
+of fixed-effect terms in linear mixed models.
+}
+\details{
+Tests of random-effects are performed using \code{\link{ranova}} (using
+\code{reduce.terms = TRUE}) and tests of fixed-effects are performed using
+\code{\link{drop1}}.
+
+The step method for \code{\link{lmer}} fits has a print method.
+}
+\examples{
+
+# Fit a model to the ham dataset:
+data("ham", package="lmerTest")
+m <- lmer(Informed.liking ~ Product*Information+
+            (1|Consumer) + (1|Product:Consumer)
+          + (1|Information:Consumer), data=ham)
+
+# Backward elimination using terms with default alpha-levels:
+(step_res <- step(m))
+
+}
+\seealso{
+\code{\link{drop1}} for tests of marginal fixed-effect terms and
+\code{\link{ranova}} for a \code{\link{drop1}}-like table of reduction of
+random-effect terms.
 }

@@ -267,3 +267,20 @@ stopifnot(
   inherits(res, "lm")
 )
 
+##################### Using reduce and keep args:
+# Fit a model to the ham dataset:
+data("ham", package="lmerTest")
+m <- lmer(Informed.liking ~ Product*Information+
+            (1|Consumer) + (1|Product:Consumer)
+          + (1|Information:Consumer), data=ham)
+
+# Backward elimination using terms with default alpha-levels:
+(step_res <- step(m))
+
+(step_res <- step(m, reduce.random = FALSE))
+(step_res <- step(m, reduce.fixed = FALSE))
+(step_res <- step(m, reduce.fixed = FALSE, reduce.random = FALSE))
+
+(step_res <- step(m, reduce.random = FALSE, keep="Information"))
+(step_res <- step(m, reduce.random = FALSE, keep="Product:Information"))
+

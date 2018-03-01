@@ -9,20 +9,66 @@ step.default <- function(object, ...) stats::step(object, ...)
 
 #' Backward Elimination for Linear Mixed Models
 #'
-#' @param object the model
-#' @param ddf degrees of freedom
-#' @param alpha.random alpha for random effects
-#' @param alpha.fixed alpha for fixed effects
+#' Backward elimination of random-effect terms followed by backward elimination
+#' of fixed-effect terms in linear mixed models.
+#'
+#' Tests of random-effects are performed using \code{\link{ranova}} (using
+#' \code{reduce.terms = TRUE}) and tests of fixed-effects are performed using
+#' \code{\link{drop1}}.
+#'
+#' The step method for \code{\link{lmer}} fits has a print method.
+#'
+#' @param object an \code{\link{lmer}} model fit (of class
+#' \code{"lmerModLmerTest"}.)
+#' @param ddf the method for computing the denominator degrees of freedom and
+#' F-statistics. \code{ddf="Satterthwaite"} (default) uses Satterthwaite's method;
+#' \code{ddf="KR"} uses Kenward-Roger's method.
+#' @param alpha.random alpha for random effects elimination
+#' @param alpha.fixed alpha for fixed effects elimination
+#' @param reduce.fixed reduce fixed effect structure? \code{TRUE} by default.
+#' @param reduce.random reduce random effect structure? \code{TRUE} by default.
+#' @param keep an optional character vector of fixed effect terms which should
+#' not be considered for eliminated. Valid terms are given by
+#' \code{attr(terms(object), "term.labels")}. Terms that are marginal to terms
+#' in keep will also not be considered for eliminations.
 #' @param ... currently not used
 #'
-#' @return a list ...
+#' @return \code{step} returns a list with elements \code{"random"} and
+#' \code{"fixed"} each
+#' containing anova-like elimination tables. The \code{"fixed"} table is
+#' based on \code{drop1} and the \code{"random"} table is
+#' based on \code{ranova} (a \code{drop1}-like table for random effects). Both
+#' tables have a column \code{"Eliminated"} indicating the order in which terms
+#' are eliminated from the model with zero (\code{0}) indicating that the term
+#' is not eliminated from the model.
+#'
+#' The \code{step} object also contains the final model as an attribute which
+#' is extractable with \code{get_model(<step_object>)}.
+#' @seealso \code{\link{drop1}} for tests of marginal fixed-effect terms and
+#' \code{\link{ranova}} for a \code{\link{drop1}}-like table of reduction of
+#' random-effect terms.
 #' @export
+#' @examples
+#'
+#' # Fit a model to the ham dataset:
+#' data("ham", package="lmerTest")
+#' m <- lmer(Informed.liking ~ Product*Information+
+#'             (1|Consumer) + (1|Product:Consumer)
+#'           + (1|Information:Consumer), data=ham)
+#'
+#' # Backward elimination using terms with default alpha-levels:
+#' (step_res <- step(m))
 #'
 step.lmerModLmerTest <- function(object, ddf=c("Satterthwaite", "KR"),
-                                 alpha.random=0.1, alpha.fixed=0.05, ...) {
+                                 alpha.random=0.1, alpha.fixed=0.05,
+                                 reduce.fixed=TRUE, reduce.random=TRUE,
+                                 keep, ...) {
+  if(!reduce.random) alpha.random <- 1
+  if(!reduce.fixed) alpha.fixed <- 1
+
   red_random <- eval.parent(reduce_random(object, alpha=alpha.random))
   red_fixed <- eval.parent(reduce_fixed(attr(red_random, "model"), ddf=ddf,
-                                        alpha=alpha.fixed))
+                                        alpha=alpha.fixed, keep=keep))
   step_random <- ran_redTable(red_random)
   step_fixed <- fix_redTable(red_fixed)
 
@@ -52,7 +98,7 @@ print.step_list <- function(x, digits = max(getOption("digits") - 2L, 3L),
   print(x[["random"]])
   cat("\n")
   print(x[["fixed"]])
-  cat("\nFound model:", deparse(formula(attr(x, "model"))), sep="\n")
+  cat("\nModel found:", deparse(formula(attr(x, "model"))), sep="\n")
   invisible(x)
 }
 
@@ -60,8 +106,8 @@ print.step_list <- function(x, digits = max(getOption("digits") - 2L, 3L),
 ran_redTable <- function(table) {
   aov <- attr(table, "ranova")[-1, , drop=FALSE]
   stopifnot(nrow(table) >= 1)
-  tab <- rbind(cbind("Step"=c(NA_real_, seq_len(nrow(table)-1)), table),
-               cbind("Step"=rep(0, nrow(aov)), aov))
+  tab <- rbind(cbind("Eliminated"=c(NA_real_, seq_len(nrow(table)-1)), table),
+               cbind("Eliminated"=rep(0, nrow(aov)), aov))
   class(tab) <- c("anova", "data.frame")
   attr(tab, "heading") <- "Backward reduced random-effect table:\n"
   tab
@@ -70,8 +116,8 @@ ran_redTable <- function(table) {
 
 fix_redTable <- function(table) {
   aov <- attr(table, "drop1")
-  tab <- rbind(cbind("Step"=seq_len(nrow(table)), table),
-               cbind("Step"=rep(0, nrow(aov)), aov))
+  tab <- rbind(cbind("Eliminated"=seq_len(nrow(table)), table),
+               cbind("Eliminated"=rep(0, nrow(aov)), aov))
   class(tab) <- c("anova", "data.frame")
   attr(tab, "heading") <- "Backward reduced fixed-effect table:"
   if(!is.null(ddf <- attr(table, "ddf"))) {
@@ -119,6 +165,8 @@ reduce_random <- function(model, alpha=0.1) {
 }
 
 ranova_lm <- function(model, REML=TRUE) {
+  # Compute a ranova table for an lm-object only containing a '<none>' row
+  # and the right header.
   aov <- mk_LRtab(get_logLik(model, REML=REML))
   rownames(aov) <- "<none>"
   head <- c("ANOVA-like table for random-effects: Single term deletions",
@@ -128,7 +176,18 @@ ranova_lm <- function(model, REML=TRUE) {
 }
 
 #' @importFrom stats nobs formula
-reduce_fixed <- function(model, ddf=c("Satterthwaite", "KR"), alpha=0.05) {
+reduce_fixed <- function(model, ddf=c("Satterthwaite", "KR"), alpha=0.05,
+                         keep) {
+  if(missing(keep)) keep <- character(0L)
+  stopifnot(is.character(keep))
+  term_names <- attr(terms(model), "term.labels")
+  # Test validity of
+  if(!all(keep %in% term_names)) {
+    offending <- paste(setdiff(keep, term_names), collapse = " ")
+    txt1 <- sprintf("Invalid 'keep' ignored: %s.", offending)
+    txt2 <- sprintf("Valid terms are: %s.", paste(term_names, collapse = " "))
+    warning(paste(txt1, txt2, sep="\n"), call. = FALSE)
+  }
   ddf <- match.arg(ddf)
   aov <- if(inherits(model, "lmerMod")) drop1(model, ddf=ddf) else
     drop1(model, test="F")[-1L, , drop=FALSE]
@@ -137,10 +196,11 @@ reduce_fixed <- function(model, ddf=c("Satterthwaite", "KR"), alpha=0.05) {
   newform <- orig_form <- formula(model)
   nobs_model <- nobs(model)
   terms <- rownames(aov)
-  pvals <- aov[, "Pr(>F)"]
+  consider <- setdiff(terms, keep)
+  pvals <- aov[consider, "Pr(>F)"]
   above <- (!is.na(pvals) & pvals > alpha)
   if(any(above)) while(any(above)) {
-    remove <- terms[which.max(pvals)]
+    remove <- consider[which.max(pvals)]
     newform <- rm_complete_terms(remove, orig_form, random = FALSE)[[1L]]
     reduced <- rbind(reduced, aov[remove, ])
     newfit <- eval.parent(update(newfit, formula = newform))
@@ -154,7 +214,8 @@ reduce_fixed <- function(model, ddf=c("Satterthwaite", "KR"), alpha=0.05) {
     # aov <- drop1(newfit)
     orig_form <- formula(newfit)
     terms <- rownames(aov)
-    pvals <- aov[, "Pr(>F)"]
+    consider <- setdiff(terms, keep)
+    pvals <- aov[consider, "Pr(>F)"]
     above <- (!is.na(pvals) & pvals > alpha)
   }
   attr(reduced, "model") <- newfit
