@@ -1,5 +1,15 @@
+# data_documentation.R - roxygen2 documentation for datasets.
 
-#' Consumer preference mapping of carrots
+# Datasets documented in this file:
+#
+# - carrots
+# - ham
+# - TVbo
+
+##############################################
+######## carrots
+##############################################
+#' Consumer Preference Mapping of Carrots
 #'
 #' In a consumer study 103 consumers scored their preference of 12 danish
 #' carrot types on a scale from 1 to 7. Moreover the consumers scored the
@@ -60,3 +70,102 @@
 #' anova(fm)
 #'
 "carrots"
+
+
+##############################################
+######## ham
+##############################################
+#' Conjoint Study of Dry Cured Ham
+#'
+#' One of the purposes of the study was to investigate the effect of
+#' information given to the consumers measured in hedonic liking for the
+#' hams. Two of the hams were Spanish and two were Norwegian, each origin
+#' representing different salt levels and different aging time. The
+#' information about origin was given in such way that both true and
+#' false information was given. Essentially a 4x2 design with 4 samples
+#' and 2 information levels. A total of 81 Consumers participated in the
+#' study.
+#'
+#' @docType data
+#'
+#' @usage data(ham)
+#'
+#' @format
+#' \describe{
+#' \item{Consumer}{factor with 81 levels: numbering identifying consumers.}
+#' \item{Product}{factor with four levels.}
+#' \item{Informed.liking}{numeric: hedonic liking for the products.}
+#' \item{Information}{factor with two levels.}
+#' \item{Gender}{factor with two levels.}
+#' \item{Age}{numeric: age of Consumer.}
+#' }
+#'
+#' @keywords datasets
+#'
+#' @references
+#' T. Næs, V. Lengard, S. Bølling Johansen, M. Hersleth (2010)
+#' Alternative methods for combining design variables and consumer preference
+#' with information about attitudes and demographics in conjoint analysis,
+#' \emph{Food Quality and Preference}, 10-4, 368-378, ISSN 0950-3293,
+#' \url{https://doi.org/10.1016/j.foodqual.2009.09.004}.
+#'
+#' @examples
+#'
+#' # Simple model for the ham data:
+#' fm <- lmer(Informed.liking ~ Product*Information + (1|Consumer) , data=ham)
+#'
+#' # Anova table for the fixed effects:
+#' anova(fm)
+#'
+#' \dontrun{
+#' # Fit 'big' model:
+#' fm <- lmer(Informed.liking ~ Product*Information*Gender*Age +
+#'              + (1|Consumer) + (1|Consumer:Product) +
+#'              (1|Consumer:Information),
+#'            data=ham)
+#' step_fm <- step(fm)
+#' step_fm # Display elimination results
+#' final_fm <- get_model(step_fm)
+#' }
+#'
+"ham"
+
+##############################################
+######## TVbo
+##############################################
+
+#' Sensory Assesment of B&O TVs
+#'
+#' The TVbo dataset has kindly been made available by the Danish high-end
+#' consumer electronics company
+#' \href{https://www.bang-olufsen.com}{Bang & Olufsen}.
+#' The main purpose was to assess 12 different TV sets (products) specified by
+#' the two attributes Picture and TVset.
+#' 15 different response variables (characteristics of the
+#' product) were assessed by a trained panel with 8 assessors.
+#'
+#' @format
+#' \describe{
+#' \item{Assessor}{factor with 8 levels assessors.}
+#' \item{TVset}{product factor with 3 levels.}
+#' \item{Picture}{product factor with 4 levels.}
+#' }
+#' In addition the following 15 numeric (response) variables are the
+#' characteristics on which the TV sets (products) are assessed:
+#'
+#' Coloursaturation, Colourbalance, Noise, Depth, Sharpness, Lightlevel,
+#' Contrast, Sharpnessofmovement, Flickeringstationary, Flickeringmovement,
+#' Distortion, Dimglasseffect, Cutting, Flossyedges, Elasticeffect.
+#'
+#' @docType data
+#'
+#' @usage data(TVbo)
+#'
+#' @examples
+#'
+#' fm <- lmer(Coloursaturation ~ TVset + Picture + (1|Assessor:TVset) +
+#'              (1|Assessor), data=TVbo)
+#' ranova(fm)
+#' anova(fm)
+#'
+"TVbo"

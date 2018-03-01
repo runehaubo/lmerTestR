@@ -1,7 +1,7 @@
 Package: lmerTestR
 Type: Package
 Title: Tests in Linear Mixed Effects Models 
-Version: 0.1.0.9008
+Version: 0.1.0.9009
 Authors@R: c(person("Rune", "Haubo Bojesen Christensen", role =  c("aut", "cre"),
 		   email = "Rune@ChristensenStatistics.dk"))
 Depends: lme4 (>= 1.0), stats, methods

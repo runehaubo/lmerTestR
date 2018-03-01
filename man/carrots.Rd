@@ -3,7 +3,7 @@
 \docType{data}
 \name{carrots}
 \alias{carrots}
-\title{Consumer preference mapping of carrots}
+\title{Consumer Preference Mapping of Carrots}
 \format{\describe{
 \item{Consumer}{factor with 103 levels: numbering identifying consumers.}
 \item{Frequency}{factor with 5 levels; "How often do you eat carrots?"
