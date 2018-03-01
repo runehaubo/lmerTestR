@@ -67,7 +67,10 @@ contest1D(L[2, , drop=TRUE], fm)
 
 }
 \seealso{
-\code{\link{contest1D}} for tests of 1-dimensional contrasts.
+\code{\link{contest}} for a flexible and general interface to tests
+of contrasts among fixed-effect parameters.
+\code{\link{contest1D}} is a direct interface for tests of 1-dimensional
+contrasts.
 }
 \author{
 Rune Haubo B. Christensen

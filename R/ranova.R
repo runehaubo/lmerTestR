@@ -102,10 +102,9 @@
 #' # ranova() may not generate all relevant test:
 #' # For the following model ranova() indicates that we should not reduce
 #' # (TVset | Assessor):
-#' data("TVbo", package="lmerTest")
 #' fm <- lmer(Coloursaturation ~ TVset * Picture + (TVset | Assessor), data=TVbo)
 #' ranova(fm)
-#' # Howver, a more appropriate model is:
+#' # However, a more appropriate model is:
 #' fm2 <- lmer(Coloursaturation ~ TVset * Picture + (1 | TVset:Assessor), data=TVbo)
 #' anova(fm, fm2, refit=FALSE)
 #' # fm and fm2 has essentially the same fit to data but fm uses 5 parameters

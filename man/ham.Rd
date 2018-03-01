@@ -49,7 +49,7 @@ final_fm <- get_model(step_fm)
 T. Næs, V. Lengard, S. Bølling Johansen, M. Hersleth (2010)
 Alternative methods for combining design variables and consumer preference
 with information about attitudes and demographics in conjoint analysis,
-\emph{Food Quality and Preference}, 10-4, 368-378,ISSN 0950-3293,
+\emph{Food Quality and Preference}, 10-4, 368-378, ISSN 0950-3293,
 \url{https://doi.org/10.1016/j.foodqual.2009.09.004}.
 }
 \keyword{datasets}

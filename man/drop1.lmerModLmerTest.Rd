@@ -31,7 +31,7 @@ compared.}
 An anova-like table with F-tests of marginal terms.
 }
 \description{
-Computes the F-test for all marginal terms, i.e. tersm that can be dropped
+Computes the F-test for all marginal terms, i.e. terms that can be dropped
 from the model while respecting the hierarchy of terms in the model.
 }
 \details{

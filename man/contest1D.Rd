@@ -63,7 +63,10 @@ contest1D(c(0, 1), fm, confint=TRUE, rhs=10) # Test for Days-coef == 10
 
 }
 \seealso{
-\code{\link{contestMD}} for multi degree-of-freedom contrast tests.
+\code{\link{contest}} for a flexible and general interface to tests
+of contrasts among fixed-effect parameters.
+\code{\link{contestMD}} is also available as a direct interface for tests of
+multi degree-of-freedom contrast.
 }
 \author{
 Rune Haubo B. Christensen
