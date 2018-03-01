@@ -21,7 +21,7 @@ L <- c(0, 1, 0)
 contest1D(L, fm)
 contest1D(L, fm, confint = TRUE)
 contest1D(L, fm, confint = TRUE, level=0.99)
-contest1D(L, fm, ddf="KR")
+contest1D(L, fm, ddf="Kenward-Roger")
 
 # Test too long L
 assertError(contest1D(c(0, 1, 1, 1), fm))
@@ -46,7 +46,7 @@ Lmat <- diag(length(fixef(fm)))
 (coef_mat <- lmerTestR:::rbindall(lapply(1:ncol(Lmat), function(i)
   contest1D(Lmat[i, ], fm))))
 (coef_mat_KR <- lmerTestR:::rbindall(lapply(1:ncol(Lmat), function(i)
-  contest1D(Lmat[i, ], fm, ddf="KR"))))
+  contest1D(Lmat[i, ], fm, ddf="Kenward-Roger"))))
 (coef_mat_lme4 <- coef(summary(fm, ddf="lme4")))
 rownames(coef_mat_KR) <- rownames(coef_mat) <- rownames(coef_mat_lme4)
 stopifnot(isTRUE(
@@ -62,7 +62,7 @@ stopifnot(isTRUE(
 fm1 <- lmer(Reaction ~ 0 + (1|Subject) + (0+Days|Subject),
             sleepstudy)
 stopifnot(length(fixef(fm1)) == 0L)
-(ans <- contest1D(numeric(0L), fm1, ddf="KR"))
+(ans <- contest1D(numeric(0L), fm1, ddf="Kenward-Roger"))
 stopifnot(nrow(ans) == 0L)
 
 # Test using model of wrong class:
@@ -73,9 +73,9 @@ assertError(contest1D(c(0, 1, 0), fm2)) # fm2 is not of class "lmerModLmerTest"
 ## Test rhs argument:
 fm <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy)
 contest1D(L=cbind(0, 1), fm)
-contest1D(L=cbind(0, 1), fm, ddf="KR")
+contest1D(L=cbind(0, 1), fm, ddf="Kenward-Roger")
 contest1D(L=cbind(0, 1), fm, rhs=10)
-contest1D(L=cbind(0, 1), fm, ddf="KR", rhs=10)
+contest1D(L=cbind(0, 1), fm, ddf="Kenward-Roger", rhs=10)
 
 contest1D(L=c(0, 1), fm, rhs = 10.467)
 

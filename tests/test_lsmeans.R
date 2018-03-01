@@ -80,7 +80,7 @@ stopifnot(
 )
 
 # KR:
-(lsm5 <- lsmeans(model, which = "recipe", ddf = "KR"))
+(lsm5 <- lsmeans(model, which = "recipe", ddf = "Kenward-Roger"))
 
 # level:
 (lsm6 <- lsmeans(model, which = "recipe", level=0.99))

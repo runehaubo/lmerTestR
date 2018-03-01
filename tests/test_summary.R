@@ -61,9 +61,9 @@ stopifnot(isTRUE(
 stopifnot(isTRUE(
   all.equal(an1, an3)
 ))
-(summary(fm, ddf="KR"))
+(summary(fm, ddf="Kenward-Roger"))
 (summary(fm, ddf="lme4"))
-assertError(summary(fm, ddf="Ken")) ## Error on incorrect arg.
+assertError(summary(fm, ddf="KR")) ## Error on incorrect arg.
 
 ## lme4 method:
 an1 <- summary(fm, ddf="lme4")
@@ -84,7 +84,7 @@ stopifnot(all(
 
 # Test printed output
 # - KR
-(sfm <- summary(fm, ddf="KR"))
+(sfm <- summary(fm, ddf="Kenward-Roger"))
 x <- capture.output(sfm)
 txt <- c("lmerModLmerTest", "t-tests use Kenward-Roger's method",
          "df", "t value", "Pr(>|t|)")
@@ -103,7 +103,7 @@ m <- lmer(Reaction ~ -1 + (Days | Subject), sleepstudy)
 stopifnot(length(fixef(m)) == 0L)
 stopifnot(
   nrow(coef(summary(m))) == 0L,
-  nrow(coef(summary(m, ddf="KR"))) == 0L,
+  nrow(coef(summary(m, ddf="Kenward-Roger"))) == 0L,
   nrow(coef(summary(m, ddf="lme4"))) == 0L
 )
 
@@ -114,7 +114,7 @@ stopifnot(length(fixef(m)) == 1L,
           names(fixef(m)) == "(Intercept)")
 stopifnot(
   nrow(coef(summary(m))) == 1L,
-  nrow(coef(summary(m, ddf="KR"))) == 1L,
+  nrow(coef(summary(m, ddf="Kenward-Roger"))) == 1L,
   nrow(coef(summary(m, ddf="lme4"))) == 1L
 )
 
@@ -124,6 +124,6 @@ stopifnot(length(fixef(m)) == 2L,
           names(fixef(m)) == c("Days", "I(Days^2)"))
 stopifnot(
   nrow(coef(summary(m))) == 2L,
-  nrow(coef(summary(m, ddf="KR"))) == 2L,
+  nrow(coef(summary(m, ddf="Kenward-Roger"))) == 2L,
   nrow(coef(summary(m, ddf="lme4"))) == 2L
 )

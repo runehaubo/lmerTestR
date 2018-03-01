@@ -22,7 +22,7 @@ step.default <- function(object, ...) stats::step(object, ...)
 #' \code{"lmerModLmerTest"}.)
 #' @param ddf the method for computing the denominator degrees of freedom and
 #' F-statistics. \code{ddf="Satterthwaite"} (default) uses Satterthwaite's method;
-#' \code{ddf="KR"} uses Kenward-Roger's method.
+#' \code{ddf="Kenward-Roger"} uses Kenward-Roger's method.
 #' @param alpha.random alpha for random effects elimination
 #' @param alpha.fixed alpha for fixed effects elimination
 #' @param reduce.fixed reduce fixed effect structure? \code{TRUE} by default.
@@ -59,7 +59,7 @@ step.default <- function(object, ...) stats::step(object, ...)
 #' # Backward elimination using terms with default alpha-levels:
 #' (step_res <- step(m))
 #'
-step.lmerModLmerTest <- function(object, ddf=c("Satterthwaite", "KR"),
+step.lmerModLmerTest <- function(object, ddf=c("Satterthwaite", "Kenward-Roger"),
                                  alpha.random=0.1, alpha.fixed=0.05,
                                  reduce.fixed=TRUE, reduce.random=TRUE,
                                  keep, ...) {
@@ -122,7 +122,7 @@ fix_redTable <- function(table) {
   attr(tab, "heading") <- "Backward reduced fixed-effect table:"
   if(!is.null(ddf <- attr(table, "ddf"))) {
     ddf <- switch(ddf, "Satterthwaite" = "Satterthwaite",
-                  "KR" = "Kenward-Roger")
+                  "Kenward-Roger" = "Kenward-Roger")
     attr(tab, "heading") <-
       c(attr(tab, "heading"), paste("Degrees of freedom method:", ddf, "\n"))
   }
@@ -176,7 +176,7 @@ ranova_lm <- function(model, REML=TRUE) {
 }
 
 #' @importFrom stats nobs formula
-reduce_fixed <- function(model, ddf=c("Satterthwaite", "KR"), alpha=0.05,
+reduce_fixed <- function(model, ddf=c("Satterthwaite", "Kenward-Roger"), alpha=0.05,
                          keep) {
   if(missing(keep)) keep <- character(0L)
   stopifnot(is.character(keep))

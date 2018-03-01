@@ -4,7 +4,7 @@
 \alias{contestMD}
 \title{Multiple Degrees-of-Freedom Contrast Tests}
 \usage{
-contestMD(L, model, rhs = 0, ddf = c("Satterthwaite", "KR"),
+contestMD(L, model, rhs = 0, ddf = c("Satterthwaite", "Kenward-Roger"),
   eps = sqrt(.Machine$double.eps))
 }
 \arguments{
@@ -18,7 +18,7 @@ contestMD(L, model, rhs = 0, ddf = c("Satterthwaite", "KR"),
 value. A numeric vector of length \code{nrow(L)} or a numeric scalar.}
 
 \item{ddf}{the method for computing the denominator degrees of freedom and
-F-statistics. \code{ddf="KR"} uses Kenward-Roger's method.}
+F-statistics. \code{ddf="Kenward-Roger"} uses Kenward-Roger's method.}
 
 \item{eps}{tolerance on eigenvalues to determine if an eigenvalue is
 positive. The number of positive eigenvalues determine the rank of

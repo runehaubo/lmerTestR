@@ -4,7 +4,7 @@
 \alias{contest1D}
 \title{Contrast Tests in 1D}
 \usage{
-contest1D(L, model, rhs = 0, ddf = c("Satterthwaite", "KR"),
+contest1D(L, model, rhs = 0, ddf = c("Satterthwaite", "Kenward-Roger"),
   confint = FALSE, level = 0.95)
 }
 \arguments{
@@ -18,7 +18,7 @@ contest1D(L, model, rhs = 0, ddf = c("Satterthwaite", "KR"),
 value (a numeric scalar).}
 
 \item{ddf}{the method for computing the denominator degrees of freedom.
-\code{ddf="KR"} uses Kenward-Roger's method.}
+\code{ddf="Kenward-Roger"} uses Kenward-Roger's method.}
 
 \item{confint}{include columns for lower and upper confidence limits?}
 

@@ -52,7 +52,7 @@
 #' difflsmeans(model) # Equivalent.
 #'
 lsmeans <- function(model, which=NULL, level=0.95,
-                      ddf=c("Satterthwaite", "KR"), pairwise=FALSE) {
+                      ddf=c("Satterthwaite", "Kenward-Roger"), pairwise=FALSE) {
   ddf <- match.arg(ddf)
   Llist <- lsmeans_contrasts(model, which=which)
   coef_nm <- if(inherits(model, "lmerMod")) colnames(model.matrix(model)) else
@@ -96,7 +96,7 @@ lsmeans <- function(model, which=NULL, level=0.95,
 #' @rdname lsmeans
 #' @export
 difflsmeans <- function(model, which=NULL, level=0.95,
-                        ddf=c("Satterthwaite", "KR")) {
+                        ddf=c("Satterthwaite", "Kenward-Roger")) {
   lsmeans(model, which=which, level=level, ddf=ddf, pairwise = TRUE)
 }
 

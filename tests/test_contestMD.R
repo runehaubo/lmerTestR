@@ -22,14 +22,14 @@ contestMD(L, fm)
 
 # Tests of ddf arg:
 contestMD(L, fm, ddf="Sat")
-contestMD(L, fm, ddf="KR")
+contestMD(L, fm, ddf="Kenward-Roger")
 assertError(contestMD(L, fm, ddf="sat")) # Invalid ddf arg.
 
 # Tests of simple 2-df test:
 (ans <- contestMD(L[2:3, ], fm, ddf="Sat"))
 stopifnot(nrow(ans) == 1L,
           ans$NumDF == 2L)
-(ans <- contestMD(L[2:3, ], fm, ddf="KR"))
+(ans <- contestMD(L[2:3, ], fm, ddf="Kenward-Roger"))
 stopifnot(nrow(ans) == 1L,
           ans$NumDF == 2L)
 
@@ -37,7 +37,7 @@ stopifnot(nrow(ans) == 1L,
 (ans <- contestMD(L[3, , drop=FALSE], fm, ddf="Sat"))
 stopifnot(nrow(ans) == 1L,
           ans$NumDF == 1L)
-(ans <- contestMD(L[3, , drop=FALSE], fm, ddf="KR"))
+(ans <- contestMD(L[3, , drop=FALSE], fm, ddf="Kenward-Roger"))
 stopifnot(nrow(ans) == 1L,
           ans$NumDF == 1L)
 
@@ -53,7 +53,7 @@ assertError(contestMD(list(L[3, , drop=FALSE]), fm, ddf="Sat")) # Need L to be a
 
 # zero-row L's are allowed (if ncol(L) is correct):
 ans1 <- contestMD(L[0, , drop=FALSE], fm, ddf="Sat")
-ans2 <- contestMD(L[0, , drop=FALSE], fm, ddf="KR")
+ans2 <- contestMD(L[0, , drop=FALSE], fm, ddf="Kenward-Roger")
 stopifnot(nrow(ans1) == 0L,
           nrow(ans2) == 0L)
 
@@ -65,7 +65,7 @@ L <- rbind(c(1, 0, 1),
            c(0, 1, 0),
            c(1, -1, 1))
 ans <- contestMD(L, fm)
-ans_KR <- contestMD(L, fm, ddf="KR")
+ans_KR <- contestMD(L, fm, ddf="Kenward-Roger")
 stopifnot(nrow(L) == 3L,
           qr(L)$rank == 2,
           ans$NumDF == 2,
@@ -103,12 +103,12 @@ stopifnot(
 L2 <- rbind(L, L[1, ] + L[2, ]) # rank deficient!
 contestMD(L2, model, rhs = c(0, 0, 0)) # no warning
 assertWarning(contestMD(L2, model, rhs = c(2, 2, 2))) # warning since L2 is rank def.
-assertWarning(contestMD(L2, model, rhs = c(2, 2, 2), ddf="KR"))
+assertWarning(contestMD(L2, model, rhs = c(2, 2, 2), ddf="Kenward-Roger"))
 
 contestMD(L2, model, rhs = -c(-2, -2, -2))
 
 fm <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy)
 contestMD(L=cbind(0, 1), fm)
-contestMD(L=cbind(0, 1), fm, ddf="KR")
+contestMD(L=cbind(0, 1), fm, ddf="Kenward-Roger")
 contestMD(L=cbind(0, 1), fm, rhs=10)
-contestMD(L=cbind(0, 1), fm, ddf="KR", rhs=10)
+contestMD(L=cbind(0, 1), fm, ddf="Kenward-Roger", rhs=10)

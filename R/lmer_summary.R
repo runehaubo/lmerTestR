@@ -17,13 +17,13 @@ NULL
 #' The returned object is of class
 #' \code{c("summary.lmerModLmerTest", "summary.merMod")} utilizing \code{print},
 #' \code{coef} and other methods defined for \code{summary.merMod} objects.
-#' The \code{"KR"} method use methods from the \pkg{pbkrtest} package internally
+#' The \code{"Kenward-Roger"} method use methods from the \pkg{pbkrtest} package internally
 #' to compute t-statistics and associated degrees-of-freedom.
 #'
 #' @param object an lmerModLmerTest object.
 #' @param ddf the method for computing the degrees of freedom and
 #' t-statistics. \code{ddf="Satterthwaite"} (default) uses Satterthwaite's method;
-#' \code{ddf="KR"} uses Kenward-Roger's method,
+#' \code{ddf="Kenward-Roger"} uses Kenward-Roger's method,
 #' \code{ddf = "lme4"} returns the lme4-summary i.e., using the summary
 #' method for \code{lmerMod} objects as defined in the \pkg{lme4}-package and
 #' ignores the \code{type} argument. Partial matching is allowed.
@@ -52,25 +52,25 @@ NULL
 #' coef(summary(fm))
 #'
 #' # Use the Kenward-Roger method
-#' summary(fm, ddf="KR")
+#' summary(fm, ddf="Kenward-Roger")
 #'
 #' # The lme4-summary table:
 #' summary(fm, ddf="lme4") # same as summary(as(fm, "lmerMod"))
 #'
-setMethod("summary", signature(object = "lmerModLmerTest"), function(object, ..., ddf=c("Satterthwaite", "KR", "lme4")) {
+setMethod("summary", signature(object = "lmerModLmerTest"), function(object, ..., ddf=c("Satterthwaite", "Kenward-Roger", "lme4")) {
   ddf <- match.arg(ddf)
   summ <- summary(as(object, "lmerMod"), ...)
   if(ddf == "lme4") return(summ)
   summ$coefficients <- get_coefmat(object, ddf=ddf)
   ddf_nm <- switch(ddf, "Satterthwaite" = "Satterthwaite's",
-                   "KR" = "Kenward-Roger's")
+                   "Kenward-Roger" = "Kenward-Roger's")
   summ$objClass <- class(object) # Used by lme4:::print.summary.lmerMod
   summ$methTitle <- paste0(summ$methTitle, ". t-tests use ", ddf_nm, " method")
   class(summ) <- c("summary.lmerModLmerTest", class(summ))
   summ
 })
 
-get_coefmat <- function(model, ddf=c("Satterthwaite", "KR")) {
+get_coefmat <- function(model, ddf=c("Satterthwaite", "Kenward-Roger")) {
   ddf <- match.arg(ddf)
   p <- length(fixef(model))
   if(p < 1)

@@ -19,7 +19,7 @@ cake2$temperature <- factor(cake2$temperature, ordered = FALSE)
 fm <- lmer(angle ~ recipe + temperature + (1|recipe:replicate), cake2)
 (an1 <- drop1(fm))
 (an2 <- drop1(fm, force_get_contrasts = TRUE))
-drop1(fm, ddf="KR")
+drop1(fm, ddf="Kenward-Roger")
 drop1(fm, ddf="lme4", test="Chi")
 
 tests1 <- show_tests(an1)
@@ -34,7 +34,7 @@ stopifnot(
 
 fm <- lmer(angle ~ recipe * temperature + (1|recipe:replicate), cake2)
 drop1(fm)
-drop1(fm, ddf="KR")
+drop1(fm, ddf="Kenward-Roger")
 drop1(fm, ddf="lme4")
 
 # Incorrect arguments:

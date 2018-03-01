@@ -25,7 +25,7 @@
 #' marginal, use \code{drop.scope(terms(object))}.
 #' @param ddf the method for computing the denominator degrees of freedom and
 #' F-statistics. \code{ddf="Satterthwaite"} (default) uses Satterthwaite's method;
-#' \code{ddf="KR"} uses Kenward-Roger's method.
+#' \code{ddf="Kenward-Roger"} uses Kenward-Roger's method.
 #' \code{ddf = "lme4"} returns the \code{drop1} table for \code{merMod} objects
 #' as defined in package \pkg{lme4}.
 #' @param force_get_contrasts enforce computation of contrast matrices by a
@@ -43,7 +43,7 @@
 #' # Basic usage:
 #' fm <- lmer(angle ~ recipe + temp + (1|recipe:replicate), cake)
 #' drop1(fm)
-#' drop1(fm, ddf="KR") # Alternative DenDF and F-test method
+#' drop1(fm, ddf="Kenward-Roger") # Alternative DenDF and F-test method
 #' drop1(fm, ddf="lme4", test="Chi") # Asymptotic Likelihood ratio tests
 #'
 #' # Consider a rank-deficient design matrix:
@@ -67,7 +67,7 @@
 #' fm <- lmer(Reaction ~ poly(Days, 2) + (Days|Subject), sleepstudy)
 #' drop1(fm)
 #'
-drop1.lmerModLmerTest <- function(object, scope, ddf=c("Satterthwaite", "KR", "lme4"),
+drop1.lmerModLmerTest <- function(object, scope, ddf=c("Satterthwaite", "Kenward-Roger", "lme4"),
                                   force_get_contrasts=FALSE, ...) {
   ddf <- match.arg(ddf)
   if(ddf == "lme4") return(NextMethod())
@@ -101,7 +101,7 @@ drop1.lmerModLmerTest <- function(object, scope, ddf=c("Satterthwaite", "KR", "l
   aov <- rbindall(lapply(Llist, function(L) contestMD(L, object, ddf = ddf)))
   # Format results:
   method <- switch(ddf, "Satterthwaite" = "Satterthwaite's",
-                   "KR" = "Kenward-Roger's")
+                   "Kenward-Roger" = "Kenward-Roger's")
   attr(aov, "heading") <-
     c(paste("Single term deletions using", method, "method:"),
       "\nModel:", deparse(formula(object)))
@@ -111,7 +111,7 @@ drop1.lmerModLmerTest <- function(object, scope, ddf=c("Satterthwaite", "KR", "l
   aov
 }
 
-# drop1.lmerModLmerTest <- function(object, scope, ddf=c("Satterthwaite", "KR", "lme4"),
+# drop1.lmerModLmerTest <- function(object, scope, ddf=c("Satterthwaite", "Kenward-Roger", "lme4"),
 #                                   method=c("extract_L", "drop.scope"), ...) {
 #   ddf <- match.arg(ddf)
 #   method <- match.arg(method)
@@ -162,7 +162,7 @@ drop1.lmerModLmerTest <- function(object, scope, ddf=c("Satterthwaite", "KR", "l
 #   aov <- rbindall(lapply(Llist, function(L) contestMD(L, object, ddf = ddf)))
 #   # Format results:
 #   method <- switch(ddf, "Satterthwaite" = "Satterthwaite's",
-#                    "KR" = "Kenward-Roger's")
+#                    "Kenward-Roger" = "Kenward-Roger's")
 #   attr(aov, "heading") <-
 #     c(paste("Single term deletions using", method, "method:"),
 #       "\nModel:", deparse(formula(object)))

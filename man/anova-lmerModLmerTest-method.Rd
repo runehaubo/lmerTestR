@@ -6,7 +6,7 @@
 \title{ANOVA Tables for Linear Mixed Models}
 \usage{
 \S4method{anova}{lmerModLmerTest}(object, ..., type = c("I", "II", "III", "1",
-  "2", "3"), ddf = c("Satterthwaite", "KR", "lme4"))
+  "2", "3"), ddf = c("Satterthwaite", "Kenward-Roger", "lme4"))
 }
 \arguments{
 \item{object}{an \code{lmerModLmerTest} object; the result of \code{lmer()}
@@ -21,7 +21,7 @@ with Type I being the familiar sequential ANOVA table.}
 
 \item{ddf}{the method for computing the denominator degrees of freedom and
 F-statistics. \code{ddf="Satterthwaite"} (default) uses Satterthwaite's method;
-\code{ddf="KR"} uses Kenward-Roger's method,
+\code{ddf="Kenward-Roger"} uses Kenward-Roger's method,
 \code{ddf = "lme4"} returns the lme4-anova table, i.e., using the anova
 method for \code{lmerMod} objects as defined in the \pkg{lme4}-package and
 ignores the \code{type} argument. Partial matching is allowed.}
@@ -36,7 +36,7 @@ Models should be fitted with
 \code{\link{lmer}} from the \pkg{lmerTestR}-package.
 }
 \details{
-The \code{"KR"} method calls \code{pbkrtest::KRmodcomp} internally and
+The \code{"Kenward-Roger"} method calls \code{pbkrtest::KRmodcomp} internally and
 reports scaled F-statistics and associated denominator degrees-of-freedom.
 }
 \examples{
@@ -49,7 +49,7 @@ anova(m, ddf="lme4")
 }
 \seealso{
 \code{\link{contestMD}} for multi degree-of-freedom contrast tests
-and \code{\link[pbkrtest]{KRmodcomp}} for the \code{"KR"} method.
+and \code{\link[pbkrtest]{KRmodcomp}} for the \code{"Kenward-Roger"} method.
 }
 \author{
 Rune Haubo B. Christensen

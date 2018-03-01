@@ -5,8 +5,8 @@
 \title{Test of Contrasts}
 \usage{
 contest(L, model, joint = TRUE, collect = TRUE, confint = TRUE,
-  level = 0.95, check_estimability = FALSE, ddf = c("Satterthwaite", "KR",
-  "lme4"), rhs = 0, ...)
+  level = 0.95, check_estimability = FALSE, ddf = c("Satterthwaite",
+  "Kenward-Roger", "lme4"), rhs = 0, ...)
 }
 \arguments{
 \item{L}{a contrast vector or matrix or a list of these.
@@ -33,7 +33,7 @@ take effect. See details section for necessary adjustments to \code{L} when
 estimability is checked with rank deficient design matrices.}
 
 \item{ddf}{the method for computing the denominator degrees of freedom.
-\code{ddf="KR"} uses Kenward-Roger's method.}
+\code{ddf="Kenward-Roger"} uses Kenward-Roger's method.}
 
 \item{rhs}{right-hand-side of the statistical test, i.e. the hypothesized
 value (a numeric scalar).}

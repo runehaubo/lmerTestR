@@ -4,8 +4,8 @@
 \alias{drop1.lmerModLmerTest}
 \title{Drop Marginal Terms from Model}
 \usage{
-\method{drop1}{lmerModLmerTest}(object, scope, ddf = c("Satterthwaite", "KR",
-  "lme4"), force_get_contrasts = FALSE, ...)
+\method{drop1}{lmerModLmerTest}(object, scope, ddf = c("Satterthwaite",
+  "Kenward-Roger", "lme4"), force_get_contrasts = FALSE, ...)
 }
 \arguments{
 \item{object}{an \code{\link{lmer}} model fit (of class
@@ -17,7 +17,7 @@ marginal, use \code{drop.scope(terms(object))}.}
 
 \item{ddf}{the method for computing the denominator degrees of freedom and
 F-statistics. \code{ddf="Satterthwaite"} (default) uses Satterthwaite's method;
-\code{ddf="KR"} uses Kenward-Roger's method.
+\code{ddf="Kenward-Roger"} uses Kenward-Roger's method.
 \code{ddf = "lme4"} returns the \code{drop1} table for \code{merMod} objects
 as defined in package \pkg{lme4}.}
 
@@ -50,7 +50,7 @@ models are being (re)fitted.
 # Basic usage:
 fm <- lmer(angle ~ recipe + temp + (1|recipe:replicate), cake)
 drop1(fm)
-drop1(fm, ddf="KR") # Alternative DenDF and F-test method
+drop1(fm, ddf="Kenward-Roger") # Alternative DenDF and F-test method
 drop1(fm, ddf="lme4", test="Chi") # Asymptotic Likelihood ratio tests
 
 # Consider a rank-deficient design matrix:

@@ -6,7 +6,7 @@
 \title{Summary Method for Linear Mixed Models}
 \usage{
 \S4method{summary}{lmerModLmerTest}(object, ..., ddf = c("Satterthwaite",
-  "KR", "lme4"))
+  "Kenward-Roger", "lme4"))
 }
 \arguments{
 \item{object}{an lmerModLmerTest object.}
@@ -15,7 +15,7 @@
 
 \item{ddf}{the method for computing the degrees of freedom and
 t-statistics. \code{ddf="Satterthwaite"} (default) uses Satterthwaite's method;
-\code{ddf="KR"} uses Kenward-Roger's method,
+\code{ddf="Kenward-Roger"} uses Kenward-Roger's method,
 \code{ddf = "lme4"} returns the lme4-summary i.e., using the summary
 method for \code{lmerMod} objects as defined in the \pkg{lme4}-package and
 ignores the \code{type} argument. Partial matching is allowed.}
@@ -34,7 +34,7 @@ degrees-of-freedom and t-statistics.
 The returned object is of class
 \code{c("summary.lmerModLmerTest", "summary.merMod")} utilizing \code{print},
 \code{coef} and other methods defined for \code{summary.merMod} objects.
-The \code{"KR"} method use methods from the \pkg{pbkrtest} package internally
+The \code{"Kenward-Roger"} method use methods from the \pkg{pbkrtest} package internally
 to compute t-statistics and associated degrees-of-freedom.
 }
 \examples{
@@ -50,7 +50,7 @@ summary(fm) # Satterthwaite df and t-tests
 coef(summary(fm))
 
 # Use the Kenward-Roger method
-summary(fm, ddf="KR")
+summary(fm, ddf="Kenward-Roger")
 
 # The lme4-summary table:
 summary(fm, ddf="lme4") # same as summary(as(fm, "lmerMod"))

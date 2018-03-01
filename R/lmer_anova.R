@@ -17,7 +17,7 @@ NULL
 #' Models should be fitted with
 #' \code{\link{lmer}} from the \pkg{lmerTestR}-package.
 #'
-#' The \code{"KR"} method calls \code{pbkrtest::KRmodcomp} internally and
+#' The \code{"Kenward-Roger"} method calls \code{pbkrtest::KRmodcomp} internally and
 #' reports scaled F-statistics and associated denominator degrees-of-freedom.
 #'
 #' @param object an \code{lmerModLmerTest} object; the result of \code{lmer()}
@@ -29,14 +29,14 @@ NULL
 #' with Type I being the familiar sequential ANOVA table.
 #' @param ddf the method for computing the denominator degrees of freedom and
 #' F-statistics. \code{ddf="Satterthwaite"} (default) uses Satterthwaite's method;
-#' \code{ddf="KR"} uses Kenward-Roger's method,
+#' \code{ddf="Kenward-Roger"} uses Kenward-Roger's method,
 #' \code{ddf = "lme4"} returns the lme4-anova table, i.e., using the anova
 #' method for \code{lmerMod} objects as defined in the \pkg{lme4}-package and
 #' ignores the \code{type} argument. Partial matching is allowed.
 #'
 #' @return an ANOVA table
 #' @seealso \code{\link{contestMD}} for multi degree-of-freedom contrast tests
-#' and \code{\link[pbkrtest]{KRmodcomp}} for the \code{"KR"} method.
+#' and \code{\link[pbkrtest]{KRmodcomp}} for the \code{"Kenward-Roger"} method.
 #' @author Rune Haubo B. Christensen
 #' @importFrom methods is callNextMethod
 #' @export
@@ -51,7 +51,7 @@ NULL
 setMethod("anova",
           signature(object="lmerModLmerTest"),
           function(object, ..., type = c("I", "II", "III", "1", "2", "3"),
-                   ddf=c("Satterthwaite", "KR", "lme4")) {
+                   ddf=c("Satterthwaite", "Kenward-Roger", "lme4")) {
             dots <- list(...)
             models <- if(length(dots))
               sapply(dots, is, "lmerModLmerTest") | sapply(dots, is, "merMod") |
@@ -85,7 +85,7 @@ setMethod("anova",
 #' @keywords internal
 single_anova <- function(object,
                          type = c("I", "II", "III", "1", "2", "3", "yates", "marginal", "2b", "3b", "3c"),
-                         ddf=c("Satterthwaite", "KR")) {
+                         ddf=c("Satterthwaite", "Kenward-Roger")) {
   if(!inherits(object, "lmerModLmerTest"))
     warning("calling single_anova(<fake-lmerModLmerTest-object>) ...")
   type <- type[1L]
@@ -117,7 +117,7 @@ single_anova <- function(object,
   # Format ANOVA table and return:
   rownames(table) <- names(L_list)
   method <- switch(ddf, "Satterthwaite" = "Satterthwaite's",
-                   "KR" = "Kenward-Roger's")
+                   "Kenward-Roger" = "Kenward-Roger's")
   # Format 'type':
   type <- if(type == "marginal") {
     "Marginal"

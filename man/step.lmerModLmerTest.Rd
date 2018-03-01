@@ -12,9 +12,9 @@ step(object, ...)
 
 \method{step}{default}(object, ...)
 
-\method{step}{lmerModLmerTest}(object, ddf = c("Satterthwaite", "KR"),
-  alpha.random = 0.1, alpha.fixed = 0.05, reduce.fixed = TRUE,
-  reduce.random = TRUE, keep, ...)
+\method{step}{lmerModLmerTest}(object, ddf = c("Satterthwaite",
+  "Kenward-Roger"), alpha.random = 0.1, alpha.fixed = 0.05,
+  reduce.fixed = TRUE, reduce.random = TRUE, keep, ...)
 
 get_model(x, ...)
 
@@ -28,7 +28,7 @@ get_model(x, ...)
 
 \item{ddf}{the method for computing the denominator degrees of freedom and
 F-statistics. \code{ddf="Satterthwaite"} (default) uses Satterthwaite's method;
-\code{ddf="KR"} uses Kenward-Roger's method.}
+\code{ddf="Kenward-Roger"} uses Kenward-Roger's method.}
 
 \item{alpha.random}{alpha for random effects elimination}
 

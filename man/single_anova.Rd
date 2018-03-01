@@ -5,7 +5,7 @@
 \title{ANOVA Tables for Linear Mixed Models}
 \usage{
 single_anova(object, type = c("I", "II", "III", "1", "2", "3", "yates",
-  "marginal", "2b", "3b", "3c"), ddf = c("Satterthwaite", "KR"))
+  "marginal", "2b", "3b", "3c"), ddf = c("Satterthwaite", "Kenward-Roger"))
 }
 \arguments{
 \item{object}{an \code{lmerModLmerTest} object; the result of \code{lmer()}

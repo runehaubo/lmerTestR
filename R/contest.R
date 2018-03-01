@@ -20,7 +20,7 @@
 #' @param rhs right-hand-side of the statistical test, i.e. the hypothesized
 #' value (a numeric scalar).
 #' @param ddf the method for computing the denominator degrees of freedom.
-#' \code{ddf="KR"} uses Kenward-Roger's method.
+#' \code{ddf="Kenward-Roger"} uses Kenward-Roger's method.
 #' @param confint include columns for lower and upper confidence limits? Applies
 #' when \code{joint} is \code{FALSE}.
 #' @param level confidence level.
@@ -80,7 +80,7 @@
 #'
 contest <- function(L, model, joint=TRUE, collect=TRUE, confint=TRUE,
                     level=0.95, check_estimability=FALSE,
-                    ddf=c("Satterthwaite", "KR", "lme4"), rhs=0, ...) {
+                    ddf=c("Satterthwaite", "Kenward-Roger", "lme4"), rhs=0, ...) {
   ddf <- match.arg(ddf)
   if(!(is_list <- is.list(L))) L <- list(L)
   if(joint) {
@@ -137,7 +137,7 @@ contest <- function(L, model, joint=TRUE, collect=TRUE, confint=TRUE,
 #' @param rhs right-hand-side of the statistical test, i.e. the hypothesized
 #' value (a numeric scalar).
 #' @param ddf the method for computing the denominator degrees of freedom.
-#' \code{ddf="KR"} uses Kenward-Roger's method.
+#' \code{ddf="Kenward-Roger"} uses Kenward-Roger's method.
 #' @param confint include columns for lower and upper confidence limits?
 #' @param level confidence level.
 #'
@@ -167,7 +167,7 @@ contest <- function(L, model, joint=TRUE, collect=TRUE, confint=TRUE,
 #' contest1D(c(0, 1), fm, confint=TRUE, rhs=10) # Test for Days-coef == 10
 #'
 #'
-contest1D <- function(L, model, rhs=0, ddf=c("Satterthwaite", "KR"), confint=FALSE,
+contest1D <- function(L, model, rhs=0, ddf=c("Satterthwaite", "Kenward-Roger"), confint=FALSE,
                       level = 0.95) {
   mk_ttable <- function(estimate, se, ddf) {
     tstat <- (estimate - rhs)/se
@@ -194,7 +194,7 @@ contest1D <- function(L, model, rhs=0, ddf=c("Satterthwaite", "KR"), confint=FAL
   }
   if(any(is.na(L))) return(mk_ttable(NA_real_, NA_real_, NA_real_))
   estimate <- sum(L * model@beta) # contrast estimate
-  if(method == "KR") { # Handle KR method:
+  if(method == "Kenward-Roger") { # Handle KR method:
     ans <- get_KR1D(L, model) # get var(contrast) and ddf
     if(!ans$error) {
       return(mk_ttable(estimate=estimate, se=sqrt(ans$var_con), ddf=ans$ddf))
@@ -254,7 +254,7 @@ get_KR1D <- function(L, model) {
 #' @param rhs right-hand-side of the statistical test, i.e. the hypothesized
 #' value. A numeric vector of length \code{nrow(L)} or a numeric scalar.
 #' @param ddf the method for computing the denominator degrees of freedom and
-#' F-statistics. \code{ddf="KR"} uses Kenward-Roger's method.
+#' F-statistics. \code{ddf="Kenward-Roger"} uses Kenward-Roger's method.
 #' @param eps tolerance on eigenvalues to determine if an eigenvalue is
 #' positive. The number of positive eigenvalues determine the rank of
 #' L and the numerator df of the F-test.
@@ -290,7 +290,7 @@ get_KR1D <- function(L, model) {
 #' # Same test, but now as a t-test instead:
 #' contest1D(L[2, , drop=TRUE], fm)
 #'
-contestMD <- function(L, model, rhs=0, ddf=c("Satterthwaite", "KR"),
+contestMD <- function(L, model, rhs=0, ddf=c("Satterthwaite", "Kenward-Roger"),
                       eps=sqrt(.Machine$double.eps)) {
   mk_Ftable <- function(Fvalue, ndf, ddf, sigma, Fscale=1) {
     MS <- Fvalue * sigma^2
@@ -312,7 +312,7 @@ contestMD <- function(L, model, rhs=0, ddf=c("Satterthwaite", "KR"),
     return(mk_Ftable(x, x, x, x))
   }
   if(any(is.na(L))) return(mk_Ftable(NA_real_, NA_real_, NA_real_, NA_real_))
-  if(method == "KR") {
+  if(method == "Kenward-Roger") {
     if(!getME(model, "is_REML"))
       stop("Kenward-Roger's method is only available for REML model fits",
            call.=FALSE)

@@ -5,11 +5,11 @@
 \alias{difflsmeans}
 \title{LS-means for lmerTest Model Fits}
 \usage{
-lsmeans(model, which = NULL, level = 0.95, ddf = c("Satterthwaite", "KR"),
-  pairwise = FALSE)
+lsmeans(model, which = NULL, level = 0.95, ddf = c("Satterthwaite",
+  "Kenward-Roger"), pairwise = FALSE)
 
 difflsmeans(model, which = NULL, level = 0.95, ddf = c("Satterthwaite",
-  "KR"))
+  "Kenward-Roger"))
 }
 \arguments{
 \item{model}{a model object fitted with \code{\link{lmer}} (of class

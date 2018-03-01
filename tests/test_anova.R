@@ -28,14 +28,14 @@ stopifnot(isTRUE(
 stopifnot(isTRUE(
   all.equal(an1, an3)
 ))
-(anova(m, ddf="KR"))
-(anova(m, ddf="KR", type=3))
+(anova(m, ddf="Kenward-Roger"))
+(anova(m, ddf="Kenward-Roger", type=3))
 (an1 <- anova(m, ddf="lme4"))
 (an2 <- anova(m, ddf="lme4", type=3)) # 'type' is ignored with ddf="lme4"
 stopifnot(isTRUE(
   all.equal(an1, an2)
 ))
-res <- assertError(anova(m, ddf="Ken")) ## Error on incorrect arg.
+res <- assertError(anova(m, ddf="KR")) ## Error on incorrect arg.
 stopifnot(
   grepl("'arg' should be one of ", unlist(res[[1]])$message)
 )
@@ -104,7 +104,7 @@ stopifnot(
 data("cake", package="lme4")
 m <- lmer(angle ~ recipe * temp + (1|recipe:replicate), cake)
 (an <- anova(m))
-(an_KR <- anova(m, ddf="KR"))
+(an_KR <- anova(m, ddf="Kenward-Roger"))
 (an_lme4 <- anova(m, ddf="lme4"))
 res <- all.equal(an[, c("Sum Sq", "Mean Sq", "F value")],
                  an_lme4[, c("Sum Sq", "Mean Sq", "F value")])
@@ -139,7 +139,7 @@ stopifnot(
 # Type 3 is not available with ordered factors:
 assertError(anova(m, type=3))
 (an <- anova(m, type=1))
-(an_KR <- anova(m, ddf="KR"))
+(an_KR <- anova(m, ddf="Kenward-Roger"))
 (an_lme4 <- anova(m, ddf="lme4"))
 res <- all.equal(an[, c("Sum Sq", "Mean Sq", "F value")],
                  an_lme4[, c("Sum Sq", "Mean Sq", "F value")])
@@ -174,7 +174,7 @@ m <- lmer(angle ~ 0 + recipe * temp + (1|recipe:replicate), cake)
 (an <- anova(m))
 (an2 <- anova(m, type=2))
 (an2 <- anova(m, type=3))
-(an_KR <- anova(m, ddf="KR"))
+(an_KR <- anova(m, ddf="Kenward-Roger"))
 (an_lme4 <- anova(m, ddf="lme4"))
 res <- all.equal(an[, c("Sum Sq", "Mean Sq", "F value")],
                  an_lme4[, c("Sum Sq", "Mean Sq", "F value")])
@@ -183,7 +183,7 @@ stopifnot(isTRUE(res))
 # ML-fit:
 m <- lmer(angle ~ recipe * temp + (1|recipe:replicate), cake, REML=FALSE)
 (an <- anova(m))
-assertError(an <- anova(m, ddf="KR")) # KR fits should be REML
+assertError(an <- anova(m, ddf="Kenward-Roger")) # KR fits should be REML
 (an_lme4 <- anova(m, ddf="lme4"))
 res <- all.equal(an[, c("Sum Sq", "Mean Sq", "F value")],
                  an_lme4[, c("Sum Sq", "Mean Sq", "F value")])
@@ -199,7 +199,7 @@ m <- lmer(angle ~ recipe * temp + (1|recipe:replicate), cake,
 (an2 <- anova(m, type=2))
 
 assertError(an3 <- anova(m, type=3))
-(an_KR <- anova(m, ddf="KR"))
+(an_KR <- anova(m, ddf="Kenward-Roger"))
 (an_lme4 <- anova(m, ddf="lme4"))
 res <- all.equal(an[, c("Sum Sq", "Mean Sq", "F value")],
                  an_lme4[, c("Sum Sq", "Mean Sq", "F value")])
@@ -217,7 +217,7 @@ stopifnot(length(fixef(m)) == 0L)
 (an <- anova(m, type=1))
 (an_2 <- anova(m, type=2))
 (an_3 <- anova(m, type=3))
-(an_KR <- anova(m, ddf="KR"))
+(an_KR <- anova(m, ddf="Kenward-Roger"))
 stopifnot(nrow(an) == 0L,
           nrow(an_2) == 0L,
           nrow(an_3) == 0L,
@@ -232,7 +232,7 @@ stopifnot(length(fixef(m)) == 1L,
 (an <- anova(m))
 (an_2 <- anova(m, type=2))
 (an_3 <- anova(m, type=3))
-(an_KR <- anova(m, ddf="KR"))
+(an_KR <- anova(m, ddf="Kenward-Roger"))
 (an_lme4 <- anova(m, ddf="lme4"))
 stopifnot(nrow(an) == 0L,
           nrow(an_2) == 0L,
@@ -248,7 +248,7 @@ stopifnot(length(fixef(m)) == 1L,
 (an <- anova(m))
 (an_2 <- anova(m, type=2))
 (an_3 <- anova(m, type=3))
-(an_KR <- anova(m, ddf="KR"))
+(an_KR <- anova(m, ddf="Kenward-Roger"))
 (an_lme4 <- anova(m, ddf="lme4"))
 
 stopifnot(nrow(an) == 1L,
@@ -271,7 +271,7 @@ stopifnot(length(fixef(m)) == 2L,
 (an <- anova(m))
 (an_2 <- anova(m, type=2))
 (an_3 <- anova(m, type=3))
-(an_KR <- anova(m, ddf="KR"))
+(an_KR <- anova(m, ddf="Kenward-Roger"))
 (an_lme4 <- anova(m, ddf="lme4"))
 stopifnot(nrow(an) == 2L,
           nrow(an_3) == 2L,
@@ -290,7 +290,7 @@ stopifnot(length(fixef(m)) == 3L)
 (an <- anova(m))
 (an_2 <- anova(m, type=2))
 (an_3 <- anova(m, type=3))
-(an_KR <- anova(m, ddf="KR"))
+(an_KR <- anova(m, ddf="Kenward-Roger"))
 (an_lme4 <- anova(m, ddf="lme4"))
 res <- all.equal(an[, c("Sum Sq", "Mean Sq", "F value")],
                  an_lme4[, c("Sum Sq", "Mean Sq", "F value")])
