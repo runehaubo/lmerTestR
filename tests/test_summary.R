@@ -7,7 +7,7 @@ assertError <- function(expr, ...)
 assertWarning <- function(expr, ...)
   if(requireNamespace("tools")) tools::assertWarning(expr, ...) else invisible()
 
-library(lmerTestR)
+library(lmerTest)
 data("sleepstudy", package="lme4")
 data("cake", package="lme4")
 

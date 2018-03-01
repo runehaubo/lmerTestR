@@ -114,7 +114,7 @@ lmer <- function(formula, data = NULL, REML = TRUE,
 #'
 #' @examples
 #' m <- lme4::lmer(Reaction ~ Days + (Days | Subject), sleepstudy)
-#' bm <- lmerTestR:::as_lmerModLmerTest(m)
+#' bm <- lmerTest:::as_lmerModLmerTest(m)
 #' slotNames(bm)
 #'
 #' @keywords internal

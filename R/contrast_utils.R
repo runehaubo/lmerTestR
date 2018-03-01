@@ -46,7 +46,7 @@ containment <- function(object) { # lm or merMod
 #' @param factors ?
 #'
 #' @return ?
-#' @author Lifted from \code{lmerTest:::makeContrastType3SAS}
+#' @author Lifted from old lmerTest package
 #' @keywords internal
 relatives <- function(classes.term, term, term_names, factors) {
   ## checks if the terms have the same number of covariates (if any)
@@ -290,8 +290,7 @@ get_yates_contrast <- function(model, which=NULL) {
 #' @param eps tolererance for non-zero pivots
 #'
 #' @return a pp-vector or qi x pp matrix with the contrast for the term.
-#' @author Rune Haubo B. Christensen based on
-#' \code{lmerTest:::makeContrastType3SAS}
+#' @author Rune Haubo B. Christensen based on the old lmerTest package
 #' @keywords internal
 contrast_type3SAS <- function(term, terms, data_classes, L, eps=1e-8) {
   # Apply rule 1 (Goodnight 1976)

@@ -15,13 +15,13 @@ NULL
 #' ANOVA table with F-tests and p-values using Satterthwaite's or
 #' Kenward-Roger's method for denominator degrees-of-freedom and F-statistic.
 #' Models should be fitted with
-#' \code{\link{lmer}} from the \pkg{lmerTestR}-package.
+#' \code{\link{lmer}} from the \pkg{lmerTest}-package.
 #'
 #' The \code{"Kenward-Roger"} method calls \code{pbkrtest::KRmodcomp} internally and
 #' reports scaled F-statistics and associated denominator degrees-of-freedom.
 #'
 #' @param object an \code{lmerModLmerTest} object; the result of \code{lmer()}
-#' after loading the \pkg{lmerTestR}-package.
+#' after loading the \pkg{lmerTest}-package.
 #' @param ... potentially additional \code{lmer} or \code{lm} model objects for
 #' comparison of models in which case \code{type} and \code{ddf} arguments are
 #' ignored.
@@ -72,7 +72,7 @@ setMethod("anova",
 #' ANOVA Tables for Linear Mixed Models
 #'
 #' @param object an \code{lmerModLmerTest} object; the result of \code{lmer()}
-#' after loading the \pkg{lmerTestR}-package.
+#' after loading the \pkg{lmerTest}-package.
 #' @param type the type of ANOVA table requested (using the SAS terminology for
 #' these) with Type I being the familiar sequential ANOVA table.
 #' @param ddf method for computing denominator degrees of freedom.

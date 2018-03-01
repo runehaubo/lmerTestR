@@ -16,7 +16,7 @@
 #' The \code{length}/\code{ncol} of each contrasts should equal
 #' \code{length(fixef(model))}.
 #' @param model a model object fitted with \code{lmer} from package
-#' \pkg{lmerTestR}, i.e., an object of class \code{\link{lmerModLmerTest}}.
+#' \pkg{lmerTest}, i.e., an object of class \code{\link{lmerModLmerTest}}.
 #' @param rhs right-hand-side of the statistical test, i.e. the hypothesized
 #' value (a numeric scalar).
 #' @param ddf the method for computing the denominator degrees of freedom.
@@ -112,6 +112,17 @@ contest <- function(L, model, joint=TRUE, collect=TRUE, confint=TRUE,
   if(collect) rbindall(res) else res
 }
 
+#' @rdname contestMD
+calcSatterth <- function(model, L) {
+  x <- contestMD(L, model)
+  list("denom"=x[["DenDF"]], "Fstat"=as.matrix(x[["F value"]]),
+       "pvalue"=as.matrix(x[["Pr(>F)"]]), "ndf"=x[["NumDF"]])
+}
+# m <- lmer(Reaction ~ Days + (1 + Days|Subject), sleepstudy)
+# L <- cbind(0,1) ## specify contrast vector
+# contestMD(L, m)
+# calcSatterth(m, L)
+
 
 ##############################################
 ######## contest1D()
@@ -119,7 +130,7 @@ contest <- function(L, model, joint=TRUE, collect=TRUE, confint=TRUE,
 #' Contrast Tests in 1D
 #'
 #' Compute the test of a one-dimensional (vector) contrast in a
-#' linear mixed model fitted with lmer from package \pkg{lmerTestR}.
+#' linear mixed model fitted with lmer from package \pkg{lmerTest}.
 #' The contrast should specify a linear function of the
 #' mean-value parameters, beta. The Satterthwaite or Kenward-Roger method is
 #' used to compute the (denominator) df for the t-test.
@@ -133,7 +144,7 @@ contest <- function(L, model, joint=TRUE, collect=TRUE, confint=TRUE,
 #' @param L a numeric (contrast) vector of the same length as
 #' \code{fixef(model)}.
 #' @param model a model object fitted with \code{lmer} from package
-#' \pkg{lmerTestR}, i.e., an object of class \code{\link{lmerModLmerTest}}.
+#' \pkg{lmerTest}, i.e., an object of class \code{\link{lmerModLmerTest}}.
 #' @param rhs right-hand-side of the statistical test, i.e. the hypothesized
 #' value (a numeric scalar).
 #' @param ddf the method for computing the denominator degrees of freedom.
@@ -253,7 +264,7 @@ get_KR1D <- function(L, model) {
 #' @param L a contrast matrix with nrow >= 1 and ncol ==
 #' \code{length(fixef(model))}.
 #' @param model a model object fitted with \code{lmer} from package
-#' \pkg{lmerTestR}, i.e., an object of class \code{\link{lmerModLmerTest}}.
+#' \pkg{lmerTest}, i.e., an object of class \code{\link{lmerModLmerTest}}.
 #' @param rhs right-hand-side of the statistical test, i.e. the hypothesized
 #' value. A numeric vector of length \code{nrow(L)} or a numeric scalar.
 #' @param ddf the method for computing the denominator degrees of freedom and

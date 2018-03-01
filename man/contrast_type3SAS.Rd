@@ -32,7 +32,6 @@ over-parameterized model notation (and also equals the number of columns in
 the 'full' rank-deficient design matrix). if qi=1 the result is a qi-vector.
 }
 \author{
-Rune Haubo B. Christensen based on
-\code{lmerTest:::makeContrastType3SAS}
+Rune Haubo B. Christensen based on the old lmerTest package
 }
 \keyword{internal}

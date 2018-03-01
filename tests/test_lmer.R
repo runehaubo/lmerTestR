@@ -1,5 +1,5 @@
 # test_lmer.R
-library(lmerTestR)
+library(lmerTest)
 
 # WRE says "using if(requireNamespace("pkgname")) is preferred, if possible."
 # even in tests:
@@ -12,7 +12,7 @@ assertWarning <- function(expr, ...)
 # Use of as_lmerModLmerTest
 data("sleepstudy", package="lme4")
 m <- lme4::lmer(Reaction ~ Days + (Days | Subject), sleepstudy)
-bm <- lmerTestR:::as_lmerModLmerTest(m)
+bm <- lmerTest:::as_lmerModLmerTest(m)
 stopifnot(
   inherits(bm, "lmerModLmerTest"),
   !inherits(m, "lmerModLmerTest"),

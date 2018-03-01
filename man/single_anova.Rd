@@ -9,7 +9,7 @@ single_anova(object, type = c("I", "II", "III", "1", "2", "3", "yates",
 }
 \arguments{
 \item{object}{an \code{lmerModLmerTest} object; the result of \code{lmer()}
-after loading the \pkg{lmerTestR}-package.}
+after loading the \pkg{lmerTest}-package.}
 
 \item{type}{the type of ANOVA table requested (using the SAS terminology for
 these) with Type I being the familiar sequential ANOVA table.}

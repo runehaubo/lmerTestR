@@ -1,5 +1,5 @@
 # test_contestMD.R
-library(lmerTestR)
+library(lmerTest)
 
 # WRE says "using if(requireNamespace("pkgname")) is preferred, if possible."
 # even in tests:

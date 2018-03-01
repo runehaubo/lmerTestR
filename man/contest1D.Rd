@@ -12,7 +12,7 @@ contest1D(L, model, rhs = 0, ddf = c("Satterthwaite", "Kenward-Roger"),
 \code{fixef(model)}.}
 
 \item{model}{a model object fitted with \code{lmer} from package
-\pkg{lmerTestR}, i.e., an object of class \code{\link{lmerModLmerTest}}.}
+\pkg{lmerTest}, i.e., an object of class \code{\link{lmerModLmerTest}}.}
 
 \item{rhs}{right-hand-side of the statistical test, i.e. the hypothesized
 value (a numeric scalar).}
@@ -32,7 +32,7 @@ are included before the p-value column.
 }
 \description{
 Compute the test of a one-dimensional (vector) contrast in a
-linear mixed model fitted with lmer from package \pkg{lmerTestR}.
+linear mixed model fitted with lmer from package \pkg{lmerTest}.
 The contrast should specify a linear function of the
 mean-value parameters, beta. The Satterthwaite or Kenward-Roger method is
 used to compute the (denominator) df for the t-test.

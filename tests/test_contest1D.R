@@ -1,5 +1,5 @@
 # test_contest1D.R
-library(lmerTestR)
+library(lmerTest)
 
 # WRE says "using if(requireNamespace("pkgname")) is preferred, if possible."
 # even in tests:
@@ -43,9 +43,9 @@ assertError(contest1D(list(c(0, 1, 0)), fm))
 
 # Test equivalence to coef(summary(fm)):
 Lmat <- diag(length(fixef(fm)))
-(coef_mat <- lmerTestR:::rbindall(lapply(1:ncol(Lmat), function(i)
+(coef_mat <- lmerTest:::rbindall(lapply(1:ncol(Lmat), function(i)
   contest1D(Lmat[i, ], fm))))
-(coef_mat_KR <- lmerTestR:::rbindall(lapply(1:ncol(Lmat), function(i)
+(coef_mat_KR <- lmerTest:::rbindall(lapply(1:ncol(Lmat), function(i)
   contest1D(Lmat[i, ], fm, ddf="Kenward-Roger"))))
 (coef_mat_lme4 <- coef(summary(fm, ddf="lme4")))
 rownames(coef_mat_KR) <- rownames(coef_mat) <- rownames(coef_mat_lme4)

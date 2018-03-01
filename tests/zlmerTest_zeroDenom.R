@@ -1,4 +1,4 @@
-library(lmerTestR)
+library(lmerTest)
 
 # Read in data set
 load(system.file("testdata","potdata.RData", package="lmerTest"))

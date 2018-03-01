@@ -1,6 +1,6 @@
 # test_lsmeans.R
 
-library(lmerTestR)
+library(lmerTest)
 
 ########### Basic model structures:
 
@@ -19,7 +19,7 @@ stopifnot(
 # Pairwise differences of LS-means:
 plsm <- lsmeans(model, pairwise = TRUE)
 plsm2 <- difflsmeans(model)
-C <- as.matrix(lmerTestR:::get_pairs(rownames(lsm)))
+C <- as.matrix(lmerTest:::get_pairs(rownames(lsm)))
 stopifnot(
   isTRUE(all.equal(plsm, plsm2)),
   isTRUE(all.equal(plsm[, "Estimate"], c(lsm[, "Estimate"] %*% C),

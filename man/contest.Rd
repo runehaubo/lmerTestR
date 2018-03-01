@@ -14,7 +14,7 @@ The \code{length}/\code{ncol} of each contrasts should equal
 \code{length(fixef(model))}.}
 
 \item{model}{a model object fitted with \code{lmer} from package
-\pkg{lmerTestR}, i.e., an object of class \code{\link{lmerModLmerTest}}.}
+\pkg{lmerTest}, i.e., an object of class \code{\link{lmerModLmerTest}}.}
 
 \item{joint}{make an F-test of potentially several contrast vectors? If
 \code{FALSE} single DF t-tests are applied to each vector or each row of

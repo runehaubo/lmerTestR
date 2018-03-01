@@ -1,6 +1,6 @@
 # test_zerovar.R
 
-library(lmerTestR)
+library(lmerTest)
 data("sleepstudy", package="lme4")
 
 # Baseline fit:

@@ -22,6 +22,6 @@ relatives(classes.term, term, term_names, factors)
 Experimental - not extensively tested in this context.
 }
 \author{
-Lifted from \code{lmerTest:::makeContrastType3SAS}
+Lifted from old lmerTest package
 }
 \keyword{internal}

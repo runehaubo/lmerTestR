@@ -10,7 +10,7 @@
 }
 \arguments{
 \item{object}{an \code{lmerModLmerTest} object; the result of \code{lmer()}
-after loading the \pkg{lmerTestR}-package.}
+after loading the \pkg{lmerTest}-package.}
 
 \item{...}{potentially additional \code{lmer} or \code{lm} model objects for
 comparison of models in which case \code{type} and \code{ddf} arguments are
@@ -33,7 +33,7 @@ an ANOVA table
 ANOVA table with F-tests and p-values using Satterthwaite's or
 Kenward-Roger's method for denominator degrees-of-freedom and F-statistic.
 Models should be fitted with
-\code{\link{lmer}} from the \pkg{lmerTestR}-package.
+\code{\link{lmer}} from the \pkg{lmerTest}-package.
 }
 \details{
 The \code{"Kenward-Roger"} method calls \code{pbkrtest::KRmodcomp} internally and
