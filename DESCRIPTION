@@ -18,6 +18,7 @@ Collate:
     'anova_contrasts.R'
     'contest.R'
     'contrast_utils.R'
+    'data_documentation.R'
     'drop1.R'
     'estimability.R'
     'lm_methods.R'
