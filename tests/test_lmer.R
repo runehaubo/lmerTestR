@@ -22,14 +22,13 @@ stopifnot(
 
 #####################################################################
 # Expect warning when model fails to converge:
-data("carrots", package="lmerTest")
 m <- assertWarning(
   lmer(Preference ~ sens2 + Homesize + Income + #(1 + sens2 | Consumer) +
          (1|Consumer) + (1 |Consumer:Income), data=carrots)
 )
 messages <- unlist(lapply(m, "[[", "message"))
 stopifnot(
-  any(grepl("Model failed to converge with 1 negative eigenvalue", messages))
+  any(grepl("Model failed to converge", messages))
 )
 
 

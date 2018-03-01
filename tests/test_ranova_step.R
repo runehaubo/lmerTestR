@@ -125,7 +125,6 @@ step(fm1)
 ranova(fm1)
 
 # What about models with nested factors?
-data("TVbo", package="lmerTest")
 fm <- lmer(Coloursaturation ~ TVset*Picture + (1|Assessor:TVset) + (1|Assessor),
            data=TVbo)
 step(fm)
@@ -165,7 +164,6 @@ assertError(step(fm))
 # Model with 2 ranef covarites:
 
 # Model of the form (x1 + x2 | gr):
-data("carrots", package="lmerTest")
 model <- lmer(Preference ~ sens2 + Homesize + (sens1 + sens2 | Consumer)
               , data=carrots)
 step(model, )
@@ -175,9 +173,8 @@ stopifnot(
 )
 
 # Model of the form (f1 + f2 | gr):
-carrots$gender <- factor(carrots$Gender)
-model <- lmer(Preference ~ sens2 + Homesize + gender +
-                (gender+Homesize|Consumer), data=carrots)
+model <- lmer(Preference ~ sens2 + Homesize + Gender +
+                (Gender+Homesize|Consumer), data=carrots)
 step(model)
 stopifnot(
   nrow(ranova(model)) == 3L,
@@ -185,14 +182,14 @@ stopifnot(
 )
 
 # Model of the form (-1 + f2 | gr):
-model <- lmer(Preference ~ sens2 + Homesize + gender +
-                (gender -1 |Consumer), data=carrots)
+model <- lmer(Preference ~ sens2 + Homesize + Gender +
+                (Gender -1 |Consumer), data=carrots)
 step(model)
 an1 <- ranova(model)
 an1b <- ranova(model, reduce.terms = FALSE)
 
-model <- lmer(Preference ~ sens2 + Homesize + gender +
-                (0 + gender|Consumer), data=carrots)
+model <- lmer(Preference ~ sens2 + Homesize + Gender +
+                (0 + Gender|Consumer), data=carrots)
 step(model)
 an2 <- ranova(model)
 an2b <- ranova(model, reduce.terms = FALSE)
@@ -203,12 +200,12 @@ stopifnot(
 )
 
 ####### Polynomial terms:
-model <- lmer(Preference ~ sens2 + gender + (poly(sens2, 2) | Consumer),
+model <- lmer(Preference ~ sens2 + Gender + (poly(sens2, 2) | Consumer),
               data=carrots)
 (an <- ranova(model))
 step(model)
 
-model <- lmer(Preference ~ sens2 + gender + (sens2 + I(sens2^2) | Consumer),
+model <- lmer(Preference ~ sens2 + Gender + (sens2 + I(sens2^2) | Consumer),
               data=carrots)
 (an2 <- ranova(model))
 step(model)
@@ -220,7 +217,7 @@ stopifnot(
 )
 
 ######## Functions of terms in random effects:
-model <- lmer(Preference ~ sens2 + gender + (log(10+sens2) | Consumer),
+model <- lmer(Preference ~ sens2 + Gender + (log(10+sens2) | Consumer),
               data=carrots)
 ranova(model) # Works
 step(model)
@@ -269,7 +266,6 @@ stopifnot(
 
 ##################### Using reduce and keep args:
 # Fit a model to the ham dataset:
-data("ham", package="lmerTest")
 m <- lmer(Informed.liking ~ Product*Information+
             (1|Consumer) + (1|Product:Consumer)
           + (1|Information:Consumer), data=ham)

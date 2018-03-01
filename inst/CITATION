@@ -1,0 +1,21 @@
+bibentry(bibtype = "Article",
+  title        = "{lmerTest} Package: Tests in Linear Mixed Effects Models",
+  author       = c(person(given = "Alexandra",
+                          family = "Kuznetsova",
+                          email = "alku@dtu.dk"),
+                   person(given = c("Per", "B."),
+                          family = "Brockhoff",
+			  email = "perbb@dtu.dk"),
+                   person(given = c("Rune", "H.", "B."),
+                          family = "Christensen",
+                          email = "Rune@ChristensenStatistics.dk")),
+  journal      = "Journal of Statistical Software",
+  year         = "2017",
+  volume       = "82",
+  number       = "13",
+  pages        = "1--26",
+  doi          = "10.18637/jss.v082.i13",
+
+  header       = "To cite lmerTest in publications use:"
+)
+
