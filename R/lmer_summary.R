@@ -35,7 +35,7 @@ NULL
 #'
 #' @seealso \code{\link{contest1D}} for one degree-of-freedom contrast tests
 #' and \code{\link[pbkrtest]{KRmodcomp}} for Kenward-Roger F-tests.
-#' @author Rune Haubo B. Christensen
+#' @author Rune Haubo B. Christensen and Alexandra Kuznetsova
 #' @export
 #' @importFrom methods as signature
 #'

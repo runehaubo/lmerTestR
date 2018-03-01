@@ -33,7 +33,7 @@
 #'
 #' @return An LS-means table in the form of a \code{data.frame}. Formally an object
 #' of class \code{c("lsmeans", "data.frame")} with a number of attributes set.
-#' @author Rune Haubo B. Christensen
+#' @author Rune Haubo B. Christensen and Alexandra Kuznetsova
 #' @seealso \code{\link{show_contrasts}} for display of the underlying LS-means
 #' contrasts.
 #' @export

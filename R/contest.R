@@ -113,6 +113,7 @@ contest <- function(L, model, joint=TRUE, collect=TRUE, confint=TRUE,
 }
 
 #' @rdname contestMD
+#' @export
 calcSatterth <- function(model, L) {
   x <- contestMD(L, model)
   list("denom"=x[["DenDF"]], "Fstat"=as.matrix(x[["F value"]]),

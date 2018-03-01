@@ -67,5 +67,5 @@ difflsmeans(model) # Equivalent.
 contrasts.
 }
 \author{
-Rune Haubo B. Christensen
+Rune Haubo B. Christensen and Alexandra Kuznetsova
 }

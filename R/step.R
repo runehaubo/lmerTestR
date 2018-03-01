@@ -51,6 +51,7 @@ step.default <- function(object, ...) stats::step(object, ...)
 #' @seealso \code{\link{drop1}} for tests of marginal fixed-effect terms and
 #' \code{\link{ranova}} for a \code{\link{drop1}}-like table of reduction of
 #' random-effect terms.
+#' @author Rune Haubo B. Christensen and Alexandra Kuznetsova
 #' @export
 #' @examples
 #'

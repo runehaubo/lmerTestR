@@ -97,3 +97,6 @@ final_fm <- get_model(step_fm)
 \code{\link{ranova}} for a \code{\link{drop1}}-like table of reduction of
 random-effect terms.
 }
+\author{
+Rune Haubo B. Christensen and Alexandra Kuznetsova
+}

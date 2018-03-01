@@ -37,8 +37,9 @@ NULL
 #' @return an ANOVA table
 #' @seealso \code{\link{contestMD}} for multi degree-of-freedom contrast tests
 #' and \code{\link[pbkrtest]{KRmodcomp}} for the \code{"Kenward-Roger"} method.
-#' @author Rune Haubo B. Christensen
+#' @author Rune Haubo B. Christensen and Alexandra Kuznetsova
 #' @importFrom methods is callNextMethod
+#' @importFrom stats anova
 #' @export
 #'
 #' @examples

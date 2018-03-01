@@ -52,5 +52,5 @@ anova(m, ddf="lme4")
 and \code{\link[pbkrtest]{KRmodcomp}} for the \code{"Kenward-Roger"} method.
 }
 \author{
-Rune Haubo B. Christensen
+Rune Haubo B. Christensen and Alexandra Kuznetsova
 }

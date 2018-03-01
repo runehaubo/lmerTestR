@@ -61,5 +61,5 @@ summary(fm, ddf="lme4") # same as summary(as(fm, "lmerMod"))
 and \code{\link[pbkrtest]{KRmodcomp}} for Kenward-Roger F-tests.
 }
 \author{
-Rune Haubo B. Christensen
+Rune Haubo B. Christensen and Alexandra Kuznetsova
 }
