@@ -5,6 +5,7 @@
 .*~$
 README.md
 ^build$
+^revdep$
 ^pkg_notes$
 TODO.md
 .Rhistory
