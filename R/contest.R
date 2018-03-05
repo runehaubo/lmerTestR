@@ -389,7 +389,7 @@ contestMD <- function(L, model, rhs=0, ddf=c("Satterthwaite", "Kenward-Roger"),
   }
   PtL <- crossprod(P, L)[1:q, ]
   if(q == 1) { # 1D case:
-    res <- contest1D(PtL, model, rhs=rhs, confint=FALSE)
+    res <- contest1D(PtL, model, rhs=rhs[1L], confint=FALSE)
     return(mk_Ftable(Fvalue=res[["t value"]]^2, ndf=q, ddf=res$df,
                      sigma=model@sigma))
   } # multi-D case proceeds:
