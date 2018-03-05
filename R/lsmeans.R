@@ -30,6 +30,7 @@
 #' @param level confidence level.
 #' @param ddf method for computation of denominator degrees of freedom.
 #' @param pairwise compute pairwise differences of LS-means instead?
+#' @param ... currently not used.
 #'
 #' @return An LS-means table in the form of a \code{data.frame}. Formally an object
 #' of class \code{c("lsmeans", "data.frame")} with a number of attributes set.
@@ -51,8 +52,9 @@
 #' lsmeans(model, pairwise=TRUE)
 #' difflsmeans(model) # Equivalent.
 #'
-lsmeans <- function(model, which=NULL, level=0.95,
-                      ddf=c("Satterthwaite", "Kenward-Roger"), pairwise=FALSE) {
+lsmeans.lmerModLmerTest <- function(model, which=NULL, level=0.95,
+                                    ddf=c("Satterthwaite", "Kenward-Roger"),
+                                    pairwise=FALSE, ...) {
   ddf <- match.arg(ddf)
   Llist <- lsmeans_contrasts(model, which=which)
   coef_nm <- if(inherits(model, "lmerMod")) colnames(model.matrix(model)) else
@@ -91,16 +93,25 @@ lsmeans <- function(model, which=NULL, level=0.95,
   means
 }
 
-#' @inheritParams lsmeans
-#'
-#' @rdname lsmeans
+#' @rdname lsmeans.lmerModLmerTest
 #' @export
-difflsmeans <- function(model, which=NULL, level=0.95,
-                        ddf=c("Satterthwaite", "Kenward-Roger")) {
+lsmeans <- function(model, ...) UseMethod("lsmeans")
+
+#' @rdname lsmeans.lmerModLmerTest
+#' @export
+difflsmeans <- function(model, ...) UseMethod("difflsmeans")
+
+#' @rdname lsmeans.lmerModLmerTest
+#' @export
+difflsmeans.lmerModLmerTest <- function(model, which=NULL, level=0.95,
+                        ddf=c("Satterthwaite", "Kenward-Roger"), ...) {
   lsmeans(model, which=which, level=level, ddf=ddf, pairwise = TRUE)
 }
 
 
+##############################################
+######## lsmeans
+##############################################
 lsmeans_contrasts <- function(model, which=NULL) {
   stopifnot(inherits(model, "lmerModLmerTest"))
   factor_terms <- attr(terms(model), "term.labels")[!numeric_terms(model)]

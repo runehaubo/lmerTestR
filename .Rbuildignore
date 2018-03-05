@@ -6,6 +6,7 @@
 README.md
 ^build$
 ^revdep$
+^revdep_archive$
 ^pkg_notes$
 TODO.md
 .Rhistory

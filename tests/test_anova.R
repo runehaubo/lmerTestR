@@ -85,14 +85,14 @@ fm <- lm(Reaction ~ Days, sleepstudy)
 (an <- anova(m, fm))
 stopifnot(
   nrow(an) == 2L,
-  rownames(an)[2] == "object"
+  rownames(an)[2] == "m"
 )
 
 m2 <- lmer(Reaction ~ Days + I(Days^2) + (Days | Subject), sleepstudy)
 (an <- anova(m, m2, refit=FALSE))
 stopifnot(
   nrow(an) == 2L,
-  rownames(an)[1] == "object"
+  rownames(an)[1] == "m"
 )
 
 
@@ -106,15 +106,15 @@ m <- lmer(angle ~ recipe * temp + (1|recipe:replicate), cake)
 (an <- anova(m))
 (an_KR <- anova(m, ddf="Kenward-Roger"))
 (an_lme4 <- anova(m, ddf="lme4"))
-res <- all.equal(an[, c("Sum Sq", "Mean Sq", "F value")],
-                 an_lme4[, c("Sum Sq", "Mean Sq", "F value")])
-stopifnot(isTRUE(res))
+# res <- all.equal(an[, c("Sum Sq", "Mean Sq", "F value")],
+#                  an_lme4[, c("Sum Sq", "Mean Sq", "F value")])
+# stopifnot(isTRUE(res))
 res <- all.equal(an[, c("Sum Sq", "Mean Sq", "F value")],
                  an_KR[, c("Sum Sq", "Mean Sq", "F value")])
 stopifnot(isTRUE(res))
 
 stopifnot(all.equal(c(2, 1, 2), an$NumDF, tol=1e-6),
-          all.equal(c(42, 222, 222), an$DenDF, tol=1e-6))
+          all.equal(c(254.0157612, 222, 222), an$DenDF, tol=1e-6))
 
 an3 <- anova(m, type=3)
 an2 <- anova(m, type=2)
@@ -139,8 +139,8 @@ stopifnot(
 # Type 3 is not available with ordered factors:
 assertError(anova(m, type=3))
 (an <- anova(m, type=1))
-(an_KR <- anova(m, ddf="Kenward-Roger"))
-(an_lme4 <- anova(m, ddf="lme4"))
+(an_KR <- anova(m, type=1, ddf="Kenward-Roger"))
+(an_lme4 <- anova(m, type=1, ddf="lme4"))
 res <- all.equal(an[, c("Sum Sq", "Mean Sq", "F value")],
                  an_lme4[, c("Sum Sq", "Mean Sq", "F value")])
 stopifnot(isTRUE(res))
@@ -171,7 +171,7 @@ stopifnot(
 
 # No intercept:
 m <- lmer(angle ~ 0 + recipe * temp + (1|recipe:replicate), cake)
-(an <- anova(m))
+(an <- anova(m, type=1))
 (an2 <- anova(m, type=2))
 (an2 <- anova(m, type=3))
 (an_KR <- anova(m, ddf="Kenward-Roger"))
@@ -182,7 +182,7 @@ stopifnot(isTRUE(res))
 
 # ML-fit:
 m <- lmer(angle ~ recipe * temp + (1|recipe:replicate), cake, REML=FALSE)
-(an <- anova(m))
+(an <- anova(m, type=1))
 assertError(an <- anova(m, ddf="Kenward-Roger")) # KR fits should be REML
 (an_lme4 <- anova(m, ddf="lme4"))
 res <- all.equal(an[, c("Sum Sq", "Mean Sq", "F value")],
@@ -195,11 +195,11 @@ stopifnot(isTRUE(res))
 
 m <- lmer(angle ~ recipe * temp + (1|recipe:replicate), cake,
           contrasts = list('recipe' = "contr.sum"))
-(an <- anova(m))
+(an <- anova(m, type=1))
 (an2 <- anova(m, type=2))
 
 assertError(an3 <- anova(m, type=3))
-(an_KR <- anova(m, ddf="Kenward-Roger"))
+(an_KR <- anova(m, type=1, ddf="Kenward-Roger"))
 (an_lme4 <- anova(m, ddf="lme4"))
 res <- all.equal(an[, c("Sum Sq", "Mean Sq", "F value")],
                  an_lme4[, c("Sum Sq", "Mean Sq", "F value")])
@@ -287,7 +287,7 @@ lmerTest:::rbindall(lapply(1:nrow(Lmat), function(i) contest1D(Lmat[i, ], m)))
 # Example with >1 fixef and intercept:
 m <- lmer(Reaction ~ Days + I(Days^2) + (Days | Subject), sleepstudy)
 stopifnot(length(fixef(m)) == 3L)
-(an <- anova(m))
+(an <- anova(m, type=1))
 (an_2 <- anova(m, type=2))
 (an_3 <- anova(m, type=3))
 (an_KR <- anova(m, ddf="Kenward-Roger"))
@@ -296,7 +296,7 @@ res <- all.equal(an[, c("Sum Sq", "Mean Sq", "F value")],
                  an_lme4[, c("Sum Sq", "Mean Sq", "F value")])
 stopifnot(isTRUE(res))
 
-res <- all.equal(an[, c("Sum Sq", "Mean Sq", "DenDF", "F value")],
+res <- all.equal(an_3[, c("Sum Sq", "Mean Sq", "DenDF", "F value")],
                  an_KR[, c("Sum Sq", "Mean Sq", "DenDF", "F value")], tol=1e-6)
 stopifnot(isTRUE(res))
 

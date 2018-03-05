@@ -4,7 +4,7 @@
 \alias{single_anova}
 \title{ANOVA Tables for Linear Mixed Models}
 \usage{
-single_anova(object, type = c("I", "II", "III", "1", "2", "3", "yates",
+single_anova(object, type = c("III", "II", "I", "3", "2", "1", "yates",
   "marginal", "2b", "3b", "3c"), ddf = c("Satterthwaite", "Kenward-Roger"))
 }
 \arguments{

@@ -57,8 +57,21 @@ NULL
 #' # The lme4-summary table:
 #' summary(fm, ddf="lme4") # same as summary(as(fm, "lmerMod"))
 #'
-setMethod("summary", signature(object = "lmerModLmerTest"), function(object, ..., ddf=c("Satterthwaite", "Kenward-Roger", "lme4")) {
+summary.lmerModLmerTest <- function(object, ...,
+                                    ddf=c("Satterthwaite", "Kenward-Roger", "lme4")) {
   ddf <- match.arg(ddf)
+  if(!inherits(object, "lmerModLmerTest") && !inherits(object, "lmerMod")) {
+    stop("Cannot compute summary for objects of class: ",
+         paste(class(object), collapse = ", "))
+  }
+  if(!inherits(object, "lmerModLmerTest") && inherits(object, "lmerMod")) {
+    message("Coercing object to class 'lmerModLmerTest'")
+    object <- as_lmerModLmerTest(object)
+    if(!inherits(object, "lmerModLmerTest")) {
+      warning("Failed to coerce object to class 'lmerModLmerTest'")
+      return(summary(object))
+    }
+  }
   summ <- summary(as(object, "lmerMod"), ...)
   if(ddf == "lme4") return(summ)
   summ$coefficients <- get_coefmat(object, ddf=ddf)
@@ -68,7 +81,20 @@ setMethod("summary", signature(object = "lmerModLmerTest"), function(object, ...
   summ$methTitle <- paste0(summ$methTitle, ". t-tests use ", ddf_nm, " method")
   class(summ) <- c("summary.lmerModLmerTest", class(summ))
   summ
-})
+}
+
+# setMethod("summary", signature(object = "lmerModLmerTest"), function(object, ..., ddf=c("Satterthwaite", "Kenward-Roger", "lme4")) {
+#   ddf <- match.arg(ddf)
+#   summ <- summary(as(object, "lmerMod"), ...)
+#   if(ddf == "lme4") return(summ)
+#   summ$coefficients <- get_coefmat(object, ddf=ddf)
+#   ddf_nm <- switch(ddf, "Satterthwaite" = "Satterthwaite's",
+#                    "Kenward-Roger" = "Kenward-Roger's")
+#   summ$objClass <- class(object) # Used by lme4:::print.summary.lmerMod
+#   summ$methTitle <- paste0(summ$methTitle, ". t-tests use ", ddf_nm, " method")
+#   class(summ) <- c("summary.lmerModLmerTest", class(summ))
+#   summ
+# })
 
 get_coefmat <- function(model, ddf=c("Satterthwaite", "Kenward-Roger")) {
   ddf <- match.arg(ddf)

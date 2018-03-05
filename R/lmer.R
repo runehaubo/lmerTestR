@@ -17,6 +17,7 @@
 #' @slot sigma the residual standard deviation.
 #'
 #' @seealso \code{\link[lme4]{lmer}} and \code{\link[lme4]{merMod}}
+#' @export
 #' @author Rune Haubo B. Christensen
 #' @importClassesFrom lme4 lmerMod
 #'
@@ -111,6 +112,7 @@ lmer <- function(formula, data = NULL, REML = TRUE,
 #' @importFrom lme4 getME
 #'
 #' @author Rune Haubo B. Christensen
+#' @export
 #'
 #' @examples
 #' m <- lme4::lmer(Reaction ~ Days + (Days | Subject), sleepstudy)

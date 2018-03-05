@@ -17,7 +17,8 @@ fm <- lmer(Reaction ~ Days + (1|Subject) + (0+Days|Subject), sleepstudy)
 
 ## Test class:
 stopifnot(all(
-  class(sfm) == c("summary.lmerModLmerTest", "summary.merMod")
+  class(sfm) == c("summary.lmerModLmerTest", "summary.merMod"),
+  all(c("df", "Pr(>|t|)") %in% colnames(coef(sfm)))
 ))
 stopifnot(class(summary(fm, ddf="lme4")) == "summary.merMod")
 
@@ -127,3 +128,4 @@ stopifnot(
   nrow(coef(summary(m, ddf="Kenward-Roger"))) == 2L,
   nrow(coef(summary(m, ddf="lme4"))) == 2L
 )
+

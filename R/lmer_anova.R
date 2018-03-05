@@ -49,22 +49,49 @@ NULL
 #' anova(m) # with p-values from F-tests using Satterthwaite's denominator df
 #' anova(m, ddf="lme4")
 #'
-setMethod("anova",
-          signature(object="lmerModLmerTest"),
-          function(object, ..., type = c("I", "II", "III", "1", "2", "3"),
-                   ddf=c("Satterthwaite", "Kenward-Roger", "lme4")) {
-            dots <- list(...)
-            models <- if(length(dots))
-              sapply(dots, is, "lmerModLmerTest") | sapply(dots, is, "merMod") |
-              sapply(dots, is, "lm") else logical(0)
-            if(any(models)) return(callNextMethod()) # return(anova(as(object, "lmerMod"), ...))
-            # Note: Need 'callNextMethod' here to get printing from anova.merMod right.
-            ddf <- match.arg(ddf)
-            # type <- match.arg(type) # not actually needed
-            if(ddf=="lme4") return(anova(as(object, "lmerMod"), ...)) # return(callNextMethod())
-            # FIXME: Warn that 'type' is ignored when ddf="lme4"
-            single_anova(object=object, type=type, ddf=ddf)
-          })
+anova.lmerModLmerTest <- function(object, ..., type = c("III", "II", "I", "3", "2", "1"),
+                                  ddf=c("Satterthwaite", "Kenward-Roger", "lme4")) {
+  if(!inherits(object, "lmerModLmerTest") && !inherits(object, "lmerMod")) {
+    stop("'object' of class: ", paste(class(object), collapse = ", "),
+         ". Expecting object of class 'lmerModLmerTest'")
+  }
+  if(!inherits(object, "lmerModLmerTest") && inherits(object, "lmerMod")) {
+    message("Coercing object to class 'lmerModLmerTest'")
+    object <- as_lmerModLmerTest(object)
+    if(!inherits(object, "lmerModLmerTest")) {
+      warning("Failed to coerce object to class 'lmerModLmerTest'")
+      return(NextMethod())
+    }
+  }
+  dots <- list(...)
+  models <- if(length(dots))
+    sapply(dots, is, "lmerModLmerTest") | sapply(dots, is, "merMod") |
+    sapply(dots, is, "lm") else logical(0)
+  if(any(models)) return(NextMethod()) # return(anova(as(object, "lmerMod"), ...))
+  # Note: Need 'callNextMethod' here to get printing from anova.merMod right.
+  ddf <- match.arg(ddf)
+  # type <- match.arg(type) # Need to pass 'hidden' options to single_anova
+  if(ddf=="lme4") return(anova(as(object, "lmerMod"), ...)) # return(callNextMethod())
+  # FIXME: Warn that 'type' is ignored when ddf="lme4"
+  single_anova(object=object, type=type, ddf=ddf)
+}
+
+# setMethod("anova",
+#           signature(object="lmerModLmerTest"),
+#           function(object, ..., type = c("I", "II", "III", "1", "2", "3"),
+#                    ddf=c("Satterthwaite", "Kenward-Roger", "lme4")) {
+#             dots <- list(...)
+#             models <- if(length(dots))
+#               sapply(dots, is, "lmerModLmerTest") | sapply(dots, is, "merMod") |
+#               sapply(dots, is, "lm") else logical(0)
+#             if(any(models)) return(callNextMethod()) # return(anova(as(object, "lmerMod"), ...))
+#             # Note: Need 'callNextMethod' here to get printing from anova.merMod right.
+#             ddf <- match.arg(ddf)
+#             # type <- match.arg(type) # not actually needed
+#             if(ddf=="lme4") return(anova(as(object, "lmerMod"), ...)) # return(callNextMethod())
+#             # FIXME: Warn that 'type' is ignored when ddf="lme4"
+#             single_anova(object=object, type=type, ddf=ddf)
+#           })
 
 
 ##############################################
@@ -85,7 +112,7 @@ setMethod("anova",
 #'
 #' @keywords internal
 single_anova <- function(object,
-                         type = c("I", "II", "III", "1", "2", "3", "yates", "marginal", "2b", "3b", "3c"),
+                         type = c("III", "II", "I", "3", "2", "1", "yates", "marginal", "2b", "3b", "3c"),
                          ddf=c("Satterthwaite", "Kenward-Roger")) {
   if(!inherits(object, "lmerModLmerTest"))
     warning("calling single_anova(<fake-lmerModLmerTest-object>) ...")

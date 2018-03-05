@@ -1,7 +1,7 @@
 Package: lmerTest
 Type: Package
 Title: Tests in Linear Mixed Effects Models 
-Version: 2.0-37.90010
+Version: 2.0-37.90012
 Authors@R: c(person("Alexandra", "Kuznetsova", role = c("aut")),
                    person("Per", "Bruun Brockhoff", role = c("aut", "ths", "cre"),
                    email = "perbb@dtu.dk"),
@@ -19,8 +19,8 @@ Description: Provides p-values in type I, II or III anova and summary
 License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
-URL: https://github.com/runehaubo/lmerTest
-BugReports: https://github.com/runehaubo/lmerTest/issues
+URL: https://github.com/runehaubo/lmerTestR
+BugReports: https://github.com/runehaubo/lmerTestR/issues
 RoxygenNote: 6.0.1
 Collate: 
     'anova_contrasts.R'

@@ -115,6 +115,16 @@ contest <- function(L, model, joint=TRUE, collect=TRUE, confint=TRUE,
 #' @rdname contestMD
 #' @export
 calcSatterth <- function(model, L) {
+  if(!inherits(model, "lmerModLmerTest") && !inherits(model, "lmerMod")) {
+    stop("'model' of class: ", paste(class(model), collapse = ", "),
+         ". Expecting model of class 'lmerModLmerTest'")
+  }
+  if(!inherits(model, "lmerModLmerTest") && inherits(model, "lmerMod")) {
+    message("Coercing model to class 'lmerModLmerTest'")
+    model <- as_lmerModLmerTest(model)
+    if(!inherits(model, "lmerModLmerTest"))
+      stop("Failed to coerce model to class 'lmerModLmerTest'")
+  }
   x <- contestMD(L, model)
   list("denom"=x[["DenDF"]], "Fstat"=as.matrix(x[["F value"]]),
        "pvalue"=as.matrix(x[["Pr(>F)"]]), "ndf"=x[["NumDF"]])
