@@ -1,4 +1,4 @@
-
+# terms_utils.R - utilities for computing on terms objects and friends
 
 
 ##############################################
@@ -93,20 +93,26 @@ get_model_matrix <- function(model, type=c("extract", "remake"),
   type <- match.arg(type)
   stopifnot(inherits(model, "lm") || inherits(model, "lmerMod"))
 
-  X <- model.matrix(model)
-  if(type == "extract") return(X)
+  if(type == "extract") return(model.matrix(model))
   # Set appropriate contrasts:
-  Contrasts <- if(length(contrasts) == 1 && is.character(contrasts) &&
-                  contrasts == "restore") {
-    attr(X, "contrasts")
+  Contrasts <- get_contrast_coding(model, contrasts=contrasts)
+  model.matrix(terms(model), data=model.frame(model),
+               contrasts.arg = Contrasts)
+}
+
+get_contrast_coding <- function(model, contrasts="restore") {
+  # Compute a list of contrasts for all factors in model
+  Contrasts <- contrasts
+  if(length(contrasts) == 1 && is.character(contrasts) &&
+     contrasts == "restore") {
+    Contrasts <- attr(model.matrix(model), "contrasts")
   } else if(length(contrasts) == 1 && is.character(contrasts) &&
             contrasts != "restore") {
     Contrasts <- .getXlevels(terms(model), model.frame(model))
     Contrasts[] <- contrasts
     Contrasts
-  } else contrasts
-  model.matrix(terms(model), data=model.frame(model),
-               contrasts.arg = Contrasts)
+  }
+  Contrasts
 }
 
 

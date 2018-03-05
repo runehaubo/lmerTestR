@@ -9,64 +9,51 @@
 # get_contrast_type1              # type = 1
 # get_contrast_marginal           # type = marginal
 #
-# get_contrast_type3old           # type = 3c
-# get_contrast_type3b             # type = 3b / yates
+# get_contrast_yates              # type = yates
 # get_contrast_type2              # type = 2b
-# get_contrast_yates # == type 4?
+
 
 ##############################################
 ######## get_contrasts_type3
 ##############################################
-#' @importFrom MASS ginv
-#' @importFrom stats terms resid lm.fit
+#' Contrasts for Type III Tests
+#'
+#' @param model model object.
+#' @param which optional character vector naming terms for which to compute the
+#' the contrasts.
+#'
+#' @return list of contrast matrices.
+#' @importFrom stats terms
+#' @keywords internal
 get_contrasts_type3 <- function(model, which=NULL) {
-  Terms <- terms(model)
-  X <- model.matrix(model)
-  term_names <- attr(Terms, "term.labels")
+  term_names <- attr(terms(model), "term.labels")
+  # Extract original design matrix:
+  Xorig <- model.matrix(model)
+  # Assumes Xorig is full (column) rank
   if(is.null(which)) {
     which <- term_names
     # If model has at most one term return Type I contrasts:
-    if(ncol(X) <= 1L || length(term_names) <= 1L)
+    if(ncol(Xorig) <= 1L || length(term_names) <= 1L)
       return(get_contrasts_type1(model))
   } else stopifnot(is.character(which), all(which %in% term_names))
 
-  # Check that appropriate contrast coding is used:
-  codings <- unlist(attr(X, "contrast"))
+  # Extract contrast coding in Xorig:
+  codings <- unlist(attr(Xorig, "contrast"))
+  # If only treatment contrasts are used we can just return the type 3
+  # contrasts for contr.treatment coding:
   if(length(codings) > 0 &&
-     !all(is.character(codings) && codings %in% c("contr.treatment", "contr.SAS")))
-    warning("Type 3c only applies if all factors are coded with 'contr.treatment' ",
-            "or 'contr.SAS'")
-  # Get 'complete' design matrix:
-  rdX <- get_rdX(model, do.warn = TRUE, use_contrasts = TRUE)
-  # cols for aliased coefs should be removed in X; not in rdX.
-  # This makes ginv(X) unique!
-  L <- zapsmall(t(MASS::ginv(X) %*% rdX))
-  dimnames(L) <- list(names(attr(rdX, "param")), colnames(X))
-
-  # Orthogonalize contrasts for terms which are contained in other terms:
-  map <- term2colX(Terms, X)
-  is_contained <- containment(model)
-  # Orthogonalize higher order terms before lower order terms:
-  terms_order <- attr(Terms, "order")
-  orthog_order <- term_names[order(terms_order, decreasing = TRUE)]
-  for(term in orthog_order) {
-    if(length(contains <- is_contained[[term]]) > 0) {
-      L[, map[[term]]] <-
-        zapsmall(resid(lm.fit(x=L[, map[[contains]], drop=FALSE],
-                              y=L[, map[[term]], drop=FALSE])))
-    }
-  }
-  # # Get indicator for which rows in L to keep:
-  # keep <- if(all(colnames(X) %in% rownames(L))) colnames(X) else {
-  #   param_ind <- term2colX(Terms, rdX)
-  #   which <- if(attr(Terms, "intercept") == 1) c("(Intercept)", term_names) else
-  #     term_names
-  #   unlist(lapply(which, function(term) {
-  #     param_ind[[term]][seq_along(map[[term]])]
-  #   }))
-  # }
-  # Return list of contrast matrices - one for each term:
-  lapply(map[which], function(term) t(L[colnames(X), term, drop=FALSE]))
+     all(is.character(codings)) && all(codings %in% c("contr.treatment")))
+    return(extract_contrasts_type3(model, X=Xorig))
+  # otherwise we need to map the type III contrasts to whatever contrast
+  # coding was used:
+  X <- get_model_matrix(model, type="remake", contrasts="contr.treatment")
+  # Ensure that X is full (column) rank:
+  X <- ensure_full_rank(X, silent=TRUE, test.ans=FALSE)
+  # Extract contrasts assuming contr.treatment coding:
+  type3ctr <- extract_contrasts_type3(model, X=X)
+  map <- zapsmall(ginv(X) %*% Xorig) # Maps between contrast codings
+  rownames(map) <- colnames(X)
+  lapply(type3ctr[which], function(L) L %*% map)
 }
 
 
@@ -172,63 +159,9 @@ get_contrasts_marginal <- function(model, which=NULL) {
 
 
 ##############################################
-######## get_contrasts_type3old
+######## get_contrasts_yates
 ##############################################
-#' Compute Type III Contrast Matrices
-#'
-#' Experimental - not extensively tested.
-#'
-#' @param model a model object; lmerMod or lmerModLmerTest
-#'
-#' @return a list of contrast matrices for each model term.
-#' @author Rune Haubo B. Christensen
-#'
-#' @keywords internal
-get_contrasts_type3old <- function(model) {
-  # Compute list of contrast matrices for type 3 tests.
-  #
-  # Get original design matrix:
-  X <- model.matrix(model)
-  # Catch boundary cases:
-  p <- ncol(X)
-  if(p == 0L) return(list(matrix(numeric(0L), nrow=0L))) # no fixef
-  if(p == 1L && attr(terms(model), "intercept")) # intercept-only model
-    return(list(matrix(numeric(0L), ncol=1L)))
-  # Check that valid contrasts are used for factors:
-  if(length(contr <- attr(X, "contrasts")) > 0) {
-    is_valid_contrast <-
-      sapply(contr, '%in%', c("contr.treatment", "contr.SAS"))
-    if(!all(is_valid_contrast))
-      stop("invalid contrasts found for type 3: Use 'contr.treatment' or 'contr.SAS' for all factors")
-  }
-  # get rank-deficient design-matrix X:
-  rdX <- get_rdX(model)
-  is_coef <- attr(rdX, "is_coef")
-  # Compute terms to be tested (term_names):
-  Terms <- terms(model, fixed.only=TRUE)
-  term_names <- attr(Terms, "term.labels")
-  ord <- unique(attr(X, "assign"))
-  term_names <- term_names[ord] # order terms (when are they not?)
-  # Compute 'general set' L:
-  L <- general_L(rdX, is_coef)
-  # Compute Type 3 Lc for each term:
-  data_classes <- attr(terms(model, fixed.only=FALSE), "dataClasses")
-  term_names <- setNames(as.list(term_names), term_names)
-  Lc_list <- lapply(term_names, function(nm) {
-    Lc <- contrast_type3SAS(nm, Terms, data_classes, L)
-    if(!is.matrix(Lc)) Lc <- matrix(Lc, ncol=length(Lc),
-                                    dimnames = list(NULL, names(Lc)))
-    Lc <- Lc[, is_coef, drop=FALSE]
-    colnames(Lc) <- colnames(X)
-    Lc
-  })
-}
-
-
-##############################################
-######## get_contrasts_type3b
-##############################################
-get_contrasts_type3b <- function(model) {
+get_contrasts_yates <- function(model) {
   # Is this really type 4?
   X <- model.matrix(model)
   Terms <- terms(model)

@@ -119,109 +119,145 @@ doolittle <- function(x, eps = 1e-6) {
   list( L=L, U=U )
 }
 
+
+##############################################
+######## ensure_full_rank()
+##############################################
+
+#' Ensure a Design Matrix has Full (Column) Rank
+#'
+#' Determine and drop redundant columns using the \code{\link{qr}}
+#' decomposition.
+#'
+#' @param X a design matrix as produced by \code{model.matrix}.
+#' @param tol \code{qr} tolerance.
+#' @param silent throw message if columns are dropped from \code{X}? Default
+#' is \code{FALSE}.
+#' @param test.ans Test if the resulting/returned matrix has full rank? Default
+#' is \code{FALSE}.
+#'
+#' @return A design matrix in which redundant columns are dropped
+#' @keywords internal
+ensure_full_rank <- function(X, tol = 1e-7, silent = FALSE, test.ans = FALSE) {
+  ### works if ncol(X) >= 0 and nrow(X) >= 0
+  ## test and match arguments:
+  stopifnot(is.matrix(X))
+  silent <- as.logical(silent)[1]
+  ## perform the qr-decomposition of X using LINPACK methods:
+  qr.X <- qr(X, tol = tol, LAPACK = FALSE)
+  if(qr.X$rank == ncol(X)) {
+    ## return X if X has full column rank
+    return(X)
+  }
+  if(!silent) ## message the no. dropped columns:
+    message(gettextf("Design is column rank deficient so dropping %d coef",
+                     ncol(X) - qr.X$rank))
+  ## return the columns correponding to the first qr.x$rank pivot
+  ## elements of X:
+  keep <- with(qr.X, pivot[seq_len(rank)])
+  newX <- X[, keep, drop = FALSE]
+  sel <- with(qr.X, pivot[-seq_len(rank)])
+  ## Copy old attributes:
+  if(!is.null(contr <- attr(X, "contrasts"))) attr(newX, "contrasts") <- contr
+  if(!is.null(asgn <- attr(X, "assign")))  attr(newX, "assign") <- asgn[-sel]
+  ## did we succeed? stop-if-not:
+  if(test.ans && qr.X$rank != qr(newX)$rank)
+    stop(gettextf("Determination of full column rank design matrix failed"),
+         call. = FALSE)
+  return(newX)
+}
+
+
 ##############################################
 ######## get_rdX()
 ##############################################
 #' Compute the 'Full' Rank-Deficient Design Matrix
 #'
-#' Experimental - not extensively tested.
 #'
 #' @param model a model object; lmerMod or lmerModLmerTest.
-#' @param do.warn throw a warning if there is no data for some factor
+#' @param do.warn throw a message if there is no data for some factor
 #' combinations.
-#' @param use_contrasts if \code{TRUE} contrasts coding from the original design
-#' matrix will be used. If \code{FALSE} the settings in \code{options()$contrasts}
-#' will be used.
 #'
-#' @return the rank-deficien design matrix, \code{rdX} with attributes
-#' \item{param}{a vector of _parameters_ in the over-parameterized model
-#' notation with length equal to the number of columns in \code{rdX}.}
-#' \item{is_coef}{numeric vector with indices on the columns in \code{rdX}
-#' which corresponds to the columns in the original full-rank \code{X} and
-#' therefore also to the coefficient vector.}
+#' @return the rank-deficien design matrix
 #' @author Rune Haubo B. Christensen
 #' @keywords internal
 #'
-#' @importFrom stats as.formula model.frame terms model.matrix setNames
-#' @importFrom lme4 fixef
-get_rdX <- function(model, do.warn=TRUE, use_contrasts=FALSE) {
-  # Compute rank-deficient design-matrix X:
+#' @importFrom stats as.formula model.frame terms model.matrix
+get_rdX <- function(model, do.warn=TRUE) {
+  # Compute rank-deficient design-matrix X usign contr.treatment coding.
   #
   # model: terms(model), model.frame(model), fixef(model)
   Terms <- terms(model, fixed.only=TRUE)
   term_names <- attr(Terms, "term.labels")
-  # X <- model.matrix(model)
   df <- model.frame(model)
   # Compute rank-deficient (full) design-matrix, X:
-  # FIXME: Consider models without terms.
-  if(!use_contrasts) {
-    rdXi <- lapply(term_names, function(trm)
-      model.matrix(as.formula(paste0("~ 0 + ", trm)), data=df))
-  } else {
-    contrasts <- attr(model.matrix(model), "contrasts")
-    rdXi <- lapply(term_names, function(trm) {
-      form <- as.formula(paste0("~ 0 + ", trm))
-      Contrast <- if(!is.null(contrasts) && trm %in% names(contrasts))
-        contrasts[trm] else NULL
-      model.matrix(form, contrasts.arg = Contrast, data=df)
-    })
-  }
-  # FIXME: Appears not to do the right thing for interactions with ordered factors.
+  rdXi <- if(length(term_names)) lapply(term_names, function(trm) {
+    form <- as.formula(paste0("~ 0 + ", trm))
+    model.matrix(form, data=df) # no contrast arg
+  }) else list(model.matrix(~ 1, data=df)[, -1, drop=FALSE])
   rdX <- do.call(cbind, rdXi)
   param_names <- unlist(lapply(rdXi, colnames))
-  colnames(rdX) <- rep(term_names, vapply(rdXi, ncol, integer(1L)))
   # Potentially add intercept:
   has_intercept <- attr(Terms, "intercept") != 0
   if(has_intercept) {
     rdX <- cbind('(Intercept)'=rep(1, nrow(rdX)), rdX)
     param_names <- c("(Intercept)", param_names)
   }
-  # Warn if there are cells without data:
-  if(do.warn && any(colSums(rdX) == 0))
-    warning("Missing cells for some factor levels: ",
-            "Interpret type III hypotheses with care", call.=FALSE)
-  # FIXME: mention name of offending factor-level in warning.
-  # Add param and is_coef attributes to rdX and return:
-  param <- setNames(numeric(ncol(rdX)), param_names)
-  coef <- fixef(model)
-  is_coef <- which(names(param) %in% names(coef))
-  param[is_coef] <- coef
-  attr(rdX, "param") <- param
-  attr(rdX, "is_coef") <- is_coef
+  colnames(rdX) <- param_names
+  # Warn/message if there are cells without data:
+  is_zero <- which(colSums(rdX) == 0)
+  if(do.warn && length(is_zero)) {
+    txt <- sprintf("Missing cells for: %s. ",
+                   paste(param_names[is_zero], collapse = ", "))
+    # warning(paste(txt, "\nInterpret type III hypotheses with care."), call.=FALSE)
+    message(paste(txt, "\nInterpret type III hypotheses with care."))
+  }
   rdX
 }
 
+
 ##############################################
-######## general_L()
+######## extract_contrasts_type3
 ##############################################
-#' Compute a 'General Set of Estimable Functions'
-#'
-#' Computes the so-called L-matrix (in SAS terminology).
-#' Experimental - not extensively tested.
-#'
-#' @param rdX a 'full' rank-deficient design matrix.
-#' @param is_coef an indicator vector of the same length as \code{fixef(model)}
-#' which indicates which columns in \code{rdX} correspond \code{fixef(model)}.
-#'
-#' @return The L-matrix
-#'
-#' @author Rune Haubo B. Christensen
-#' @keywords internal
-general_L <- function(rdX, is_coef) {
-  # Compute a/the 'general set of estimable functions' (the L-matrix)
-  #
-  # rdX: rank-deficient design-matrix X with pp columns, where pp is the
-  #   number of parameters in the over-parameterized model.
-  # is_coef: indicator vector: which of pp cols(rdX) correspond to the model
-  #   coefficients.
-  xtx <- crossprod(rdX)
-  g2 <- array(0, dim=dim(xtx))
-  g2[is_coef, is_coef] <- solve(xtx[is_coef, is_coef])
-  g2[abs(g2) < 1e-10] <- 0
-  #general set of estimable function
-  L <- g2 %*% xtx
-  L[abs(L) < 1e-6] <- 0
-  L
+#' @importFrom MASS ginv
+#' @importFrom stats terms resid lm.fit
+extract_contrasts_type3 <- function(model, X=NULL) {
+  # Computes contrasts for type III tests with reference to treatment contrast coding
+  # X: Optional full rank design matrix in contr.treatment coding
+  Terms <- terms(model)
+  term_names <- attr(Terms, "term.labels")
+  if(is.null(X)) {
+    X <- get_model_matrix(model, type="remake", contrasts="contr.treatment")
+    X <- ensure_full_rank(X)
+  }
+  # Get 'complete' design matrix:
+  rdX <- get_rdX(model, do.warn = TRUE) # treatment contrasts
+  # cols for aliased coefs should be removed in X; not in rdX.
+  # This makes ginv(X) unique!
+  L <- zapsmall(t(MASS::ginv(X) %*% rdX)) # basic contrast matrix
+  dimnames(L) <- list(colnames(rdX), colnames(X))
+
+  # Orthogonalize contrasts for terms which are contained in other terms:
+  map <- term2colX(Terms, X)
+  is_contained <- containment(model)
+  # Orthogonalize higher order terms before lower order terms:
+  terms_order <- attr(Terms, "order")
+  orthog_order <- term_names[order(terms_order, decreasing = TRUE)]
+  for(term in orthog_order) {
+    # if term is contained in other terms:
+    if(length(contains <- is_contained[[term]]) > 0) {
+      # orthogonalize cols in L for 'term' wrt. cols that contain 'term':
+      L[, map[[term]]] <-
+        zapsmall(resid(lm.fit(x=L[, map[[contains]], drop=FALSE],
+                              y=L[, map[[term]], drop=FALSE])))
+    }
+  }
+  # Keep rows in L corresponding to model coefficients:
+  L <- L[colnames(X), , drop=FALSE]
+  # Extract list of contrast matrices from L - one for each term:
+  Llist <- lapply(map[term_names], function(term) t(L[, term, drop=FALSE]))
+  # Keep all non-zero rows:
+  lapply(Llist, function(L) L[rowSums(abs(L)) > 1e-8, , drop=FALSE])
 }
 
 
@@ -262,110 +298,10 @@ get_yates_contrast <- function(model, which=NULL) {
                     paste(names(Llist[not_estim]), collapse = ", ")),
             call. = FALSE)
 
-  # Make contrast for joint test of Compute contrast among LS-means:
+  # Make contrast for joint test of contrast among LS-means:
   lapply(Llist, function(L) {
     (t(get_trts(rownames(L))) %*% L)[, coef_nm, drop=FALSE]
   })
-}
-
-
-##############################################
-######## contrast_type3SAS
-##############################################
-#' Compute Type III Contrast Matrix for a Model Term
-#'
-#' Experimental - not extensively tested.
-#'
-#' Compute the type III qi x pp contrast matrix for 'term' where qi is the
-#' numerater df for 'term' and pp is the number of parameters in the
-#' over-parameterized model notation (and also equals the number of columns in
-#' the 'full' rank-deficient design matrix). if qi=1 the result is a qi-vector.
-#'
-#' @param term the name of a model term; one of
-#' \code{attr(terms(model), "term.labels")}.
-#' @param terms a terms object (using \code{fixed.only=TRUE}).
-#' @param data_classes \code{attr(terms(model, fixed.only=FALSE), "dataClasses")}.
-#' @param L the pp x pp matrix with pp-p zero-rows indicating the relation between the
-#' pp parameters and p coefficients.
-#' @param eps tolererance for non-zero pivots
-#'
-#' @return a pp-vector or qi x pp matrix with the contrast for the term.
-#' @author Rune Haubo B. Christensen based on the old lmerTest package
-#' @keywords internal
-contrast_type3SAS <- function(term, terms, data_classes, L, eps=1e-8) {
-  # Apply rule 1 (Goodnight 1976)
-  #
-  # Find all terms that contain term_name:
-  factor_mat <- attr(terms,"factors")
-  term_names <- attr(terms, "term.labels")
-  term_cols <- which(colnames(L) == term) # cols in L for the term
-  # Terms which are relatives of 'name'/'term'
-  num.relate <- relatives(data_classes, term, term_names, factor_mat)
-  # related_terms <- term_names[num.relate]
-  # related_cols <- ...
-  # unrelated_cols <- ...
-
-  # FIXME: Describe this:
-  if(length(num.relate) == 0)
-    colnums <- setdiff(1:ncol(L), term_cols)
-  if(length(num.relate) > 0) {
-    cols.contain <- NULL
-    for(i in 1:length(num.relate))
-      # cols.contain are the cols in rdX for terms which contain 'name'
-      cols.contain <- c(cols.contain,
-                        which(colnames(L) == term_names[num.relate[i]]))
-    # colnums are the cols in rdX which are unrelated to 'name'
-    colnums <- setdiff(1:ncol(L), c(term_cols, cols.contain))
-  }
-
-  # For each column among those which are unrelated 'name':
-  # Seems to orthogonalize all terms that are not T and does not contain T
-  #  relative to T:
-  for(colnum in colnums) {
-    # pivots are the non-zero entries in L[, colnum]
-    pivots <- which(abs(L[, colnum]) > eps)
-    if(length(pivots) > 0) {
-      # Normalize the L[pivots[1L], ] with L[pivots[1], colnum]
-      L[pivots[1], ] <- L[pivots[1], ] / L[pivots[1], colnum]
-      nonzeros <- setdiff(pivots, pivots[1])
-      if(length(nonzeros) > 0) {
-        for(nonzero in nonzeros) {
-          L[nonzero, ] <- L[nonzero, ]-L[nonzero, colnum]*L[pivots[1], ]
-        }
-      }
-      L[pivots[1], ] <- rep(0, ncol(L))
-    }
-  }
-
-  # Select the non-zero rows in L:
-  nums <- which(apply(L, 1, function(y) sum(abs(y))) != 0)
-  L <- L[nums, , drop=FALSE]
-  # If L is a vector then return, otherwise proceed to orthogonalization:
-  if(nrow(L) <= 1L) return(L)
-
-  # Orthogonalization:
-  if(length(term_cols) > 1)
-    # Determine the rows of L which are _indirectly_ related to 'name', i.e.
-    # those for which only 'related' terms contribute:
-    zero.rows <- which(apply(L[, term_cols], 1, function(y) sum(abs(y))) == 0)
-  else
-    zero.rows <- which(L[, term_cols] == 0)
-
-  for(zero.row in zero.rows) { # for each 'related' row in L:
-    w <- L[zero.row, ]
-    for(i in setdiff(1:nrow(L), zero.row)) { # for all other rows:
-      if(sum(abs(L[i, ])) != 0) # if the row is non-zero:
-        # orthogonalize the i'th row relative to w:
-        L[i, ] <- L[i, ] - ((w %*% L[i, ]) / (w %*% w)) %*% w
-    }
-    L[zero.row, ] <- rep(0, ncol(L)) # set 'w' to zero
-  }
-  # zero small entries:
-  L[abs(L) < 1e-6] <- 0
-  # Keep non-zero rows:
-  nonzero <- which(apply(L, 1, function(y) sum(abs(y))) != 0)
-  L <- L[nonzero, , drop=FALSE]
-  L
 }
 
 

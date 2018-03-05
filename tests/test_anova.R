@@ -131,13 +131,14 @@ stopifnot(
 m <- lmer(angle ~ recipe * temperature + (1|recipe:replicate), cake)
 (an1 <- anova(m, type=1))
 (an2 <- anova(m, type=2))
-## Balanced data and only factors: Type I and II should be the same:
+# Type 3 is also available with ordered factors:
+(an3 <- anova(m, type=3))
+## Balanced data and only factors: Type I, II and III should be the same:
 stopifnot(
-  isTRUE(all.equal(an1, an2, check.attributes=FALSE))
+  isTRUE(all.equal(an1, an2, check.attributes=FALSE, tol=1e-6)),
+  isTRUE(all.equal(an1, an3, check.attributes=FALSE, tol=1e-6))
 )
 
-# Type 3 is not available with ordered factors:
-assertError(anova(m, type=3))
 (an <- anova(m, type=1))
 (an_KR <- anova(m, type=1, ddf="Kenward-Roger"))
 (an_lme4 <- anova(m, type=1, ddf="lme4"))
@@ -197,8 +198,10 @@ m <- lmer(angle ~ recipe * temp + (1|recipe:replicate), cake,
           contrasts = list('recipe' = "contr.sum"))
 (an <- anova(m, type=1))
 (an2 <- anova(m, type=2))
-
-assertError(an3 <- anova(m, type=3))
+(an3 <- anova(m, type=3))
+stopifnot(
+  isTRUE(all.equal(an2, an3, check.attributes=FALSE, tol=1e-6))
+)
 (an_KR <- anova(m, type=1, ddf="Kenward-Roger"))
 (an_lme4 <- anova(m, ddf="lme4"))
 res <- all.equal(an[, c("Sum Sq", "Mean Sq", "F value")],
@@ -302,3 +305,40 @@ stopifnot(isTRUE(res))
 
 ## FIXME: Test the use of refit arg to lme4:::anova.merMod
 
+##############################
+# Test that type III anova is the same regardless of contrast coding:
+# 3 x 3 factorial with missing diagonal
+data("cake", package="lme4")
+cake4 <- cake
+cake4$temperature <- factor(cake4$temperature, ordered=FALSE)
+cake4 <- droplevels(subset(cake4, temperature %in% levels(cake4$temperature)[1:3]))
+cake4 <- droplevels(subset(cake4, !((recipe == "A" & temperature == "175") |
+                                      (recipe == "B" & temperature == "185") |
+                                      (recipe == "C" & temperature == "195") )))
+str(cake4)
+with(cake4, table(recipe, temperature))
+# load_all(r2path)
+
+fm1 <- lmer(angle ~ recipe * temperature + (1|recipe:replicate), cake4)
+fm2 <- lmer(angle ~ recipe * temperature + (1|recipe:replicate), cake4,
+            contrasts=list(recipe="contr.sum", temperature="contr.SAS"))
+fm3 <- lmer(angle ~ recipe * temperature + (1|recipe:replicate), cake4,
+            contrasts=list(recipe="contr.sum", temperature="contr.poly"))
+fm4 <- lmer(angle ~ recipe * temperature + (1|recipe:replicate), cake4,
+            contrasts=list(recipe=contr.helmert, temperature="contr.poly"))
+(an1 <- anova(fm1))
+(an2 <- anova(fm2))
+(an3 <- anova(fm3))
+(an4 <- anova(fm4))
+options("contrasts")
+options(contrasts = c("contr.sum", "contr.poly"))
+fm5 <- lmer(angle ~ recipe * temperature + (1|recipe:replicate), cake4)
+(an5 <- anova(fm5))
+options(contrasts = c("contr.treatment", "contr.poly"))
+options("contrasts")
+stopifnot(
+  isTRUE(all.equal(an1, an2, check.attributes=FALSE, tol=1e-6)),
+  isTRUE(all.equal(an1, an3, check.attributes=FALSE, tol=1e-6)),
+  isTRUE(all.equal(an1, an4, check.attributes=FALSE, tol=1e-6)),
+  isTRUE(all.equal(an1, an5, check.attributes=FALSE, tol=1e-6))
+)

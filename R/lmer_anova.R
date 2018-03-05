@@ -76,23 +76,6 @@ anova.lmerModLmerTest <- function(object, ..., type = c("III", "II", "I", "3", "
   single_anova(object=object, type=type, ddf=ddf)
 }
 
-# setMethod("anova",
-#           signature(object="lmerModLmerTest"),
-#           function(object, ..., type = c("I", "II", "III", "1", "2", "3"),
-#                    ddf=c("Satterthwaite", "Kenward-Roger", "lme4")) {
-#             dots <- list(...)
-#             models <- if(length(dots))
-#               sapply(dots, is, "lmerModLmerTest") | sapply(dots, is, "merMod") |
-#               sapply(dots, is, "lm") else logical(0)
-#             if(any(models)) return(callNextMethod()) # return(anova(as(object, "lmerMod"), ...))
-#             # Note: Need 'callNextMethod' here to get printing from anova.merMod right.
-#             ddf <- match.arg(ddf)
-#             # type <- match.arg(type) # not actually needed
-#             if(ddf=="lme4") return(anova(as(object, "lmerMod"), ...)) # return(callNextMethod())
-#             # FIXME: Warn that 'type' is ignored when ddf="lme4"
-#             single_anova(object=object, type=type, ddf=ddf)
-#           })
-
 
 ##############################################
 ######## single_anova()
@@ -112,7 +95,7 @@ anova.lmerModLmerTest <- function(object, ..., type = c("III", "II", "I", "3", "
 #'
 #' @keywords internal
 single_anova <- function(object,
-                         type = c("III", "II", "I", "3", "2", "1", "yates", "marginal", "2b", "3b", "3c"),
+                         type = c("III", "II", "I", "3", "2", "1", "yates", "marginal", "2b"),
                          ddf=c("Satterthwaite", "Kenward-Roger")) {
   if(!inherits(object, "lmerModLmerTest"))
     warning("calling single_anova(<fake-lmerModLmerTest-object>) ...")
@@ -131,10 +114,8 @@ single_anova <- function(object,
     get_contrasts_type2(object)
   } else if(type == "3") {
     get_contrasts_type3(object)
-  } else if(type == "3b" || type == "yates") {
-    get_contrasts_type3b(object)
-  } else if(type == "3c") {
-    get_contrasts_type3old(object)
+  } else if(type == "yates") {
+    get_contrasts_yates(object)
   } else if(type == "marginal") {
     get_contrasts_marginal(object)
   } else {

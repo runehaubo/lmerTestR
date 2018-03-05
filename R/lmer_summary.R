@@ -83,19 +83,7 @@ summary.lmerModLmerTest <- function(object, ...,
   summ
 }
 
-# setMethod("summary", signature(object = "lmerModLmerTest"), function(object, ..., ddf=c("Satterthwaite", "Kenward-Roger", "lme4")) {
-#   ddf <- match.arg(ddf)
-#   summ <- summary(as(object, "lmerMod"), ...)
-#   if(ddf == "lme4") return(summ)
-#   summ$coefficients <- get_coefmat(object, ddf=ddf)
-#   ddf_nm <- switch(ddf, "Satterthwaite" = "Satterthwaite's",
-#                    "Kenward-Roger" = "Kenward-Roger's")
-#   summ$objClass <- class(object) # Used by lme4:::print.summary.lmerMod
-#   summ$methTitle <- paste0(summ$methTitle, ". t-tests use ", ddf_nm, " method")
-#   class(summ) <- c("summary.lmerModLmerTest", class(summ))
-#   summ
-# })
-
+#' @importFrom lme4 fixef
 get_coefmat <- function(model, ddf=c("Satterthwaite", "Kenward-Roger")) {
   ddf <- match.arg(ddf)
   p <- length(fixef(model))

@@ -4,28 +4,19 @@
 \alias{get_rdX}
 \title{Compute the 'Full' Rank-Deficient Design Matrix}
 \usage{
-get_rdX(model, do.warn = TRUE, use_contrasts = FALSE)
+get_rdX(model, do.warn = TRUE)
 }
 \arguments{
 \item{model}{a model object; lmerMod or lmerModLmerTest.}
 
-\item{do.warn}{throw a warning if there is no data for some factor
+\item{do.warn}{throw a message if there is no data for some factor
 combinations.}
-
-\item{use_contrasts}{if \code{TRUE} contrasts coding from the original design
-matrix will be used. If \code{FALSE} the settings in \code{options()$contrasts}
-will be used.}
 }
 \value{
-the rank-deficien design matrix, \code{rdX} with attributes
-\item{param}{a vector of _parameters_ in the over-parameterized model
-notation with length equal to the number of columns in \code{rdX}.}
-\item{is_coef}{numeric vector with indices on the columns in \code{rdX}
-which corresponds to the columns in the original full-rank \code{X} and
-therefore also to the coefficient vector.}
+the rank-deficien design matrix
 }
 \description{
-Experimental - not extensively tested.
+Compute the 'Full' Rank-Deficient Design Matrix
 }
 \author{
 Rune Haubo B. Christensen
