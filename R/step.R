@@ -1,12 +1,33 @@
 # step.R - implementation of backward elimination for lmerModLmerTest objects
 
-#' @rdname step.lmerModLmerTest
+
+##############################################
+######## step()
+##############################################
+#' Generic Step Function
+#'
+#' Generic step function with default method \code{stats::step}. This
+#' contruction ensures that \code{stats::step} still works on \code{lm}
+#' objects etc. after loading the \pkg{lmerTest} package.
+#'
+#' @param object a model object.
+#' @param ... currently not used.
+#'
+#' @author Rune Haubo B. Christensen
+#' @seealso \code{\link{step.lmerModLmerTest}}
 #' @export
+#' @keywords internal
 step <- function(object, ...) UseMethod("step")
 
-#' @rdname step.lmerModLmerTest
+
+##############################################
+######## step.default()
+##############################################
+#' @rdname step
 #' @export
+#' @keywords internal
 step.default <- function(object, ...) stats::step(object, ...)
+
 
 ##############################################
 ######## step.lmerModLmerTest()
@@ -35,7 +56,7 @@ step.default <- function(object, ...) stats::step(object, ...)
 #' not be considered for eliminated. Valid terms are given by
 #' \code{attr(terms(object), "term.labels")}. Terms that are marginal to terms
 #' in keep will also not be considered for eliminations.
-#' @param ... currently not used
+#' @param ... currently not used.
 #'
 #' @return \code{step} returns a list with elements \code{"random"} and
 #' \code{"fixed"} each
@@ -95,18 +116,35 @@ step.lmerModLmerTest <- function(object, ddf=c("Satterthwaite", "Kenward-Roger")
   step_list
 }
 
-#' @rdname step.lmerModLmerTest
+
+##############################################
+######## get_model()
+##############################################
+#' Extract Model from an Object
+#'
+#' @param x an object.
+#' @param ... currently not used.
+#'
+#' @seealso \code{\link{get_model.step_list}}
 #' @export
+#' @keywords internal
 get_model <- function(x, ...) UseMethod("get_model")
 
+
+##############################################
+######## get_model.step_list()
+##############################################
 #' @rdname step.lmerModLmerTest
-#' @param x a step object
+#' @param x a step object.
 #' @export
 get_model.step_list <- function(x, ...) {
   attr(x, "model")
 }
 
 
+##############################################
+######## print.step_list()
+##############################################
 #' @importFrom stats formula
 print.step_list <- function(x, digits = max(getOption("digits") - 2L, 3L),
                             signif.stars = getOption("show.signif.stars"),
@@ -118,6 +156,10 @@ print.step_list <- function(x, digits = max(getOption("digits") - 2L, 3L),
   invisible(x)
 }
 
+
+##############################################
+######## step utility functions below
+##############################################
 
 ran_redTable <- function(table) {
   aov <- attr(table, "ranova")[-1, , drop=FALSE]

@@ -7,7 +7,7 @@
 show_contrasts(object, fractions = FALSE, names = TRUE)
 }
 \arguments{
-\item{object}{an \code{lsmeans} object.}
+\item{object}{an \code{ls_means} object.}
 
 \item{fractions}{display contrasts as fractions rather than decimal numbers?}
 
@@ -23,10 +23,13 @@ Extracts the contrasts which defines the LS-mean contrasts.
 
 data("cake", package="lme4")
 model <- lmer(angle ~ recipe * temp + (1|recipe:replicate), cake)
-(lsm <- lsmeans(model))
+(lsm <- ls_means(model))
 show_contrasts(lsm)
 
 }
 \seealso{
-\code{\link{lsmeans}} for computation of LS-means.
+\code{\link[=ls_means.lmerModLmerTest]{ls_means}} for computation of LS-means.
+}
+\author{
+Rune Haubo B. Christensen
 }

@@ -7,7 +7,7 @@ library(lmerTest)
 # Factor * covariate:
 data("cake", package="lme4")
 model <- lmer(angle ~ recipe * temp + (1|recipe:replicate), cake)
-(lsm <- lsmeans(model))
+(lsm <- ls_means(model))
 stopifnot(
   nrow(lsm) == 3L,
   ncol(lsm) == 7L,
@@ -17,7 +17,7 @@ stopifnot(
 )
 
 # Pairwise differences of LS-means:
-plsm <- lsmeans(model, pairwise = TRUE)
+plsm <- ls_means(model, pairwise = TRUE)
 plsm2 <- difflsmeans(model)
 C <- as.matrix(lmerTest:::get_pairs(rownames(lsm)))
 stopifnot(
@@ -32,7 +32,7 @@ show_contrasts(plsm)
 
 # Factor * Ordered:
 model <- lmer(angle ~ recipe * temperature + (1|recipe:replicate), cake)
-(lsm2 <- lsmeans(model))
+(lsm2 <- ls_means(model))
 stopifnot(
   nrow(lsm2) == 3 + 6 + 3*6,
   ncol(lsm) == 7L,
@@ -46,7 +46,7 @@ stopifnot(
 cake2 <- cake
 cake2$temperature <- factor(cake2$temperature, ordered = FALSE)
 model <- lmer(angle ~ recipe * temperature + (1|recipe:replicate), cake2)
-(lsm3 <- lsmeans(model))
+(lsm3 <- ls_means(model))
 stopifnot(
   isTRUE(all.equal(lsm2, lsm3, check.attributes=FALSE))
 )
@@ -54,7 +54,7 @@ stopifnot(
 # Covariate (only):
 data("sleepstudy", package="lme4")
 m <- lmer(Reaction ~ Days + (Days | Subject), sleepstudy)
-(lsm <- lsmeans(m))
+(lsm <- ls_means(m))
 stopifnot(
   nrow(lsm) == 0L,
   ncol(lsm) == 7L
@@ -62,7 +62,7 @@ stopifnot(
 
 # No fixef:
 m <- lmer(Reaction ~ 0 + (Days | Subject), sleepstudy)
-(lsm <- lsmeans(m))
+(lsm <- ls_means(m))
 stopifnot(
   nrow(lsm) == 0L,
   ncol(lsm) == 7L
@@ -72,7 +72,7 @@ stopifnot(
 
 # which
 model <- lmer(angle ~ recipe * temperature + (1|recipe:replicate), cake2)
-(lsm4 <- lsmeans(model, which = "recipe"))
+(lsm4 <- ls_means(model, which = "recipe"))
 stopifnot(
   nrow(lsm4) == 3L,
   ncol(lsm4) == 7L,
@@ -80,10 +80,10 @@ stopifnot(
 )
 
 # KR:
-(lsm5 <- lsmeans(model, which = "recipe", ddf = "Kenward-Roger"))
+(lsm5 <- ls_means(model, which = "recipe", ddf = "Kenward-Roger"))
 
 # level:
-(lsm6 <- lsmeans(model, which = "recipe", level=0.99))
+(lsm6 <- ls_means(model, which = "recipe", level=0.99))
 
 stopifnot(
   all(lsm6[, "lower"] < lsm4[, "lower"]),
@@ -102,7 +102,7 @@ cake3 <- droplevels(subset(cake3, !(recipe == "C" & temperature == "195") ))
 str(cake3)
 with(cake3, table(recipe, temperature))
 model <- lmer(angle ~ recipe * temperature + (1|recipe:replicate), cake3)
-(lsm7 <- lsmeans(model))
+(lsm7 <- ls_means(model))
 
 # Using show_contrasts with options:
 show_contrasts(lsm7, fractions = TRUE)
@@ -118,14 +118,14 @@ cake4 <- droplevels(subset(cake4, !((recipe == "A" & temperature == "175") |
 # str(cake4)
 with(cake4, table(recipe, temperature))
 model <- lmer(angle ~ recipe * temperature + (1|recipe:replicate), cake4)
-lsmeans(model)
+ls_means(model)
 
 
 ########### Various contrasts codings:
 
 model <- lmer(angle ~ recipe * temperature + (1|recipe:replicate), cake3,
               contrasts = list(recipe="contr.sum", temperature="contr.helmert"))
-(lsm8 <- lsmeans(model))
+(lsm8 <- ls_means(model))
 # show_contrasts(lsm7)
 # show_contrasts(lsm8)
 stopifnot(
@@ -136,7 +136,7 @@ stopifnot(
 options("contrasts")
 options(contrasts = c("contr.sum", "contr.poly"))
 model <- lmer(angle ~ recipe * temperature + (1|recipe:replicate), cake3)
-(lsm9 <- lsmeans(model))
+(lsm9 <- ls_means(model))
 options(contrasts = c("contr.treatment", "contr.poly"))
 options("contrasts")
 stopifnot(

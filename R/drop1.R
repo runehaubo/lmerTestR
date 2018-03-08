@@ -33,6 +33,7 @@
 #' compared.
 #' @param ... currently not used.
 #'
+#' @author Rune Haubo B. Christensen
 #' @seealso \code{\link{ranova}} for tests of marginal random terms.
 #' @return An anova-like table with F-tests of marginal terms.
 #' @export

@@ -66,7 +66,7 @@
 #' number of model parameters.}
 #' \item{Pr(>Chisq)}{the p-value.}
 #' @export
-#' @author Rune Haubo B. Christensen
+#' @author Rune Haubo B. Christensen and Alexandra Kuznetsova
 #'
 #' @seealso \code{\link{drop1}} for tests of marginal fixed-effect terms and
 #' \code{\link{anova}} for usual anova tables for fixed-effect terms.

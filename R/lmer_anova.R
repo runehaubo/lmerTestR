@@ -77,6 +77,11 @@ anova.lmerModLmerTest <- function(object, ..., type = c("III", "II", "I", "3", "
 }
 
 
+# #' @export
+# #' @keywords internal
+# anova <- function(object, ...) UseMethod("anova")
+
+
 ##############################################
 ######## single_anova()
 ##############################################

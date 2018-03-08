@@ -121,5 +121,5 @@ anova(fm, fm2, refit=FALSE)
 \code{\link{anova}} for usual anova tables for fixed-effect terms.
 }
 \author{
-Rune Haubo B. Christensen
+Rune Haubo B. Christensen and Alexandra Kuznetsova
 }

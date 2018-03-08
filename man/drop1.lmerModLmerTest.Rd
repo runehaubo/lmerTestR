@@ -78,3 +78,6 @@ drop1(fm)
 \seealso{
 \code{\link{ranova}} for tests of marginal random terms.
 }
+\author{
+Rune Haubo B. Christensen
+}
