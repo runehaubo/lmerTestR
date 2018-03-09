@@ -29,7 +29,6 @@ Collate:
     'data_documentation.R'
     'drop1.R'
     'estimability.R'
-    'lm_methods.R'
     'lmer.R'
     'lmer_anova.R'
     'lmer_summary.R'

@@ -1,5 +1,37 @@
 # contest.R - contrast tests using Satterthwaites df
 
+##############################################
+######## Generics for contest, contest1D and contestMD
+##############################################
+#' Generic Contrast Test Functions
+#'
+#' Generic functions for tests contrasts.
+#'
+#' @param L a contrast vector or matrix.
+#' @param model a model object.
+#' @param ... additional arguments passed to methods.
+#'
+#' @export
+#' @author Rune Haubo B. Christensen
+#' @seealso contest methods for \code{\link{lmer}} objects:
+#' \code{\link[=contest.lmerModLmerTest]{contest}},
+#' \code{\link[=contest1D.lmerModLmerTest]{contest1D}}, and
+#' \code{\link[=contestMD.lmerModLmerTest]{contestMD}}.
+#' @keywords internal
+contest <- function(model, L, ...) UseMethod("contest")
+
+#' @rdname contest
+#' @export
+contest1D <- function(model, L, ...) UseMethod("contest1D")
+
+#' @rdname contest
+#' @export
+contestMD <- function(model, L, ...) UseMethod("contestMD")
+
+
+##############################################
+######## contest()
+##############################################
 #' Test of Contrasts
 #'
 #' Tests of vector or matrix contrasts for \code{\link{lmer}} model fits.
@@ -36,8 +68,10 @@
 #'
 #' @return a \code{data.frame} or a list of \code{data.frame}s.
 #' @export
-#' @seealso \code{\link{contestMD}} for multi degree-of-freedom contrast tests,
-#' and \code{\link{contest1D}} for tests of 1-dimensional contrasts.
+#' @seealso \code{\link[=contestMD.lmerModLmerTest]{contestMD}} for multi
+#' degree-of-freedom contrast tests,
+#' and \code{\link[=contest1D.lmerModLmerTest]{contest1D}} for tests of
+#' 1-dimensional contrasts.
 #' @author Rune Haubo B. Christensen
 #' @importFrom stats coef model.matrix setNames
 #'
@@ -47,21 +81,21 @@
 #' fm <- lmer(Reaction ~ Days + I(Days^2) + (1|Subject) + (0+Days|Subject),
 #'            sleepstudy)
 #' # F-test of third coeffcients - I(Days^2):
-#' contest(c(0, 0, 1), fm)
+#' contest(fm, c(0, 0, 1))
 #' # Equivalent t-test:
-#' contest(L=c(0, 0, 1), fm, joint=FALSE)
+#' contest(fm, L=c(0, 0, 1), joint=FALSE)
 #' # Test of 'Days + I(Days^2)':
-#' contest(L=diag(3)[2:3, ], fm)
+#' contest(fm, L=diag(3)[2:3, ])
 #' # Other options:
-#' contest(L=diag(3)[2:3, ], fm, joint=FALSE)
-#' contest(L=diag(3)[2:3, ], fm, joint=FALSE, collect=FALSE)
+#' contest(fm, L=diag(3)[2:3, ], joint=FALSE)
+#' contest(fm, L=diag(3)[2:3, ], joint=FALSE, collect=FALSE)
 #'
 #' # Illustrate a list argument:
 #' L <- list("First"=diag(3)[3, ], "Second"=diag(3)[-1, ])
-#' contest(L, fm)
-#' contest(L, fm, collect = FALSE)
-#' contest(L, fm, joint=FALSE, confint = FALSE)
-#' contest(L, fm, joint=FALSE, collect = FALSE, level=0.99)
+#' contest(fm, L)
+#' contest(fm, L, collect = FALSE)
+#' contest(fm, L, joint=FALSE, confint = FALSE)
+#' contest(fm, L, joint=FALSE, collect = FALSE, level=0.99)
 #'
 #' # Illustrate testing of estimability:
 #' # Consider the 'cake' dataset with a missing cell:
@@ -76,15 +110,15 @@
 #' attr(model.matrix(fm), "col.dropped")
 #' # so any contrast involving this coefficient is not estimable:
 #' Lmat <- diag(6)
-#' contest(Lmat, fm, joint=FALSE, check_estimability = TRUE)
+#' contest(fm, Lmat, joint=FALSE, check_estimability = TRUE)
 #'
-contest <- function(L, model, joint=TRUE, collect=TRUE, confint=TRUE,
-                    level=0.95, check_estimability=FALSE,
-                    ddf=c("Satterthwaite", "Kenward-Roger", "lme4"), rhs=0, ...) {
+contest.lmerModLmerTest <- function(model, L, rhs=0, joint=TRUE, collect=TRUE, confint=TRUE,
+                                    level=0.95, check_estimability=FALSE,
+                                    ddf=c("Satterthwaite", "Kenward-Roger", "lme4"), ...) {
   ddf <- match.arg(ddf)
   if(!(is_list <- is.list(L))) L <- list(L)
   if(joint) {
-    res <- lapply(L, function(l) contestMD(l, model, ddf=ddf, rhs=rhs, ...))
+    res <- lapply(L, function(l) contestMD(model, l, ddf=ddf, rhs=rhs, ...))
   } else { # joint is FALSE:
     if(check_estimability) {
       coef_nm <- if(inherits(model, "lmerMod")) colnames(model.matrix(model)) else
@@ -105,12 +139,13 @@ contest <- function(L, model, joint=TRUE, collect=TRUE, confint=TRUE,
       }
       l <- lapply(setNames(1:nrow(l), rownames(l)), function(i) l[i, ])
       rbindall(lapply(l, function(ll)
-        contest1D(ll, model, rhs=rhs, ddf=ddf, confint=confint,
+        contest1D(model, ll, rhs=rhs, ddf=ddf, confint=confint,
                   level=level)))
     })
   }
   if(collect) rbindall(res) else res
 }
+
 
 ##############################################
 ######## contest1D()
@@ -139,16 +174,17 @@ contest <- function(L, model, joint=TRUE, collect=TRUE, confint=TRUE,
 #' \code{ddf="Kenward-Roger"} uses Kenward-Roger's method.
 #' @param confint include columns for lower and upper confidence limits?
 #' @param level confidence level.
+#' @param ... currently not used.
 #'
 #' @return A \code{data.frame} with one row and columns with \code{"Estimate"},
 #' \code{"Std. Error"}, \code{"t value"}, \code{"df"}, and \code{"Pr(>|t|)"}
 #' (p-value). If \code{confint = TRUE} \code{"lower"} and \code{"upper"} columns
 #' are included before the p-value column.
 #' @export
-#' @seealso \code{\link{contest}} for a flexible and general interface to tests
-#' of contrasts among fixed-effect parameters.
-#' \code{\link{contestMD}} is also available as a direct interface for tests of
-#' multi degree-of-freedom contrast.
+#' @seealso \code{\link[=contest.lmerModLmerTest]{contest}} for a flexible
+#' and general interface to tests of contrasts among fixed-effect parameters.
+#' \code{\link[=contestMD.lmerModLmerTest]{contestMD}} is also available as a
+#' direct interface for tests of multi degree-of-freedom contrast.
 #' @author Rune Haubo B. Christensen
 #' @importFrom stats pt
 #'
@@ -159,18 +195,19 @@ contest <- function(L, model, joint=TRUE, collect=TRUE, confint=TRUE,
 #' fm <- lmer(Reaction ~ Days + (1 + Days|Subject), sleepstudy)
 #'
 #' # Tests and CI of model coefficients are obtained with:
-#' contest1D(c(1, 0), fm, confint=TRUE) # Test for Intercept
-#' contest1D(c(0, 1), fm, confint=TRUE) # Test for Days
+#' contest1D(fm, c(1, 0), confint=TRUE) # Test for Intercept
+#' contest1D(fm, c(0, 1), confint=TRUE) # Test for Days
 #'
 #' # Tests of coefficients are also part of:
 #' summary(fm)
 #'
 #' # Illustrate use of rhs argument:
-#' contest1D(c(0, 1), fm, confint=TRUE, rhs=10) # Test for Days-coef == 10
+#' contest1D(fm, c(0, 1), confint=TRUE, rhs=10) # Test for Days-coef == 10
 #'
 #'
-contest1D <- function(L, model, rhs=0, ddf=c("Satterthwaite", "Kenward-Roger"), confint=FALSE,
-                      level = 0.95) {
+contest1D.lmerModLmerTest <- function(model, L, rhs=0,
+                                      ddf=c("Satterthwaite", "Kenward-Roger"),
+                                      confint=FALSE, level = 0.95, ...) {
   mk_ttable <- function(estimate, se, ddf) {
     tstat <- (estimate - rhs)/se
     pvalue <- 2 * pt(abs(tstat), df = ddf, lower.tail = FALSE)
@@ -184,8 +221,6 @@ contest1D <- function(L, model, rhs=0, ddf=c("Satterthwaite", "Kenward-Roger"), 
       data.frame("Estimate"=estimate, "Std. Error"=se, "df"=ddf,
                  "t value"=tstat, "Pr(>|t|)"=pvalue, check.names=FALSE)
   }
-  if(!inherits(model, "lmerModLmerTest"))
-    stop("'model' has to be of class lmerModLmerTest")
   method <- match.arg(ddf)
   if(is.matrix(L)) L <- drop(L)
   stopifnot(is.numeric(L), length(L) == length(model@beta),
@@ -197,12 +232,13 @@ contest1D <- function(L, model, rhs=0, ddf=c("Satterthwaite", "Kenward-Roger"), 
   if(any(is.na(L))) return(mk_ttable(NA_real_, NA_real_, NA_real_))
   estimate <- sum(L * model@beta) # contrast estimate
   if(method == "Kenward-Roger") { # Handle KR method:
-    ans <- get_KR1D(L, model) # get var(contrast) and ddf
+    ans <- get_KR1D(model, L) # get var(contrast) and ddf
     if(!ans$error) {
       return(mk_ttable(estimate=estimate, se=sqrt(ans$var_con), ddf=ans$ddf))
     } else {
       warning("Unable to compute Kenward-Roger t-test: using Satterthwaite instead",
               call.=FALSE)
+      if(!inherits(model, "lmerModLmerTest")) model <- as_lmerModLmerTest(model)
     }
   } # method == "Satterthwaite" proceeds:
   var_con <- qform(L, model@vcov_beta) # variance of contrast
@@ -215,7 +251,7 @@ contest1D <- function(L, model, rhs=0, ddf=c("Satterthwaite", "Kenward-Roger"), 
   mk_ttable(estimate, sqrt(var_con), ddf)
 }
 
-get_KR1D <- function(L, model) {
+get_KR1D <- function(model, L) {
   # Compute var(contrast) and ddf using KR-method via the pbkrtest package
   if(!getME(model, "is_REML"))
     stop("Kenward-Roger's method is only available for REML model fits",
@@ -226,11 +262,12 @@ get_KR1D <- function(L, model) {
   vcov_beta_adj <- try(pbkrtest::vcovAdj(model), silent=TRUE) # Adjusted vcov(beta)
   if(inherits(vcov_beta_adj, "try-error")) return(list(error=TRUE))
   var_con_adj <- qform(L, as.matrix(vcov_beta_adj)) # variance of contrast
-  ddf <- try(pbkrtest::Lb_ddf(L=L, V0=model@vcov_beta,
+  ddf <- try(pbkrtest::Lb_ddf(L=L, V0=vcov(model),
                               Vadj=vcov_beta_adj), silent=TRUE) # vcov_beta_adj need to be dgeMatrix!
   if(inherits(ddf, "try-error")) return(list(error=TRUE))
   list(var_con=var_con_adj, ddf=ddf, error=FALSE)
 }
+
 
 ##############################################
 ######## contestMD()
@@ -260,15 +297,16 @@ get_KR1D <- function(L, model) {
 #' @param eps tolerance on eigenvalues to determine if an eigenvalue is
 #' positive. The number of positive eigenvalues determine the rank of
 #' L and the numerator df of the F-test.
+#' @param ... currently not used.
 #'
 #' @return a \code{data.frame} with one row and columns with \code{"Sum Sq"},
 #' \code{"Mean Sq"}, \code{"F value"}, \code{"NumDF"} (numerator df),
 #' \code{"DenDF"} (denominator df) and \code{"Pr(>F)"} (p-value).
 #' @export
-#' @seealso \code{\link{contest}} for a flexible and general interface to tests
-#' of contrasts among fixed-effect parameters.
-#' \code{\link{contest1D}} is a direct interface for tests of 1-dimensional
-#' contrasts.
+#' @seealso \code{\link[=contest.lmerModLmerTest]{contest}} for a flexible and
+#' general interface to tests of contrasts among fixed-effect parameters.
+#' \code{\link[=contest1D.lmerModLmerTest]{contest1D}} is a direct interface for
+#' tests of 1-dimensional contrasts.
 #' @author Rune Haubo B. Christensen
 #' @importFrom stats pf
 #' @importFrom MASS ginv
@@ -285,18 +323,19 @@ get_KR1D <- function(L, model) {
 #'            c(0, 0, 1))
 #'
 #' # Make the 2-df F-test of any effect of Days:
-#' contestMD(L, fm)
+#' contestMD(fm, L)
 #'
 #' # Illustrate rhs argument:
-#' contestMD(L, fm, rhs=c(5, .1))
+#' contestMD(fm, L, rhs=c(5, .1))
 #'
 #' # Make the 1-df F-test of the effect of Days^2:
-#' contestMD(L[2, , drop=FALSE], fm)
+#' contestMD(fm, L[2, , drop=FALSE])
 #' # Same test, but now as a t-test instead:
-#' contest1D(L[2, , drop=TRUE], fm)
+#' contest1D(fm, L[2, , drop=TRUE])
 #'
-contestMD <- function(L, model, rhs=0, ddf=c("Satterthwaite", "Kenward-Roger"),
-                      eps=sqrt(.Machine$double.eps)) {
+contestMD.lmerModLmerTest <- function(model, L, rhs=0,
+                                      ddf=c("Satterthwaite", "Kenward-Roger"),
+                                      eps=sqrt(.Machine$double.eps), ...) {
   mk_Ftable <- function(Fvalue, ndf, ddf, sigma, Fscale=1) {
     MS <- Fvalue * sigma^2
     Fvalue <- Fvalue * Fscale
@@ -304,8 +343,6 @@ contestMD <- function(L, model, rhs=0, ddf=c("Satterthwaite", "Kenward-Roger"),
     data.frame("Sum Sq"=MS*ndf, "Mean Sq"=MS, "NumDF"=ndf, "DenDF"=ddf,
                "F value"=Fvalue, "Pr(>F)"=pvalue, check.names = FALSE)
   }
-  if(!inherits(model, "lmerModLmerTest"))
-    stop("'model' has to be of class lmerModLmerTest")
   if(!is.matrix(L)) L <- matrix(L, ncol=length(L))
   stopifnot(is.matrix(L), is.numeric(L),
             ncol(L) == length(model@beta))
@@ -331,9 +368,10 @@ contestMD <- function(L, model, rhs=0, ddf=c("Satterthwaite", "Kenward-Roger"),
     if(inherits(x, "try-error")) { # Handle try-error
       warning("Unable to compute Kenward-Roger F-test: using Satterthwaite instead",
               call.=FALSE)
+      if(!inherits(model, "lmerModLmerTest")) model <- as_lmerModLmerTest(model)
     } else { # return F-table if we can compute the KR F-test:
       return(mk_Ftable(Fvalue=x["FtestU", "stat"], ndf=x[1L, "ndf"],
-                       ddf=x[1L, "ddf"], sigma=model@sigma,
+                       ddf=x[1L, "ddf"], sigma=sigma(model),
                        Fscale=x["Ftest", "F.scaling"]))
     }
     # NOTE on the KR method:
@@ -343,7 +381,7 @@ contestMD <- function(L, model, rhs=0, ddf=c("Satterthwaite", "Kenward-Roger"),
     # has to be compute k times.
   } # method == "Satterthwaite" proceeds:
   if(nrow(L) == 1L) { # 1D case:
-    res <- contest1D(drop(L), model, rhs=rhs, confint=FALSE)
+    res <- contest1D(model, drop(L), rhs=rhs, confint=FALSE)
     return(mk_Ftable(Fvalue=res[["t value"]]^2, ndf=1L, ddf=res$df,
                      sigma=model@sigma))
   } # multi-D case proceeds:
@@ -366,7 +404,7 @@ contestMD <- function(L, model, rhs=0, ddf=c("Satterthwaite", "Kenward-Roger"),
   }
   PtL <- crossprod(P, L)[1:q, ]
   if(q == 1) { # 1D case:
-    res <- contest1D(PtL, model, rhs=rhs[1L], confint=FALSE)
+    res <- contest1D(model, PtL, rhs=rhs[1L], confint=FALSE)
     return(mk_Ftable(Fvalue=res[["t value"]]^2, ndf=q, ddf=res$df,
                      sigma=model@sigma))
   } # multi-D case proceeds:
@@ -432,27 +470,69 @@ get_Fstat_ddf <- function(nu, tol=1e-8) {
   if(!is.list(nu)) fun(nu) else vapply(nu, fun, numeric(1L))
 }
 
+
 ##############################################
 ######## calcSatterth()
 ##############################################
-#' @rdname contestMD
+#' @rdname contestMD.lmerModLmerTest
 #' @export
 calcSatterth <- function(model, L) {
-  if(!inherits(model, "lmerModLmerTest") && !inherits(model, "lmerMod")) {
-    stop("'model' of class: ", paste(class(model), collapse = ", "),
-         ". Expecting model of class 'lmerModLmerTest'")
-  }
-  if(!inherits(model, "lmerModLmerTest") && inherits(model, "lmerMod")) {
+  stopifnot(inherits(model, "lmerMod"))
+  if(!inherits(model, "lmerModLmerTest")) {
     message("Coercing model to class 'lmerModLmerTest'")
     model <- as_lmerModLmerTest(model)
     if(!inherits(model, "lmerModLmerTest"))
       stop("Failed to coerce model to class 'lmerModLmerTest'")
   }
-  x <- contestMD(L, model)
+  x <- contestMD(model, L)
   list("denom"=x[["DenDF"]], "Fstat"=as.matrix(x[["F value"]]),
        "pvalue"=as.matrix(x[["Pr(>F)"]]), "ndf"=x[["NumDF"]])
 }
 # m <- lmer(Reaction ~ Days + (1 + Days|Subject), sleepstudy)
 # L <- cbind(0,1) ## specify contrast vector
-# contestMD(L, m)
+# contestMD(m, L)
 # calcSatterth(m, L)
+
+
+##############################################
+######## lmerMod methods for contest, contest1D and contestMD
+##############################################
+#' @rdname contest.lmerModLmerTest
+#' @export
+contest.lmerMod <- function(model, L, rhs=0, joint=TRUE, collect=TRUE, confint=TRUE,
+                            level=0.95, check_estimability=FALSE,
+                            ddf=c("Satterthwaite", "Kenward-Roger", "lme4"), ...) {
+  ddf <- match.arg(ddf)
+  # For Satterthwaite we need to compute stuff - not for K-R:
+  if(ddf == "Satterthwaite") model <- as_lmerModLmerTest(model)
+  # Use lmerModLmerTest method:
+  eval.parent(contest.lmerModLmerTest(model, L=L, joint=joint, collect=collect,
+                                      confint=confint, level=level,
+                                      check_estimability=check_estimability,
+                                      ddf=ddf, rhs=rhs, ...))
+}
+
+#' @rdname contest1D.lmerModLmerTest
+#' @export
+contest1D.lmerMod <- function(model, L, rhs=0,
+                              ddf=c("Satterthwaite", "Kenward-Roger"),
+                              confint=FALSE, level = 0.95, ...) {
+  ddf <- match.arg(ddf)
+  # For Satterthwaite we need to compute stuff - not for K-R:
+  if(ddf == "Satterthwaite") model <- as_lmerModLmerTest(model)
+  # Use lmerModLmerTest method:
+  eval.parent(contest1D.lmerModLmerTest(model, L=L, rhs=rhs, ddf=ddf,
+                                        confint=confint, level=level))
+}
+
+#' @rdname contestMD.lmerModLmerTest
+#' @export
+contestMD.lmerMod <- function(model, L, rhs=0,
+                              ddf=c("Satterthwaite", "Kenward-Roger"),
+                              eps=sqrt(.Machine$double.eps), ...) {
+  ddf <- match.arg(ddf)
+  # For Satterthwaite we need to compute stuff - not for K-R:
+  if(ddf == "Satterthwaite") model <- as_lmerModLmerTest(model)
+  # Use lmerModLmerTest method:
+  eval.parent(contestMD.lmerModLmerTest(model, L=L, rhs=rhs, ddf=ddf, eps=eps))
+}

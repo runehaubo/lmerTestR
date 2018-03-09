@@ -127,7 +127,7 @@ single_anova <- function(object,
     stop("'type' not recognized")
   }
   # Get F-test for each term and collect in table:
-  table <- rbindall(lapply(L_list, contestMD, model=object, ddf=ddf))
+  table <- rbindall(lapply(L_list, function(L) contestMD(object, L, ddf=ddf)))
   # Format ANOVA table and return:
   rownames(table) <- names(L_list)
   method <- switch(ddf, "Satterthwaite" = "Satterthwaite's",

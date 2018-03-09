@@ -88,10 +88,9 @@ get_coefmat <- function(model, ddf=c("Satterthwaite", "Kenward-Roger")) {
   ddf <- match.arg(ddf)
   p <- length(fixef(model))
   if(p < 1)
-    return(as.matrix(contest1D(numeric(0L), model=model, ddf=ddf)))
+    return(as.matrix(contest1D(model, numeric(0L), ddf=ddf)))
   Lmat <- diag(p)
-  tab <- rbindall(lapply(1:p, function(i)
-    contest1D(Lmat[i, ], model=model, ddf=ddf)))
+  tab <- rbindall(lapply(1:p, function(i) contest1D(model, Lmat[i, ], ddf=ddf)))
   rownames(tab) <- names(fixef(model))
   as.matrix(tab)
 }

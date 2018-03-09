@@ -99,7 +99,7 @@ drop1.lmerModLmerTest <- function(object, scope, ddf=c("Satterthwaite", "Kenward
     }
   }
   # Compute anova-like table:
-  aov <- rbindall(lapply(Llist, function(L) contestMD(L, object, ddf = ddf)))
+  aov <- rbindall(lapply(Llist, function(L) contestMD(object, L, ddf = ddf)))
   # Format results:
   method <- switch(ddf, "Satterthwaite" = "Satterthwaite's",
                    "Kenward-Roger" = "Kenward-Roger's")
@@ -111,66 +111,6 @@ drop1.lmerModLmerTest <- function(object, scope, ddf=c("Satterthwaite", "Kenward
   class(aov) <- c("anova", "data.frame")
   aov
 }
-
-# drop1.lmerModLmerTest <- function(object, scope, ddf=c("Satterthwaite", "Kenward-Roger", "lme4"),
-#                                   method=c("extract_L", "drop.scope"), ...) {
-#   ddf <- match.arg(ddf)
-#   method <- match.arg(method)
-#   if(ddf == "lme4") return(NextMethod())
-#   marg_terms <- drop.scope(terms(object))
-#   if(missing(scope)) scope <- marg_terms else {
-#     if(!is.character(scope))
-#       stop("'scope' should be a character vector naming terms to be dropped")
-#   }
-#   # Get contrasts for marginal terms:
-#   if(method == "extract_L") {
-#     ncolX <- ncol(X <- model.matrix(object))
-#     orig_form <- formula(object)
-#     new_forms <- lapply(rm_complete_terms(scope, orig_form, random=FALSE), nobars)
-#     Llist <- if(!length(new_forms)) list() else
-#       lapply(new_forms, function(form) {
-#         suppressWarnings(x <- model.matrix(form[-2], data=model.frame(object),
-#                                            contrasts.arg = attr(X, "contrasts")))
-#         L <- get_Ldiffmat2(x, X)
-#         if(!length(L)) rep(NA_real_, ncolX) else L
-#       })
-#   } else {
-#     Llist <- get_contrasts_marginal(object)
-#     if(!all(scope %in% marg_terms))
-#       stop("Only marginal terms can be dropped from the model")
-#     if(length(scope)) {
-#       Llist <- Llist[scope]
-#       if(!is.null(attr(X, "col.dropped"))) {
-#         orig_form <- formula(object)
-#         new_forms <- lapply(rm_complete_terms(scope, orig_form, random=FALSE), nobars)
-#         Llist <- if(!length(new_forms)) list() else
-#           lapply(new_forms, function(form) {
-#             suppressWarnings(x <- model.matrix(form[-2], data=model.frame(object),
-#                                                contrasts.arg = attr(X, "contrasts")))
-#             L <- get_Ldiffmat2(x, X)
-#             if(!length(L)) rep(NA_real_, ncolX) else L
-#           })
-#         # ok <- unlist(lapply(new_forms, function(form) {
-#         #   x <- model.matrix(form[-2], data=model.frame(object))
-#         #   ncol(x) < ncolX
-#         # }))
-#         # notok <- names(ok[!ok])
-#         # for(nm in notok) Llist[[nm]][] <- NA_real_
-#       }
-#     }
-#   }
-#   # Compute anova-like table:
-#   aov <- rbindall(lapply(Llist, function(L) contestMD(L, object, ddf = ddf)))
-#   # Format results:
-#   method <- switch(ddf, "Satterthwaite" = "Satterthwaite's",
-#                    "Kenward-Roger" = "Kenward-Roger's")
-#   attr(aov, "heading") <-
-#     c(paste("Single term deletions using", method, "method:"),
-#       "\nModel:", deparse(formula(object)))
-#   attr(aov, "hypotheses") <- Llist
-#   class(aov) <- c("anova", "data.frame")
-#   aov
-# }
 
 Rank <- function(X) qr(X)$rank
 

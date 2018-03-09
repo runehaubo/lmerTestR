@@ -2,101 +2,33 @@
 % Please edit documentation in R/contest.R
 \name{contest}
 \alias{contest}
-\title{Test of Contrasts}
+\alias{contest1D}
+\alias{contestMD}
+\title{Generic Contrast Test Functions}
 \usage{
-contest(L, model, joint = TRUE, collect = TRUE, confint = TRUE,
-  level = 0.95, check_estimability = FALSE, ddf = c("Satterthwaite",
-  "Kenward-Roger", "lme4"), rhs = 0, ...)
+contest(model, L, ...)
+
+contest1D(model, L, ...)
+
+contestMD(model, L, ...)
 }
 \arguments{
-\item{L}{a contrast vector or matrix or a list of these.
-The \code{length}/\code{ncol} of each contrasts should equal
-\code{length(fixef(model))}.}
+\item{model}{a model object.}
 
-\item{model}{a model object fitted with \code{lmer} from package
-\pkg{lmerTest}, i.e., an object of class \code{\link{lmerModLmerTest}}.}
+\item{L}{a contrast vector or matrix.}
 
-\item{joint}{make an F-test of potentially several contrast vectors? If
-\code{FALSE} single DF t-tests are applied to each vector or each row of
-contrasts matrices.}
-
-\item{collect}{collect list of tests in a matrix?}
-
-\item{confint}{include columns for lower and upper confidence limits? Applies
-when \code{joint} is \code{FALSE}.}
-
-\item{level}{confidence level.}
-
-\item{check_estimability}{check estimability of contrasts? Only single DF
-contrasts are checked for estimability thus requiring \code{joint = FALSE} to
-take effect. See details section for necessary adjustments to \code{L} when
-estimability is checked with rank deficient design matrices.}
-
-\item{ddf}{the method for computing the denominator degrees of freedom.
-\code{ddf="Kenward-Roger"} uses Kenward-Roger's method.}
-
-\item{rhs}{right-hand-side of the statistical test, i.e. the hypothesized
-value (a numeric scalar).}
-
-\item{...}{passed to \code{\link{contestMD}}.}
-}
-\value{
-a \code{data.frame} or a list of \code{data.frame}s.
+\item{...}{additional arguments passed to methods.}
 }
 \description{
-Tests of vector or matrix contrasts for \code{\link{lmer}} model fits.
-}
-\details{
-If the design matrix is rank deficient, \code{lmer} drops columns for the
-aliased coefficients from the design matrix and excludes the corresponding
-aliased coefficients from \code{fixef(model)}. When estimability is checked
-the original rank-deficient design matrix is recontructed and therefore
-\code{L} contrast vectors need to include elements for the aliased
-coefficients. Similarly when \code{L} is a matrix, its number of columns
-needs to match that of the reconstructed rank-deficient design matrix.
-}
-\examples{
-
-data("sleepstudy", package="lme4")
-fm <- lmer(Reaction ~ Days + I(Days^2) + (1|Subject) + (0+Days|Subject),
-           sleepstudy)
-# F-test of third coeffcients - I(Days^2):
-contest(c(0, 0, 1), fm)
-# Equivalent t-test:
-contest(L=c(0, 0, 1), fm, joint=FALSE)
-# Test of 'Days + I(Days^2)':
-contest(L=diag(3)[2:3, ], fm)
-# Other options:
-contest(L=diag(3)[2:3, ], fm, joint=FALSE)
-contest(L=diag(3)[2:3, ], fm, joint=FALSE, collect=FALSE)
-
-# Illustrate a list argument:
-L <- list("First"=diag(3)[3, ], "Second"=diag(3)[-1, ])
-contest(L, fm)
-contest(L, fm, collect = FALSE)
-contest(L, fm, joint=FALSE, confint = FALSE)
-contest(L, fm, joint=FALSE, collect = FALSE, level=0.99)
-
-# Illustrate testing of estimability:
-# Consider the 'cake' dataset with a missing cell:
-data("cake", package="lme4")
-cake$temperature <- factor(cake$temperature, ordered=FALSE)
-cake <- droplevels(subset(cake, temperature \%in\% levels(cake$temperature)[1:2] &
-                            !(recipe == "C" & temperature == "185")))
-with(cake, table(recipe, temperature))
-fm <- lmer(angle ~ recipe * temperature + (1|recipe:replicate), cake)
-fixef(fm)
-# The coefficient for recipeC:temperature185 is dropped:
-attr(model.matrix(fm), "col.dropped")
-# so any contrast involving this coefficient is not estimable:
-Lmat <- diag(6)
-contest(Lmat, fm, joint=FALSE, check_estimability = TRUE)
-
+Generic functions for tests contrasts.
 }
 \seealso{
-\code{\link{contestMD}} for multi degree-of-freedom contrast tests,
-and \code{\link{contest1D}} for tests of 1-dimensional contrasts.
+contest methods for \code{\link{lmer}} objects:
+\code{\link[=contest.lmerModLmerTest]{contest}},
+\code{\link[=contest1D.lmerModLmerTest]{contest1D}}, and
+\code{\link[=contestMD.lmerModLmerTest]{contestMD}}.
 }
 \author{
 Rune Haubo B. Christensen
 }
+\keyword{internal}

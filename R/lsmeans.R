@@ -71,7 +71,7 @@ ls_means.lmerModLmerTest <- function(model, which=NULL, level=0.95,
 
   # Compute LS-means:
   if(length(Llist) == 0) {
-    means <- contest1D(rep(NA_real_, length(coef_nm)), ddf=ddf, model=model,
+    means <- contest1D(model, rep(NA_real_, length(coef_nm)), ddf=ddf,
                        confint=TRUE, level=level)[0L, , drop=FALSE]
   } else
     means <- rbindall(lapply(names(Llist), function(var) {
@@ -82,7 +82,7 @@ ls_means.lmerModLmerTest <- function(model, which=NULL, level=0.95,
       L <- L[, coef_nm, drop=FALSE] # drop aliased coefs
       # Evaluate contrasts:
       tab <- rbindall(lapply(1:nrow(L), function(i)
-        contest1D(L[i, ], model=model, ddf=ddf, confint=TRUE, level=level)))
+        contest1D(model, L[i, ], ddf=ddf, confint=TRUE, level=level)))
       rownames(tab) <- rownames(L)
       tab
     }))
