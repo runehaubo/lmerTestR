@@ -243,7 +243,7 @@ extract_contrasts_type3 <- function(model, X=NULL) {
     if(length(contains <- is_contained[[term]]) > 0) {
       # orthogonalize cols in L for 'term' wrt. cols that contain 'term':
       L[, map[[term]]] <-
-        zapsmall(resid(lm.fit(x=L[, map[[contains]], drop=FALSE],
+        zapsmall(resid(lm.fit(x=L[, unlist(map[contains]), drop=FALSE],
                               y=L[, map[[term]], drop=FALSE])))
     }
   }

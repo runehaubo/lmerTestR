@@ -35,7 +35,12 @@ term2colX <- function(terms, X) {
     term_names[asgn[asgn > 0]]
   if(!length(col_terms) == ncol(X)) # should never happen.
     stop("An error happended when mapping terms to columns of X")
-  split(seq_along(col_terms), col_terms)[unique(col_terms)]
+  # get names of terms (including aliased terms)
+  nm <- union(unique(col_terms), term_names)
+  res <- lapply(setNames(as.list(nm), nm), function(x) numeric(0L))
+  map <- split(seq_along(col_terms), col_terms)
+  res[names(map)] <- map
+  res[nm] # order appropriately
 }
 
 ##############################################

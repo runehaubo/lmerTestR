@@ -93,15 +93,13 @@ get_contrasts_type2_unfolded <- function(model, which=NULL) {
 #' Type I ANOVA table contrasts
 #'
 #' @param model a model object with \code{terms} and \code{model.matrix} methods.
-#' @param keep_intercept defaults to \code{FALSE}. If \code{TRUE} a contrast
-#' for the intercept is included in the returned list of contrast matrices.
 #'
 #' @return List of contrast matrices - one contrast matrix for each model term.
 #' @importFrom stats setNames
 #' @author Rune Haubo B. Christensen
 #'
 #' @keywords internal
-get_contrasts_type1 <- function(model, keep_intercept = FALSE) {
+get_contrasts_type1 <- function(model) {
   terms <- terms(model)
   X <- model.matrix(model)
   p <- ncol(X)
@@ -112,16 +110,8 @@ get_contrasts_type1 <- function(model, keep_intercept = FALSE) {
   L <- if(p == 1L) matrix(1L) else t(doolittle(crossprod(X))$L)
   dimnames(L) <- list(colnames(X), colnames(X))
   # Determine which rows of L belong to which term:
-  asgn <- attr(X, "assign")
-  stopifnot(!is.null(asgn))
-  term_labels <- attr(terms, "term.labels")
-  term_names <- c("(Intercept)", term_labels)
-  term_names <- term_names[1 + unique(asgn)] # order appropriately
-  # Compute list of row indicators for L matrix:
-  ind.list <- setNames(split(1L:p, asgn), nm=term_names)
-  ind.list <- ind.list[term_labels] # rm intercept if present
+  ind.list <- term2colX(terms, X)[attr(terms, "term.labels")]
   lapply(ind.list, function(rows) L[rows, , drop=FALSE])
-  # FIXME: implement keep_intercept = TRUE. Do we need it, want it?
 }
 
 
