@@ -1,4 +1,31 @@
-# contest.R - contrast tests using Satterthwaites df
+# contest.R - contrast tests using Satterthwaites or KR ddf
+
+# ------- Contents: --------
+#
+# --- Generics: ---
+#
+# contest
+# contest1D
+# contestMD
+#
+# --- methods: ---
+#
+# contest.lmerModLmerTest
+# contest1D.lmerModLmerTest
+# contestMD.lmerModLmerTest
+# contest.lmerMod
+# contest1D.lmerMod
+# contestMD.lmerMod
+#
+# --- other exported function: ---
+#
+# calcSatterth
+#
+# --- utility functions: ---
+#
+# get_KR1D
+# get_Fstat_ddf
+
 
 ##############################################
 ######## Generics for contest, contest1D and contestMD

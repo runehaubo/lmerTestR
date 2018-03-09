@@ -1,13 +1,20 @@
 # lmer_summary.R - summary method for lmerModLmerTest objects
 
+# ------- Contents: --------
+#
+# summary.lmerModLmerTest
+#
+# --- utility functions: ---
+#
+# get_coefmat
+#
+
 #' @include lmer.R
 NULL
 
 ##############################################
 ######## summary method for lmerModLmerTest
 ##############################################
-
-
 #' Summary Method for Linear Mixed Models
 #'
 #' Summaries of Linear Mixed Models with coefficient tables including t-tests
@@ -83,6 +90,10 @@ summary.lmerModLmerTest <- function(object, ...,
   summ
 }
 
+
+##############################################
+######## get_coefmat
+##############################################
 #' @importFrom lme4 fixef
 get_coefmat <- function(model, ddf=c("Satterthwaite", "Kenward-Roger")) {
   ddf <- match.arg(ddf)

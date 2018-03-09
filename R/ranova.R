@@ -1,5 +1,25 @@
 # ranova.R - random effects ANOVA table
 
+# ------- Contents: --------
+#
+# --- exported function: ---
+#
+# ranova
+# rand
+#
+# --- utility functions: ---
+#
+# rm_complete_terms
+# get_lm_call
+# get_newforms
+# get_logLik
+# mk_LRtab
+# has_ranef
+# has_terms
+# get_lhs
+# get_rhs
+#
+
 ##############################################
 ######## ranova(); rand()
 ##############################################
@@ -199,7 +219,6 @@ get_lm_call <- function(object, formula) {
   Call[[1]] <- as.name("lm")
   Call
 }
-
 
 #' @importFrom stats update.formula drop.scope
 get_newforms <- function(form, full_formula) {

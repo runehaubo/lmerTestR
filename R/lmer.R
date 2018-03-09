@@ -1,3 +1,17 @@
+# lmer.R - implements lmerTest::lmer incl. class def etc.
+
+# ------- Contents: --------
+#
+# lmerModLmerTest class definition (S4)
+# lmerTest::lmer
+# as_lmerModLmerTest
+#
+# --- utility functions: ---
+#
+# devfun_vp
+# get_covbeta
+#
+
 ##############################################
 ######## lmerModLmerTest class
 ##############################################
@@ -176,23 +190,6 @@ as_lmerModLmerTest <- function(model, tol=1e-8) {
     array(Jac[, i], dim=rep(length(res@beta), 2))) # k-list of jacobian matrices
   return(res)
 }
-
-
-##############################################
-######## update.lmerModLmerTest()
-##############################################
-# #' @importFrom stats update
-# #' @importFrom methods as
-# #' @method update lmerModLmerTest
-# #' @export
-# #' @keywords internal
-# update.lmerModLmerTest <- function(object, formula., ..., evaluate=TRUE) {
-#   if(!evaluate) return(update(as(object, "lmerMod"), formula.=formula., ...,
-#                               evaluate = evaluate))
-#   model <- eval.parent(update(as(object, "lmerMod"), formula.=formula., ...,
-#                               evaluate = evaluate))
-#   return(as_lmerModLmerTest(model))
-# }
 
 
 ##############################################

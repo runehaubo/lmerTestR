@@ -1,8 +1,11 @@
 # lmer_anova.R - anova method for lmerModLmerTest objects
 
-# anova - lmerModLmerTest
+# ------- Contents: --------
+#
+# anova.lmerModLmerTest
 # single_anova
 # show_tests
+#
 
 #' @include lmer.R
 NULL

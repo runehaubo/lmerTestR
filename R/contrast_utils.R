@@ -1,18 +1,14 @@
 # contrast-utils.R - utility functions for contrasts, terms and anova
 
-# Functions:
-
+# -------- Contents: --------
+#
 # containment
 # relatives
 # doolittle
+# ensure_full_rank
 # get_rdX
-# general_L
-# term2colX
-# need_yates
-# no_yates
-# numeric_terms
+# extract_contrasts_type3
 # get_yates_contrast
-# contrast_type3SAS
 
 
 ##############################################
@@ -123,7 +119,6 @@ doolittle <- function(x, eps = 1e-6) {
 ##############################################
 ######## ensure_full_rank()
 ##############################################
-
 #' Ensure a Design Matrix has Full (Column) Rank
 #'
 #' Determine and drop redundant columns using the \code{\link{qr}}

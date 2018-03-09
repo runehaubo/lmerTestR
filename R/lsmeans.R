@@ -1,4 +1,28 @@
+# lsmeans.R - lsmeans methods for lmerTest::lmer model fits
 
+# ------- Contents: --------
+#
+# --- Generics: ---
+#
+# ls_means
+# difflsmeans
+# lsmeansLT
+#
+# --- methods: ---
+#
+# ls_means.lmerModLmerTest
+# difflsmeans.lmerModLmerTest
+# lsmeansLT.lmerModLmerTest
+# print.ls_means
+#
+# --- other exported function: ---
+#
+# show_contrasts
+#
+# --- utility functions: ---
+#
+# lsmeans_contrasts
+#
 
 ##############################################
 ######## ls_means()

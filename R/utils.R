@@ -1,5 +1,15 @@
 # utils.R - Utility functions
 
+# ------- Contents: --------
+#
+# --- utility functions: ---
+#
+# qform
+# rbindall
+# cond
+# safeDeparse
+# waldCI
+#
 
 ##############################################
 ######## qform

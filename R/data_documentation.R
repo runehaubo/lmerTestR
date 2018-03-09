@@ -130,10 +130,10 @@
 #'
 "ham"
 
+
 ##############################################
 ######## TVbo
 ##############################################
-
 #' Sensory Assesment of B&O TVs
 #'
 #' The TVbo dataset has kindly been made available by the Danish high-end

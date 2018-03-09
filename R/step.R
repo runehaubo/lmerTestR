@@ -1,5 +1,30 @@
 # step.R - implementation of backward elimination for lmerModLmerTest objects
 
+# ------- Contents: --------
+#
+# --- Generics: ---
+#
+# step
+# get_model
+#
+# --- methods: ---
+#
+# step.lmerModLmerTest
+# step.default
+# get_model.step_list
+# print.step_list
+#
+# --- other exported function: ---
+#
+# --- utility functions: ---
+#
+# ran_redTable
+# fix_redTable
+# reduce_random
+# ranova_lm
+# reduce_fixed
+#
+
 
 ##############################################
 ######## step()
@@ -170,7 +195,6 @@ ran_redTable <- function(table) {
   attr(tab, "heading") <- "Backward reduced random-effect table:\n"
   tab
 }
-
 
 fix_redTable <- function(table) {
   aov <- attr(table, "drop1")

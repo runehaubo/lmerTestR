@@ -8,6 +8,16 @@ assertError <- function(expr, ...)
 assertWarning <- function(expr, ...)
   if(requireNamespace("tools")) tools::assertWarning(expr, ...) else invisible()
 
+
+#####################################################################
+# Check that lme4::lmer and lmerTest::lmer have the same arguments
+lmer_args <- formals(lme4::lmer)
+lmerTest_args <- formals(lmerTest::lmer)
+stopifnot(
+  all.equal(names(lmer_args), names(lmerTest_args)),
+  all.equal(lmer_args, lmerTest_args)
+)
+
 #####################################################################
 # Use of as_lmerModLmerTest
 data("sleepstudy", package="lme4")

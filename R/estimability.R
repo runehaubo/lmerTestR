@@ -1,5 +1,12 @@
 # estimability.R - functions for assessing model estimability
 
+# ------- Contents: --------
+#
+# is_estimable
+# nullspace
+#
+
+
 ##############################################
 ######## is_estimable
 ##############################################

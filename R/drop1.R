@@ -1,5 +1,15 @@
 # drop1.R - drop1 method for lmerModLmerTest objects
 
+# ------- Contents: --------
+#
+# drop1.lmerModLmerTest
+#
+# --- Utility functions: ---
+#
+# get_Ldiffmat
+# get_Ldiffmat2
+#
+
 ##############################################
 ######## drop1.lmerModLmerTest
 ##############################################
@@ -112,9 +122,9 @@ drop1.lmerModLmerTest <- function(object, scope, ddf=c("Satterthwaite", "Kenward
   aov
 }
 
-Rank <- function(X) qr(X)$rank
 
 get_Ldiffmat <- function(A0, A) {
+  Rank <- function(X) qr(X)$rank
   Q <- qr.Q(qr(cbind(A0, A)))
   rA0 <- Rank(A0)
   rA <- Rank(A)

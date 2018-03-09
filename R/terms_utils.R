@@ -1,5 +1,22 @@
 # terms_utils.R - utilities for computing on terms objects and friends
 
+# ------- Contents: --------
+#
+# --- utility functions: ---
+#
+# term2colX
+# need_yates
+# no_yates
+# numeric_terms
+# get_model_matrix
+# get_contrast_coding
+# get_min_data
+# get_var_list
+# get_fac_list
+# get_num_list
+# get_pairs
+# get_trts
+#
 
 ##############################################
 ######## term2colX()
@@ -100,6 +117,9 @@ get_model_matrix <- function(model, type=c("extract", "remake"),
                contrasts.arg = Contrasts)
 }
 
+##############################################
+######## get_contrast_coding()
+##############################################
 get_contrast_coding <- function(model, contrasts="restore") {
   # Compute a list of contrasts for all factors in model
   Contrasts <- contrasts
