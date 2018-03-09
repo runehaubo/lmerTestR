@@ -73,10 +73,13 @@ lmer <- function(formula, data = NULL, REML = TRUE,
                  subset, weights, na.action, offset, contrasts = NULL,
                  devFunOnly = FALSE, ...) {
   mc <- match.call()
-  mc[[1]] <- quote(lme4::lmer)
+  mc[[1L]] <- quote(lme4::lmer)
   model <- eval.parent(mc)
   # Make an lmerModLmerTest object:
-  return(as_lmerModLmerTest(model))
+  model <- as_lmerModLmerTest(model)
+  # Restore the right 'call' in model:
+  model@call[[1L]] <- quote(lmer)
+  return(model)
 }
 
 ##############################################
@@ -124,7 +127,11 @@ as_lmerModLmerTest <- function(model, tol=1e-8) {
   if(!inherits(model, "lmerMod"))
     stop("model not of class 'lmerMod': cannot coerce to class 'lmerModLmerTest")
   # Extract deviance function and REML indicator
-  devfun <- update(model, devFunOnly=TRUE)
+  # if 'control' is not set we suppress potential message about rank deficient X:
+  devfun <- if("control" %in% names(as.list(getCall(model))))
+    update(model, devFunOnly=TRUE) else
+      update(model, devFunOnly=TRUE,
+             control=lmerControl(check.rankX = "silent.drop.cols"))
   is_reml <- getME(model, "is_REML")
   # Coerce 'lme4-model' to 'lmerModLmerTest':
   res <- as(model, "lmerModLmerTest")
@@ -174,16 +181,18 @@ as_lmerModLmerTest <- function(model, tol=1e-8) {
 ##############################################
 ######## update.lmerModLmerTest()
 ##############################################
-#' @importFrom stats update
-#' @importFrom methods as
-#' @method update lmerModLmerTest
-#' @export
-#' @keywords internal
-update.lmerModLmerTest <- function(object, formula., ..., evaluate=TRUE) {
-  model <- eval.parent(update(as(object, "lmerMod"), formula.=formula., ...,
-                              evaluate = evaluate))
-  return(as_lmerModLmerTest(model))
-}
+# #' @importFrom stats update
+# #' @importFrom methods as
+# #' @method update lmerModLmerTest
+# #' @export
+# #' @keywords internal
+# update.lmerModLmerTest <- function(object, formula., ..., evaluate=TRUE) {
+#   if(!evaluate) return(update(as(object, "lmerMod"), formula.=formula., ...,
+#                               evaluate = evaluate))
+#   model <- eval.parent(update(as(object, "lmerMod"), formula.=formula., ...,
+#                               evaluate = evaluate))
+#   return(as_lmerModLmerTest(model))
+# }
 
 
 ##############################################
