@@ -52,6 +52,16 @@ NULL
 #' anova(m) # with p-values from F-tests using Satterthwaite's denominator df
 #' anova(m, ddf="lme4")
 #'
+#' \dontshow{
+#'   an1 <- anova(m) # with p-values from F-tests using Satterthwaite's denominator df
+#'   an2 <- anova(m, ddf="lme4")
+#'   stopifnot(
+#'     all(colnames(an1) == c("Sum Sq", "Mean Sq", "NumDF", "DenDF", "F value", "Pr(>F)")),
+#'     !"Pr(>F)" %in% colnames(an2),
+#'     all(!is.na(an1)),
+#'     all(!is.na(an2))
+#'   )
+#' }
 anova.lmerModLmerTest <- function(object, ..., type = c("III", "II", "I", "3", "2", "1"),
                                   ddf=c("Satterthwaite", "Kenward-Roger", "lme4")) {
   if(!inherits(object, "lmerModLmerTest") && !inherits(object, "lmerMod")) {

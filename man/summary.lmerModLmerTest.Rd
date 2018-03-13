@@ -54,6 +54,20 @@ summary(fm, ddf="Kenward-Roger")
 # The lme4-summary table:
 summary(fm, ddf="lme4") # same as summary(as(fm, "lmerMod"))
 
+\dontshow{
+  # Check that summaries are as expected:
+  summ_fm <- coef(summary(fm))
+  summ_fm_kr <- coef(summary(fm, ddf="Kenward-Roger"))
+  summ_fm_lme4 <- coef(summary(fm, ddf="lme4"))
+  stopifnot(
+    all(colnames(summ_fm) == c("Estimate", "Std. Error", "df", "t value", "Pr(>|t|)")),
+    all(colnames(summ_fm_kr) == c("Estimate", "Std. Error", "df", "t value", "Pr(>|t|)")),
+    all(colnames(summ_fm_lme4) == c("Estimate", "Std. Error", "t value")),
+    all(!(is.na(summ_fm))),
+    all(!(is.na(summ_fm_kr))),
+    all(!(is.na(summ_fm_lme4)))
+  )
+}
 }
 \seealso{
 \code{\link{contest1D}} for one degree-of-freedom contrast tests

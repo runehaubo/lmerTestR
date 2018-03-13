@@ -45,6 +45,16 @@ m <- lmer(Reaction ~ Days + (Days | Subject), sleepstudy)
 anova(m) # with p-values from F-tests using Satterthwaite's denominator df
 anova(m, ddf="lme4")
 
+\dontshow{
+  an1 <- anova(m) # with p-values from F-tests using Satterthwaite's denominator df
+  an2 <- anova(m, ddf="lme4")
+  stopifnot(
+    all(colnames(an1) == c("Sum Sq", "Mean Sq", "NumDF", "DenDF", "F value", "Pr(>F)")),
+    !"Pr(>F)" \%in\% colnames(an2),
+    all(!is.na(an1)),
+    all(!is.na(an2))
+  )
+}
 }
 \seealso{
 \code{\link{contestMD}} for multi degree-of-freedom contrast tests

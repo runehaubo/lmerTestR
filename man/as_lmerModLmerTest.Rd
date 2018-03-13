@@ -32,7 +32,7 @@ with respect to the variance parameters.
 }
 \examples{
 m <- lme4::lmer(Reaction ~ Days + (Days | Subject), sleepstudy)
-bm <- lmerTest:::as_lmerModLmerTest(m)
+bm <- as_lmerModLmerTest(m)
 slotNames(bm)
 
 }
