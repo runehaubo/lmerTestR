@@ -125,15 +125,26 @@ step.lmerModLmerTest <- function(object, ddf=c("Satterthwaite", "Kenward-Roger")
                                  alpha.random=0.1, alpha.fixed=0.05,
                                  reduce.fixed=TRUE, reduce.random=TRUE,
                                  keep, ...) {
+  # Check for and warn about deprecated arguments:
+  ignored <- c("type", "fixed.calc", "lsmeans.calc", "difflsmeans.calc",
+               "test.effs")
+  dots <- list(...)
+  for(nm in ignored) if(any(pmatch(names(dots), nm, nomatch = 0)))
+    warning(paste0("Argument '", nm, "' is deprecated and ignored."))
+  if(any(pmatch(names(dots), "keep.effs", nomatch = 0)))
+    warning("Argument 'keep.effs' is deprecated: use 'keep' instead")
+
+  # reduce random and fixed parts?
   if(!reduce.random) alpha.random <- 1
   if(!reduce.fixed) alpha.fixed <- 1
-
+  # Reduce random and fixed parts:
   red_random <- eval.parent(reduce_random(object, alpha=alpha.random))
   red_fixed <- eval.parent(reduce_fixed(attr(red_random, "model"), ddf=ddf,
                                         alpha=alpha.fixed, keep=keep))
+  # get 'reduction' tables:
   step_random <- ran_redTable(red_random)
   step_fixed <- fix_redTable(red_fixed)
-
+  # organize results and return:
   step_list <- list(random=step_random, fixed=step_fixed)
   class(step_list) <- "step_list"
   attr(step_list, "model") <- attr(red_fixed, "model")

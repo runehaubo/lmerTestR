@@ -62,6 +62,14 @@ stopifnot(
   all.equal(an1[1:2, "logLik"], an2[2:1, "logLik"])
 )
 
+# Expect warnings when old (version < 3.0-0) arguments are used:
+assertWarning(step(fm, reduce.fixed = FALSE, reduce.random = FALSE,
+                   type=3, fixed.calc = FALSE, lsmeans.calc = FALSE,
+                   difflsmeans.calc = TRUE, test.effs = 42, keep.e="save"))
+assertWarning(step(fm, reduce.fixed = FALSE, reduce.random = FALSE,
+                   lsmeans=3))
+
+
 check_nrow <- function(obj, expect_nrow) {
   stopifnot(
     is.numeric(expect_nrow),
