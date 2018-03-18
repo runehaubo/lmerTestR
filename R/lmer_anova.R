@@ -2,9 +2,24 @@
 
 # ------- Contents: --------
 #
-# anova.lmerModLmerTest
-# single_anova
+# --- Generics: ---
+#
 # show_tests
+#
+# --- methods: ---
+#
+# anova.lmerModLmerTest
+#
+# show_tests.default
+# show_tests.anova
+#
+# --- other exported function: ---
+#
+# show_contrasts
+#
+# --- utility functions: ---
+#
+# single_anova
 #
 
 #' @include lmer.R
@@ -81,11 +96,12 @@ anova.lmerModLmerTest <- function(object, ..., type = c("III", "II", "I", "3", "
     sapply(dots, is, "lmerModLmerTest") | sapply(dots, is, "merMod") |
     sapply(dots, is, "lm") else logical(0)
   if(any(models)) return(NextMethod()) # return(anova(as(object, "lmerMod"), ...))
-  # Note: Need 'callNextMethod' here to get printing from anova.merMod right.
+  # Note: Need 'NextMethod' here to get printing from anova.merMod right.
   ddf <- match.arg(ddf)
-  # type <- match.arg(type) # Need to pass 'hidden' options to single_anova
-  if(ddf=="lme4") return(anova(as(object, "lmerMod"), ...)) # return(callNextMethod())
-  # FIXME: Warn that 'type' is ignored when ddf="lme4"
+  # Commented since we need to pass 'hidden' type options to single_anova
+  # type <- match.arg(type)
+  if(ddf=="lme4") return(anova(as(object, "lmerMod"), ...)) # return(NextMethod())
+  # FIXME: Warn that 'type' is ignored when ddf="lme4"?
   single_anova(object=object, type=type, ddf=ddf)
 }
 
@@ -166,7 +182,7 @@ single_anova <- function(object,
 }
 
 ##############################################
-######## show_tests()
+######## show_tests.anova()
 ##############################################
 #' Show Hypothesis Tests in ANOVA Tables
 #'
@@ -174,13 +190,16 @@ single_anova <- function(object,
 #' functions of the parameters are being tested in anova tables.
 #'
 #' @param object an anova table with a \code{"hypotheses"} attribute.
-#' @param fractions Display entries in the hypothesis matrices as fractions?
+#' @param fractions display entries in the hypothesis matrices as fractions?
 #' @param names if \code{FALSE} column and row names of the hypothesis matrices
 #' are suppressed.
+#' @param ... currently not used.
 #'
 #' @return a list of hypothesis matrices.
 #' @importFrom MASS fractions
 #' @author Rune Haubo B. Christensen
+#' @seealso \code{\link[=show_tests.ls_means]{show_tests}} for \code{ls_means}
+#' objects.
 #' @export
 #'
 #' @examples
@@ -198,7 +217,37 @@ single_anova <- function(object,
 #' show_tests(anova(fm1, type="2"), fractions=TRUE, names=FALSE)
 #' show_tests(an, fractions=TRUE)
 #'
-show_tests <- function(object, fractions=FALSE, names=TRUE) {
+show_tests.anova <- function(object, fractions=FALSE, names=TRUE, ...)
+  NextMethod() # use default method
+
+##############################################
+######## show_tests()
+##############################################
+#' Show Tests Generic Function and Default Method
+#'
+#' @param object a suitable object with an \code{"hypotheses"} attribute, e.g. an
+#' anova table or an \code{ls_means} table as defined in \pkg{lmerTest}.
+#' @param ... parsed on to methods; currently not used in the default method.
+#'
+#' @export
+#' @author Rune Haubo B. Christensen
+#' @seealso \code{\link{show_tests.anova}} and \code{\link{show_tests.ls_means}}
+#' @keywords internal
+show_tests <- function(object, ...) UseMethod("show_tests")
+
+
+##############################################
+######## show_tests.default()
+##############################################
+#' @rdname show_tests
+#'
+#' @param fractions display entries in the hypothesis matrices as fractions?
+#' @param names if \code{FALSE} column and row names of the hypothesis matrices
+#' are suppressed.
+#' @export
+#' @author Rune Haubo B. Christensen
+#' @keywords internal
+show_tests.default <- function(object, fractions=FALSE, names=TRUE, ...) {
   tests <- attr(object, "hypotheses")
   # FIXME: Maybe this should be a generic with a method for anova objects?
   if(is.null(tests))

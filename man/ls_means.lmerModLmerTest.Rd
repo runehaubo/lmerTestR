@@ -64,14 +64,17 @@ model <- lmer(angle ~ recipe * temp + (1|recipe:replicate), cake)
 # Compute LS-means:
 ls_means(model)
 
+# Get LS-means contrasts:
+show_tests(ls_means(model))
+
 # Compute pairwise differences of LS-means for each factor:
 ls_means(model, pairwise=TRUE)
 difflsmeans(model) # Equivalent.
 
 }
 \seealso{
-\code{\link{show_contrasts}} for display of the underlying LS-means
-contrasts.
+\code{\link[=show_tests.ls_means]{show_tests}} for display of the
+underlying LS-means contrasts.
 }
 \author{
 Rune Haubo B. Christensen and Alexandra Kuznetsova

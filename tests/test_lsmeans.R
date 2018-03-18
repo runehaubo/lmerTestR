@@ -27,8 +27,8 @@ stopifnot(
 )
 
 # Contrasts vectors:
-show_contrasts(lsm)
-show_contrasts(plsm)
+show_tests(lsm)
+show_tests(plsm)
 
 # Factor * Ordered:
 model <- lmer(angle ~ recipe * temperature + (1|recipe:replicate), cake)
@@ -104,9 +104,9 @@ with(cake3, table(recipe, temperature))
 model <- lmer(angle ~ recipe * temperature + (1|recipe:replicate), cake3)
 (lsm7 <- ls_means(model))
 
-# Using show_contrasts with options:
-show_contrasts(lsm7, fractions = TRUE)
-show_contrasts(lsm7, fractions = TRUE, names = FALSE)
+# Using show_tests with options:
+show_tests(lsm7, fractions = TRUE)
+show_tests(lsm7, fractions = TRUE, names = FALSE)
 
 # Missing diagonal:
 cake4 <- cake
@@ -126,8 +126,8 @@ ls_means(model)
 model <- lmer(angle ~ recipe * temperature + (1|recipe:replicate), cake3,
               contrasts = list(recipe="contr.sum", temperature="contr.helmert"))
 (lsm8 <- ls_means(model))
-# show_contrasts(lsm7)
-# show_contrasts(lsm8)
+# show_tests(lsm7)
+# show_tests(lsm8)
 stopifnot(
   isTRUE(all.equal(lsm7, lsm8, check.attributes=FALSE))
 )

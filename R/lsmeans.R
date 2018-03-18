@@ -15,6 +15,8 @@
 # lsmeansLT.lmerModLmerTest
 # print.ls_means
 #
+# show_tests.ls_means
+#
 # --- other exported function: ---
 #
 # show_contrasts
@@ -60,8 +62,8 @@
 #' @return An LS-means table in the form of a \code{data.frame}. Formally an object
 #' of class \code{c("ls_means", "data.frame")} with a number of attributes set.
 #' @author Rune Haubo B. Christensen and Alexandra Kuznetsova
-#' @seealso \code{\link{show_contrasts}} for display of the underlying LS-means
-#' contrasts.
+#' @seealso \code{\link[=show_tests.ls_means]{show_tests}} for display of the
+#' underlying LS-means contrasts.
 #' @export
 #'
 #' @examples
@@ -72,6 +74,9 @@
 #'
 #' # Compute LS-means:
 #' ls_means(model)
+#'
+#' # Get LS-means contrasts:
+#' show_tests(ls_means(model))
 #'
 #' # Compute pairwise differences of LS-means for each factor:
 #' ls_means(model, pairwise=TRUE)
@@ -112,7 +117,7 @@ ls_means.lmerModLmerTest <- function(model, which=NULL, level=0.95,
     }))
   attr(means, "confidence_level") <- level
   attr(means, "ddf") <- ddf
-  attr(means, "contrasts") <- Llist
+  attr(means, "hypotheses") <- Llist
   attr(means, "heading") <- "Least Squares Means table:\n"
   class(means) <- c("ls_means", "data.frame")
   means
@@ -209,6 +214,7 @@ lsmeans_contrasts <- function(model, which=NULL) {
 ######## print.ls_means
 ##############################################
 #' @importFrom stats printCoefmat
+#' @export
 print.ls_means <- function(x, digits = max(getOption("digits") - 2L, 3L),
                           signif.stars = getOption("show.signif.stars"),
                           ...) {
@@ -229,35 +235,38 @@ print.ls_means <- function(x, digits = max(getOption("digits") - 2L, 3L),
 
 
 ##############################################
-######## show_contrasts
+######## show_tests.lsmeans
 ##############################################
-#' Show LS-means Contrasts
+#' Show LS-means Hypothesis Tests and Contrasts
 #'
-#' Extracts the contrasts which defines the LS-mean contrasts.
+#' Extracts the contrasts which defines the LS-mean hypothesis tests.
 #'
 #' @param object an \code{ls_means} object.
 #' @param fractions display contrasts as fractions rather than decimal numbers?
 #' @param names include row and column names of the contrasts matrices?
+#' @param ... currently not used.
 #'
 #' @return a list of contrast matrices; one matrix for each model term.
 #' @export
 #' @author Rune Haubo B. Christensen
 #' @importFrom MASS fractions
-#' @seealso \code{\link[=ls_means.lmerModLmerTest]{ls_means}} for computation of LS-means.
+#' @seealso \code{\link[=ls_means.lmerModLmerTest]{ls_means}} for computation of
+#' LS-means and \code{\link[=show_tests.anova]{show_tests}} for \code{anova}
+#' objects.
 #'
 #' @examples
 #'
 #' data("cake", package="lme4")
 #' model <- lmer(angle ~ recipe * temp + (1|recipe:replicate), cake)
-#' (lsm <- ls_means(model))
-#' show_contrasts(lsm)
 #'
-show_contrasts <- function(object, fractions=FALSE, names=TRUE) {
-  tests <- attr(object, "contrasts")
-  # FIXME: Maybe this should be a generic with a method for anova objects?
-  if(is.null(tests))
-    stop("'object' does not have an 'contrasts' attribute")
-  if(fractions) tests <- lapply(tests, MASS::fractions)
-  if(names) tests else lapply(tests, unname)
-}
+#' # LS-means:
+#' (lsm <- ls_means(model))
+#'
+#' # Contrasts for LS-means estimates and hypothesis tests:
+#' show_tests(lsm)
+#'
+show_tests.ls_means <- function(object, fractions=FALSE, names=TRUE, ...)
+  NextMethod() # use default method
+
+
 

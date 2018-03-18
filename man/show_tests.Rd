@@ -2,41 +2,33 @@
 % Please edit documentation in R/lmer_anova.R
 \name{show_tests}
 \alias{show_tests}
-\title{Show Hypothesis Tests in ANOVA Tables}
+\alias{show_tests.default}
+\title{Show Tests Generic Function and Default Method}
 \usage{
-show_tests(object, fractions = FALSE, names = TRUE)
+show_tests(object, ...)
+
+\method{show_tests}{default}(object, fractions = FALSE, names = TRUE, ...)
 }
 \arguments{
-\item{object}{an anova table with a \code{"hypotheses"} attribute.}
+\item{object}{a suitable object with an \code{"hypotheses"} attribute, e.g. an
+anova table or an \code{ls_means} table as defined in \pkg{lmerTest}.}
 
-\item{fractions}{Display entries in the hypothesis matrices as fractions?}
+\item{...}{parsed on to methods; currently not used in the default method.}
+
+\item{fractions}{display entries in the hypothesis matrices as fractions?}
 
 \item{names}{if \code{FALSE} column and row names of the hypothesis matrices
 are suppressed.}
 }
-\value{
-a list of hypothesis matrices.
-}
 \description{
-Extracts hypothesis matrices for terms in ANOVA tables detailing exactly which
-functions of the parameters are being tested in anova tables.
+Show Tests Generic Function and Default Method
 }
-\examples{
-
-# Fit basic model to the 'cake' data:
-data("cake", package="lme4")
-fm1 <- lmer(angle ~ recipe * temp + (1|recipe:replicate), cake)
-
-# Type 3 anova table:
-(an <- anova(fm1, type="3"))
-
-# Display tests/hypotheses for type 1, 2, and 3 ANOVA tables:
-# (and illustrate effects of 'fractions' and 'names' arguments)
-show_tests(anova(fm1, type="1"))
-show_tests(anova(fm1, type="2"), fractions=TRUE, names=FALSE)
-show_tests(an, fractions=TRUE)
-
+\seealso{
+\code{\link{show_tests.anova}} and \code{\link{show_tests.ls_means}}
 }
 \author{
 Rune Haubo B. Christensen
+
+Rune Haubo B. Christensen
 }
+\keyword{internal}
