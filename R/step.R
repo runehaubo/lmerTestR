@@ -171,6 +171,8 @@ get_model.step_list <- function(x, ...) {
 ######## print.step_list()
 ##############################################
 #' @importFrom stats formula
+#' @export
+#' @keywords internal
 print.step_list <- function(x, digits = max(getOption("digits") - 2L, 3L),
                             signif.stars = getOption("show.signif.stars"),
                             ...) {
