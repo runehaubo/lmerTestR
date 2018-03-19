@@ -1,14 +1,14 @@
 Package: lmerTest
 Type: Package
 Title: Tests in Linear Mixed Effects Models 
-Version: 2.0-37.90014
+Version: 2.0-37.90015
 Authors@R: c(person("Alexandra", "Kuznetsova", role = c("aut")),
                    person("Per", "Bruun Brockhoff", role = c("aut", "ths", "cre"),
                    email = "perbb@dtu.dk"),
                    person("Rune", "Haubo Bojesen Christensen", role =  c("aut"),
 		   email = "Rune@ChristensenStatistics.dk"))
 Depends: lme4 (>= 1.0), stats, methods
-Imports: numDeriv, MASS
+Imports: numDeriv, MASS, ggplot2
 Suggests: pbkrtest, tools
 Description: Provides p-values in type I, II or III anova and summary
     tables for lmer model fits (cf. lme4) via Satterthwaite's degrees of 

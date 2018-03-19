@@ -13,6 +13,7 @@
 # step.default
 # get_model.step_list
 # print.step_list
+# plot.step_list
 #
 # --- other exported function: ---
 #
@@ -192,6 +193,58 @@ print.step_list <- function(x, digits = max(getOption("digits") - 2L, 3L),
   print(x[["fixed"]])
   cat("\nModel found:", deparse(formula(attr(x, "model"))), sep="\n")
   invisible(x)
+}
+
+
+##############################################
+######## plot.step_list()
+##############################################
+#' Plot LS-means for Backward Reduced Model
+#'
+#' Computes the LS-means for the final backward reduced model and passes these
+#' to \code{\link{plot.ls_means}}.
+#'
+#' Error bars are confidence intervals - the default is 95% CI but the confidence
+#' level can be changed.
+#'
+#' @param x a \code{step_list} object; the result of running \code{\link{step}}.
+#' @param y not used and ignored with a warning.
+#' @param which optional character vector naming factors for which LS-means should
+#' be plotted. If \code{NULL} (default) plots for all LS-means are generated.
+#' @param mult if \code{TRUE} and there is more than one term for which to plot
+#' LS-means the plots are organized in panels with \code{facet_wrap}.
+#' @param pairwise pairwise differences of LS-means?
+#' @param level confidence level.
+#' @param ddf denominator degree of freedom method.
+#' @param ... currently not used.
+#'
+#' @export
+#' @author Rune Haubo B. Christensen and Alexandra Kuznetsova
+#' @seealso \code{\link[=ls_means.lmerModLmerTest]{ls_means}} and
+#' \code{\link{plot.ls_means}}
+#' @keywords internal
+#' @examples
+#'
+#' \dontrun{
+#' # Fit example model:
+#' tv <- lmer(Sharpnessofmovement ~ TVset * Picture +
+#'              (1 | Assessor:TVset) + (1 | Assessor:Picture) +
+#'              (1 | Assessor:Picture:TVset) + (1 | Repeat) + (1 | Repeat:Picture) +
+#'              (1 | Repeat:TVset) + (1 | Repeat:TVset:Picture) + (1 | Assessor),
+#'            data = TVbo)
+#'
+#' # Backward reduce the model:
+#' (st <- step(tv)) # takes ~10 sec to run
+#'
+#' # Pairwise comparisons of LS-means for Picture and TVset:
+#'   plot(st, which=c("Picture", "TVset"), pairwise = TRUE)
+#' }
+#'
+plot.step_list <- function(x, y=NULL, which=NULL, pairwise=FALSE, mult=TRUE,
+                           level=0.95, ddf=c("Satterthwaite", "Kenward-Roger"),
+                           ...) {
+  plot(ls_means(get_model(x), pairwise=pairwise, level=level, ddf=ddf),
+       y=y, which=which, mult=mult)
 }
 
 

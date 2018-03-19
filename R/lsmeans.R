@@ -115,6 +115,7 @@ ls_means.lmerModLmerTest <- function(model, which=NULL, level=0.95,
       rownames(tab) <- rownames(L)
       tab
     }))
+  attr(means, "response") <- deparse(formula(model)[[2]])
   attr(means, "confidence_level") <- level
   attr(means, "ddf") <- ddf
   attr(means, "hypotheses") <- Llist
@@ -235,7 +236,7 @@ print.ls_means <- function(x, digits = max(getOption("digits") - 2L, 3L),
 
 
 ##############################################
-######## show_tests.lsmeans
+######## show_tests.ls_means
 ##############################################
 #' Show LS-means Hypothesis Tests and Contrasts
 #'
@@ -268,5 +269,169 @@ print.ls_means <- function(x, digits = max(getOption("digits") - 2L, 3L),
 show_tests.ls_means <- function(object, fractions=FALSE, names=TRUE, ...)
   NextMethod() # use default method
 
+##############################################
+######## plot.ls_means
+##############################################
+#' Bar Plots of LS-Means
+#'
+#' Bar plots of LS-means using the \pkg{ggplot2} package.
+#'
+#' @param x an \code{\link{ls_means}} object.
+#' @param y not used and ignored with a warning.
+#' @param which optional character vector naming factors for which LS-means should
+#' be plotted. If \code{NULL} (default) plots for all LS-means are generated.
+#' @param mult if \code{TRUE} and there is more than one term for which to plot
+#' LS-means the plots are organized in panels with \code{facet_wrap}.
+#' @param ... currently not used.
+#'
+#' @return generates the desired plots and invisibly returns the plot objects.
+#' @author Rune Haubo B. Christensen
+#' @seealso \code{\link{ls_means.lmerModLmerTest}}
+#' @export
+#' @importFrom graphics plot
+#' @importFrom ggplot2 ggplot aes geom_bar geom_errorbar theme element_text
+#' @importFrom ggplot2 scale_fill_manual xlab ylab facet_wrap rel
+#' @keywords internal
+#'
+#' @examples
+#'
+#' # Fit example model with 2 factors:
+#' data("cake", package="lme4")
+#' cake$Temp <- factor(cake$temperature, ordered = FALSE)
+#' model <- lmer(angle ~ recipe * Temp + (1|recipe:replicate), cake)
+#'
+#' # Extract LS-means:
+#' (lsm <- ls_means(model))
+#'
+#' # Multi-frame plot of the LS-means
+#' plot(lsm)
+#'
+#' # Compute list of 'single frame' plots:
+#' res <- plot(lsm, mult=FALSE)
+#'
+#' # Display each plot separately:
+#' plot(res[[1]])
+#' plot(res[[2]])
+#'
+#' # Example with pairwise differences of LS-means:
+#' (lsm <- ls_means(model, pairwise = TRUE))
+#' plot(lsm, which="Temp")
+#'
+plot.ls_means <- function(x, y=NULL, which=NULL, mult=TRUE, ...) {
+  Estimate <- col.bars <- lower <- term <- upper <- NULL # so that r cmd check can see them
+  get_plot <- function(d, response="") { # basic plot function
+    ggplot(d, aes(x=levels, y = Estimate, fill = col.bars)) +
+      geom_bar(position = "dodge", stat = "identity") +
+      geom_errorbar(aes(ymin = lower, ymax = upper), colour="black", width=.1) +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.4),
+            axis.title.y = element_text(size = rel(1.4)),
+            axis.text = element_text(size = rel(1)),
+            legend.text = element_text(size = rel(1)),
+            legend.title = element_text(size = rel(1)))  +
+      scale_fill_manual(
+        values=c("NS" = "grey", "p-value < 0.01" = "orange",
+                 "p-value < 0.05" = "yellow", "p-value < 0.001" = "red"),
+        name="Significance") + ylab(response)
+  }
+  get_color_values <- function(x) {
+    if(x<0.001) return("p-value < 0.001")
+    if(x<0.01) return("p-value < 0.01")
+    if(x<0.05) return("p-value < 0.05")
+    return("NS")
+  }
+  # Check for and warn about deprecated arguments:
+  dots <- list(...)
+  ignored <- c("main", "cex")
+  for(nm in ignored) if(any(pmatch(names(dots), nm, nomatch = 0)))
+    warning(paste0("Argument '", nm, "' is deprecated and ignored."))
+  if(any(pmatch(names(dots), "effs", nomatch = 0)))
+    warning("Argument 'effs' is deprecated: use 'which' instead.")
+  if(!is.null(y)) warning("Argument 'y' is defunct and ignored.")
 
+  # Get data for plotting:
+  plotdata <- as.data.frame(x, add_levels = TRUE)
+  plotdata <- # Add significance information for colors:
+    cbind(plotdata, col.bars=sapply(plotdata[, "Pr(>|t|)"], get_color_values))
+
+  # Subset plotdata for terms
+  if(!is.null(which)) {
+    stopifnot(is.character(which), length(which) >= 1L,
+              all(sapply(which, length) > 0L))
+    term_names <- unique(as.character(plotdata[["term"]]))
+    valid <- which %in% term_names
+    if(!all(valid)) {
+      warning(sprintf("The following terms are invalid and ignored: %s.",
+                      paste(which[!valid], collapse = ", ")))
+    }
+    plotdata <- subset(plotdata, term %in% which[valid])
+  }
+  if(nrow(plotdata) == 0L) stop("No LS-means to plot.")
+
+  # Generate plots:
+  if(mult && length(unique(as.character(plotdata[["term"]]))) > 1L) {
+    res <- get_plot(plotdata, response=attr(x, "response")) + xlab("") +
+      facet_wrap( ~ term, scales="free")
+    print(res)
+  } else {
+    plotdata <- split(plotdata, plotdata$term)
+    res <- lapply(1:length(plotdata), function(i)
+      get_plot(plotdata[[i]], response=attr(x, "response")) +
+        xlab(names(plotdata)[i])
+    )
+    names(res) <- names(plotdata)
+    for(obj in res) print(obj)
+  }
+  invisible(res)
+}
+
+##############################################
+######## as.data.frame.ls_means
+##############################################
+#' Coerce \code{ls_means} Objects to \code{data.frame}s
+#'
+#' @param x an \code{\link{ls_means}} object.
+#' @param add_levels add \code{term} and \code{levels} columns to returned
+#' \code{data.frame}?
+#' @param ... currently not used.
+#'
+#' @export
+#' @author Rune Haubo B. Christensen
+#' @seealso \code{\link{ls_means.lmerModLmerTest}}
+#' @keywords internal
+#' @examples
+#'
+#' # Fit example model:
+#' data("cake", package="lme4")
+#' cake$Temp <- factor(cake$temperature, ordered = FALSE)
+#' model <- lmer(angle ~ recipe + Temp + (1|recipe:replicate), cake)
+#'
+#' # Extract LS-means:
+#' head(lsm <- ls_means(model))
+#'
+#' # Coerce LS-means objects to data.frames:
+#' head(as.data.frame(lsm))
+#' head(as.data.frame(lsm, add_levels=FALSE))
+#'
+as.data.frame.ls_means <- function(x, ..., add_levels=TRUE) {
+  # Function to compute levels of terms including interaction:terms
+  get_levels <- function(term, levels) {
+    fun <- function(term, levels) { # workhorse
+      strng <- paste(paste0("^", unlist(strsplit(term, ":"))), collapse = "|")
+      sapply(strsplit(levels, ":"), function(txt)
+        paste(gsub(strng, "", txt), collapse = ":"))
+    }
+    if(all(grepl(" - ", levels))) # pairwise contrasts
+      sapply(strsplit(levels, " - "), function(lev)
+        paste(fun(term, lev), collapse = " - ")) else fun(term, levels)
+  }
+  if(!add_levels) return(structure(x, class="data.frame"))
+  contrasts <- attr(x, "hypotheses")
+  term_names <- names(contrasts)
+  lsm_levels <- lapply(1:length(term_names), function(i)
+    get_levels(term_names[i], rownames(contrasts[[i]]))
+  )
+  class(x) <- "data.frame"
+  cbind(term = rep(term_names, sapply(lsm_levels, length)),
+        levels=unlist(lsm_levels), x, stringsAsFactors=FALSE)
+}
 
