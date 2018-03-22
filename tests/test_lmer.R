@@ -33,14 +33,16 @@ stopifnot(
 #####################################################################
 # Expect warning when model fails to converge:
 m <- assertWarning(
-  lmer(Preference ~ sens2 + Homesize + Income + #(1 + sens2 | Consumer) +
-         (1|Consumer) + (1 |Consumer:Income), data=carrots)
+  fm <- lmer(Preference ~ sens2 + Homesize + Income + #(1 + sens2 | Consumer) +
+               (1|Consumer) + (1 |Consumer:Income), data=carrots)
 )
-messages <- unlist(lapply(m, "[[", "message"))
-stopifnot(
-  any(grepl("Model failed to converge", messages))
-)
-
+# May not fail to converge on all platforms in all versions:
+if(any(grepl("Model failed to converge", fm@optinfo$conv$lme$messages))) {
+  messages <- unlist(lapply(m, "[[", "message"))
+  stopifnot(
+    any(grepl("Model failed to converge", messages))
+  )
+}
 
 #####################################################################
 # Update method

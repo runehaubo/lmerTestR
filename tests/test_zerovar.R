@@ -18,7 +18,7 @@ m
 # check that fit has a zero variance
 vc <- as.data.frame(VarCorr(m))
 stopifnot(isTRUE(
-  all.equal(0, vc[vc$grp == "g", "sdcor"])
+  all.equal(0, vc[vc$grp == "g", "sdcor"], tol=1e-4)
 ))
 # The hessian/vcov is actually positive definite:
 stopifnot(isTRUE(
@@ -31,7 +31,7 @@ stopifnot(isTRUE(
 ))
 
 stopifnot(isTRUE( # Equality of summary tables
-  all.equal(coef(summary(m0)), coef(summary(m)), tolerance=1e-6)
+  all.equal(coef(summary(m0)), coef(summary(m)), tolerance=1e-4)
 ))
 stopifnot(isTRUE( # Equality of lme4-anova tables
   all.equal(anova(m0, ddf="lme4"), anova(m, ddf="lme4"), tolerance=1e-4)
