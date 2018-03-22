@@ -28,7 +28,8 @@
 #' Compute an ANOVA-like table with tests of random-effect terms in the model.
 #' Each random-effect term is reduced or removed and likelihood ratio tests of
 #' model reductions are presented in a form similar to that of
-#' \code{\link[stats]{drop1}}. \code{rand} is an alias for \code{ranova}.
+#' \code{\link[=drop1.lmerModLmerTest]{drop1}}.
+#' \code{rand} is an alias for \code{ranova}.
 #'
 #' If the model is fitted with REML the tests are REML-likelihood ratio tests.
 #'
@@ -88,7 +89,8 @@
 #' @export
 #' @author Rune Haubo B. Christensen and Alexandra Kuznetsova
 #'
-#' @seealso \code{\link{drop1}} for tests of marginal fixed-effect terms and
+#' @seealso \code{\link[=drop1.lmerModLmerTest]{drop1}} for tests of marginal
+#' fixed-effect terms and
 #' \code{\link{anova}} for usual anova tables for fixed-effect terms.
 #' @importFrom stats formula nobs update
 #' @importFrom lme4 getME findbars nobars

@@ -14,6 +14,8 @@
 # difflsmeans.lmerModLmerTest
 # lsmeansLT.lmerModLmerTest
 # print.ls_means
+# plot.ls_means
+# as.data.frame.ls_means
 #
 # show_tests.ls_means
 #

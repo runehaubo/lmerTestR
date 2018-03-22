@@ -18,7 +18,7 @@ The **lmerTest** package has been re-written and is released as package version 
 The **lmerTest** package provides $p$-values in type I, II or III `anova` and `summary`
 tables for linear mixed models (`lmer` model fits cf. **lme4**) via Satterthwaite's degrees of freedom method; a Kenward-Roger method is also available via the **pbkrtest**
 package. Model selection and assessment methods include `step`, `drop1`, anova-like 
-tables for random effects (`ranova`), least-square means (LS-means; `lsmeans`) 
+tables for random effects (`ranova`), least-square means (LS-means; `ls_means`) 
 and tests of linear contrasts of fixed effects (`contest`).
 
 The most important changes for end-users are:

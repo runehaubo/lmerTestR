@@ -40,7 +40,7 @@
 #' @param ... currently not used.
 #'
 #' @author Rune Haubo B. Christensen
-#' @seealso \code{\link{step.lmerModLmerTest}}
+#' @seealso \code{\link[=step.lmerModLmerTest]{step}}
 #' @export
 #' @keywords internal
 step <- function(object, ...) UseMethod("step")
@@ -65,7 +65,7 @@ step.default <- function(object, ...) stats::step(object, ...)
 #'
 #' Tests of random-effects are performed using \code{\link{ranova}} (using
 #' \code{reduce.terms = TRUE}) and tests of fixed-effects are performed using
-#' \code{\link{drop1}}.
+#' \code{\link[=drop1.lmerModLmerTest]{drop1}}.
 #'
 #' The step method for \code{\link{lmer}} fits has a print method.
 #'
@@ -95,8 +95,9 @@ step.default <- function(object, ...) stats::step(object, ...)
 #'
 #' The \code{step} object also contains the final model as an attribute which
 #' is extractable with \code{get_model(<step_object>)}.
-#' @seealso \code{\link{drop1}} for tests of marginal fixed-effect terms and
-#' \code{\link{ranova}} for a \code{\link{drop1}}-like table of reduction of
+#' @seealso \code{\link[=drop1.lmerModLmerTest]{drop1}} for tests of marginal
+#' fixed-effect terms and \code{\link{ranova}} for a
+#' \code{\link[=drop1.lmerModLmerTest]{drop1}}-like table of reduction of
 #' random-effect terms.
 #' @author Rune Haubo B. Christensen and Alexandra Kuznetsova
 #' @export
@@ -207,7 +208,8 @@ print.step_list <- function(x, digits = max(getOption("digits") - 2L, 3L),
 #' Error bars are confidence intervals - the default is 95% CI but the confidence
 #' level can be changed.
 #'
-#' @param x a \code{step_list} object; the result of running \code{\link{step}}.
+#' @param x a \code{step_list} object; the result of running
+#' \code{\link[=step.lmerModLmerTest]{step}}.
 #' @param y not used and ignored with a warning.
 #' @param which optional character vector naming factors for which LS-means should
 #' be plotted. If \code{NULL} (default) plots for all LS-means are generated.

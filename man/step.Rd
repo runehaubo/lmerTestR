@@ -20,7 +20,7 @@ contruction ensures that \code{stats::step} still works on \code{lm}
 objects etc. after loading the \pkg{lmerTest} package.
 }
 \seealso{
-\code{\link{step.lmerModLmerTest}}
+\code{\link[=step.lmerModLmerTest]{step}}
 }
 \author{
 Rune Haubo B. Christensen

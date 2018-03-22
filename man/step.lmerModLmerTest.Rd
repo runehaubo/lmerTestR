@@ -56,7 +56,7 @@ of fixed-effect terms in linear mixed models.
 \details{
 Tests of random-effects are performed using \code{\link{ranova}} (using
 \code{reduce.terms = TRUE}) and tests of fixed-effects are performed using
-\code{\link{drop1}}.
+\code{\link[=drop1.lmerModLmerTest]{drop1}}.
 
 The step method for \code{\link{lmer}} fits has a print method.
 }
@@ -84,8 +84,9 @@ final_fm <- get_model(step_fm)
 
 }
 \seealso{
-\code{\link{drop1}} for tests of marginal fixed-effect terms and
-\code{\link{ranova}} for a \code{\link{drop1}}-like table of reduction of
+\code{\link[=drop1.lmerModLmerTest]{drop1}} for tests of marginal
+fixed-effect terms and \code{\link{ranova}} for a
+\code{\link[=drop1.lmerModLmerTest]{drop1}}-like table of reduction of
 random-effect terms.
 }
 \author{

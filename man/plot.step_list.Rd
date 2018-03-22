@@ -9,7 +9,8 @@
   ...)
 }
 \arguments{
-\item{x}{a \code{step_list} object; the result of running \code{\link{step}}.}
+\item{x}{a \code{step_list} object; the result of running
+\code{\link[=step.lmerModLmerTest]{step}}.}
 
 \item{y}{not used and ignored with a warning.}
 
