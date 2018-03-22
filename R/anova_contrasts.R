@@ -198,11 +198,7 @@ get_contrasts_type2 <- function(model, which=NULL) {
   which <- setNames(as.list(which), which)
 
   # Compute containment:
-  factor_mat <- attr(terms, "factors")
-  # list: for each term 'T' a vector of terms in which 'T' is contained:
-  contained_in <- setNames(lapply(term_names, function(term) {
-    term_names[relatives(data_classes, term, term_names, factor_mat)]
-  }), term_names)
+  is_contained <- containment(model)
 
   # Compute term asignment list: map from terms to columns in X
   has_intercept <- attr(terms, "intercept") > 0
@@ -215,7 +211,7 @@ get_contrasts_type2 <- function(model, which=NULL) {
   # Compute contrast for each term - return as named list:
   lapply(which, function(term) {
     # Reorder the cols in X to [, unrelated_to_term, term, contained_in_term]
-    cols_term <- unlist(term2colX[c(term, contained_in[[term]])])
+    cols_term <- unlist(term2colX[c(term, is_contained[[term]])])
     Xnew <- cbind(X[, -cols_term, drop=FALSE], X[, cols_term, drop=FALSE])
     # Compute order of terms in Xnew:
     newXcol_terms <- c(col_terms[-cols_term], col_terms[cols_term])

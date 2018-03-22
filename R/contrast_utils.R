@@ -3,6 +3,7 @@
 # -------- Contents: --------
 #
 # containment
+# term_contain
 # relatives
 # doolittle
 # ensure_full_rank
@@ -14,6 +15,16 @@
 ##############################################
 ######## containment()
 ##############################################
+#' Determine the Containment Structure for All Terms in a Model
+#'
+#' See \code{\link{term_contain}} for details about containment.
+#'
+#' @param object a model object, e.g. of class \code{lm} or \code{merMod}.
+#'
+#' @return a list with one element for each term in the model. Each element/term
+#' is a character vector of terms that the term is contained in.
+#' @importFrom stats terms setNames
+#' @keywords internal
 containment <- function(object) { # lm or merMod
   # For all terms 'T' in object compute the terms
   # Return a list:
@@ -23,47 +34,86 @@ containment <- function(object) { # lm or merMod
   # Note: need fixed.only for merMod objects to get dataClasses
   term_names <- attr(terms, "term.labels")
   factor_mat <- attr(terms, "factors")
-  setNames(lapply(term_names, function(term) {
-    term_names[relatives(data_classes, term, term_names, factor_mat)]
-  }), term_names)
+  lapply(setNames(term_names, term_names), function(term) {
+    term_names[term_contain(term, factor_mat, data_classes, term_names)]
+  })
+}
+
+##############################################
+######## term_contain()
+##############################################
+#' Determine which Terms Contain a Term
+#'
+#' The definition of \emph{containment} follows from the SAS documentation on
+#' "The Four Types of Estimable Functions".
+#'
+#' Containment is defined for two model terms, say, F1 and F2 as:
+#' F1 is contained in F2 (F2 contains F1) if
+#' \enumerate{
+#' \item F1 and F2 involve the same continuous variables (if any)
+#' \item F2 involve more factors than F1
+#' \item All factors in F1 (if any) are part of F2
+#' }
+#' The intercept, though not really a model term, is defined by SAS to be
+#' contained in all factor terms, but it is not contained in any
+#' effect involving a continuous variable.
+#'
+#' @param term character; name of a model term and one of \code{term_names}.
+#' @param factors the result of \code{attr(terms_object, "factors")}.
+#' @param dataClasses the result of
+#' \code{attr(terms(model, fixed.only=FALSE), "dataClasses")}. Note that
+#' \code{fixed.only=FALSE} is only needed for \code{merMod} objects, but does
+#' no harm for \code{lm} objects.
+#' @param term_names the result of \code{attr(terms_object, "term.labels")}.
+#'
+#' @return a logical vector indicating for each term in \code{term_names} if
+#' it contains \code{term}.
+#' @importFrom stats setNames
+#' @keywords internal
+term_contain <- function(term, factors, dataClasses, term_names) {
+  get_vars <- function(term)
+    # Extract vector of names of all variables in a term
+    rownames(factors)[factors[, term] == 1]
+  contain <- function(F1, F2) {
+    # Returns TRUE if F1 is contained in F2 (i.e. if F2 contains F1)
+    # F1, F2: Names of terms, i.e. attr(terms_object, "term.labels")
+    all(vars[[F1]] %in% vars[[F2]]) && # all variables in F1 are also in F2
+      length(setdiff(vars[[F2]], vars[[F1]])) > 0L && # F2 involve more variables than F1
+      setequal(numerics[[F1]], numerics[[F2]]) # F1 and F2 involve the same covariates (if any)
+  }
+  # Get (named) list of all variables in terms:
+  vars <- lapply(setNames(term_names, term_names), get_vars)
+  # Get (named) list of all _numeric_ variables in all terms:
+  numerics <- lapply(vars, function(varnms)
+    varnms[which(dataClasses[varnms] == "numeric")])
+  # Check if 'term' is contained in each model term:
+  sapply(term_names, function(term_nm) contain(term, term_nm))
 }
 
 
 ##############################################
 ######## relatives()
 ##############################################
-#' Find which model terms 'Contain' a term
-#'
-#' Experimental - not extensively tested in this context.
-#'
-#' @param classes.term ?
-#' @param term ?
-#' @param term_names ?
-#' @param factors ?
-#'
-#' @return ?
-#' @author Lifted from old lmerTest package
-#' @keywords internal
-relatives <- function(classes.term, term, term_names, factors) {
-  ## checks if the terms have the same number of covariates (if any)
-  checkCovContain <- function(term1, term2) {
-    num.numeric <- which(classes.term=="numeric")
-    num.numeric.term1 <- which((num.numeric %in% which(factors[,term1]!=0))==TRUE)
-    num.numeric.term2 <- which((num.numeric %in% which(factors[,term2]!=0))==TRUE)
-    if((length(num.numeric.term1)>0 && length(num.numeric.term2)>0)||
-       (length(num.numeric.term1)==0 && length(num.numeric.term2)==0))
-      return(all(num.numeric.term2 == num.numeric.term1))
-    else
-      return(FALSE)
-  }
-  is.relative <- function(term1, term2) {
-    all(!(factors[, term1] & (!factors[, term2]))) && checkCovContain(term1, term2)
-  }
-  if(length(term_names) == 1) return(NULL)
-  which.term <- which(term == term_names)
-  (1:length(term_names))[-which.term][sapply(term_names[-which.term],
-                                             function(term2) is.relative(term, term2))]
-}
+# relatives <- function(classes.term, term, term_names, factors) {
+#   ## checks if the terms have the same number of covariates (if any)
+#   checkCovContain <- function(term1, term2) {
+#     num.numeric <- which(classes.term=="numeric")
+#     num.numeric.term1 <- which((num.numeric %in% which(factors[,term1]!=0))==TRUE)
+#     num.numeric.term2 <- which((num.numeric %in% which(factors[,term2]!=0))==TRUE)
+#     if((length(num.numeric.term1)>0 && length(num.numeric.term2)>0)||
+#        (length(num.numeric.term1)==0 && length(num.numeric.term2)==0))
+#       return(all(num.numeric.term2 == num.numeric.term1))
+#     else
+#       return(FALSE)
+#   }
+#   is.relative <- function(term1, term2) {
+#     all(!(factors[, term1] & (!factors[, term2]))) && checkCovContain(term1, term2)
+#   }
+#   if(length(term_names) == 1) return(NULL)
+#   which.term <- which(term == term_names)
+#   (1:length(term_names))[-which.term][sapply(term_names[-which.term],
+#                                              function(term2) is.relative(term, term2))]
+# }
 
 
 ##############################################
