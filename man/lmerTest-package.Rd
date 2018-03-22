@@ -30,12 +30,12 @@ type I, II, and III anova tables for fixed-effect terms with
 Satterthwaite and Kenward-Roger methods for denominator degrees of freedom
 for F-tests.}
 \item{summary}{summary method for \code{\link{lmer}} model fits adds
-denominator degrees of freedom and p-values to the coefficient table}
+denominator degrees of freedom and p-values to the coefficient table.}
 \item{ranova}{anova-like table of random effects via likelihood ratio tests
-with methods for both lmerMod and lmerModLmerTest objects.
+with methods for both \code{lmerMod} and \code{lmerModLmerTest} objects.
 \code{ranova} can either test reduction of random-effect terms to simpler
 structures or it can test removal of entire random-effect terms.}
-\code{drop1}{F-tests of fixed-effect terms using Satterthwaite or
+\item{drop1}{F-tests of fixed-effect terms using Satterthwaite or
 Kenward-Roger methods for denominator degrees of freedom. These 'single term
 deletion' tables are useful for model selection and tests of marginal terms.
 Compared to the likelihood ratio tests of \code{lme4::drop1} the F-tests and
@@ -50,14 +50,14 @@ automatically detected and appropriate adjustments made. Methods for
 \code{lmerModLmerTest} as well as \code{lmerMod} objects -- the latter avoids
 the Satterthwaite specific computations when the Kenward-Roger method is used.}
 \item{show_test}{a function which operates on anova tables and LS-means tables
-(produced by \code{\link{ls_means}}) makes it possible to see exactly which
-functions of the coefficients are being tested. This is very helpful when
+makes it possible to see exactly which
+functions of the coefficients are being tested. This is helpful when
 differences between type I, II and III anova tables are being considered and
 discussed.}
 \item{ls_means}{computes the so-called least-squares means (classical Yates
 contrasts) as well as pairwise differences of these.}
 \item{step}{performs automatic backward model selection of fixed and random
-parts of the linear mixed model}
+parts of the linear mixed model.}
 \item{as_lmerModLmerTest}{an explicit coerce function from class
 \code{lmerMod} to \code{lmerModLmerTest}.}
 }
