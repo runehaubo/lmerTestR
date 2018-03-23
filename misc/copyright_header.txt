@@ -18,4 +18,3 @@
 #    <https://www.r-project.org/Licenses/> and/or
 #    <http://www.gnu.org/licenses/>.
 #############################################################################
-#
