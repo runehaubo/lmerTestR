@@ -4,6 +4,7 @@
 ^\.git$
 .*~$
 README.md
+NEWS.html
 ^build$
 ^revdep$
 ^revdep_archive$

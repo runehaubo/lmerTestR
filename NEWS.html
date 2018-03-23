@@ -1,0 +1,90 @@
+<h2 id="lmertest-3.0-0">lmerTest 3.0-0</h2>
+<ul>
+<li>The new and completely re-written lmerTest package. Details of changes are available in <a href="https://github.com/runehaubo/lmerTestR/blob/master/pkg_notes/new_lmerTest.pdf">pdf</a> or <a href="http://htmlpreview.github.io/?https://github.com/runehaubo/lmerTestR/blob/master/pkg_notes/new_lmerTest.html">html</a></li>
+</ul>
+<h2 id="lmertest-3.0-0-1">lmerTest &lt; 3.0-0</h2>
+<ul>
+<li>Signficant news and changes for the 2.0-xx release series is provided below.</li>
+</ul>
+<p>2.0-34</p>
+<ul>
+<li>included citation info for JSS</li>
+</ul>
+<p>2.0-33</p>
+<ul>
+<li>lsmeans and difflsmeans are now deprecated functions. Changed the names to lsmeansLT and dlsmeansLT</li>
+<li>changed the maintainer field</li>
+</ul>
+<p>2.0-32</p>
+<ul>
+<li>changed the message of identifiability to the more appropriate one</li>
+</ul>
+<p>2.0-31</p>
+<ul>
+<li>removed lmerTestFunctions.R and restructured the package. added calcSatterth(model, L) for calculating Satterthwaite's approximation for a specified L matrix</li>
+</ul>
+<p>2.0-30</p>
+<ul>
+<li>envir.R failed with the newest version of lme4. Changed the code to pass the check. TODO: remove updating the model</li>
+</ul>
+<p>2.0-28</p>
+<ul>
+<li>changes in general summary function. callNextMethod changed to as(model, &quot;lmerMod)</li>
+</ul>
+<p>2.0-25</p>
+<ul>
+<li>updated according to comments from CRAN</li>
+</ul>
+<p>2.0-24 changes:</p>
+<ul>
+<li>cleaned the code</li>
+</ul>
+<p>2.0-23 changes:</p>
+<ul>
+<li>hessian and grad changed to mygrad and myhess (deriv.R functions of Rune)</li>
+<li>plots use ggplot2</li>
+<li>look for previous changes in R-Forge</li>
+</ul>
+<p>2.0-11 changes:</p>
+<ul>
+<li>elimRandEffs deleted. now the rand table contains all the information</li>
+</ul>
+<p>2.0-9 changes:</p>
+<ul>
+<li>fixed.calc option is added to step function</li>
+<li>elimRand effs changed: random effects that are 1 approx to 1e-6 are eliminated</li>
+<li>las=2 in barplots: verical axis names contrast with the name &quot;l&quot; changed to &quot;l.lmerTest.private.contrasts&quot;</li>
+</ul>
+<p>2.0-8 changes:</p>
+<ul>
+<li>throws error for lsmeans, difflsmeans, rand and step functions if the model does not inherit lmerMod class</li>
+</ul>
+<p>2.0-7 changes:</p>
+<ul>
+<li>in utils calcSatterth changed: solve of 0 dim matrix now catches in tryCatch - example MAMex.R in tests is added to check the bug</li>
+<li>messages are printed if some computational errors occurr in anova or summary and the ones from lme4 are returned (bugSummary.R for testing)</li>
+</ul>
+<p>2.0.6 changes:</p>
+<ul>
+<li>added a number of tests in the tests folder and inst/datasets for the testing data sets - will not be included in the R-forge nor CRAN (for a moment)</li>
+<li>model is not updated automatically to REML (tests for random effects are ML!)</li>
+<li>man functions updated</li>
+</ul>
+<p>2.0.5 changes:</p>
+<ul>
+<li>fixed bug from Ben - summary(model, &quot;lme4&quot;) changed to summary(model, ddf=&quot;lme4&quot;)</li>
+<li>fixed bug for summary from Cyrus</li>
+<li>added in manual notes regarding random coefficient models simplification</li>
+<li>Rune changed solve to chol2inv in lmerTestFunctions.R</li>
+<li>changed updateModel function so that the bugs with the environmentgs are solved</li>
+</ul>
+<p>2.0.4 new:</p>
+<ul>
+<li>rewritten rand table elimination</li>
+<li>added elimrand.R</li>
+</ul>
+<p>Modifications in lmerTest 2.0.1</p>
+<ul>
+<li>The elim.num column now has KEEP instead of 0</li>
+<li>X'X deficiancy was fixed by Rune, lmerTest was fixed accordingly</li>
+</ul>
