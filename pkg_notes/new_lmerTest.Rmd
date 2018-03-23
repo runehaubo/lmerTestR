@@ -3,10 +3,10 @@ title: "The New **lmerTest** Package"
 author: "Rune Haubo B Christensen on behalf of the **lmerTest** authors"
 date: "March 2018"
 output:
-  pdf_document:
-    toc: no
   html_document:
     toc: yes
+  pdf_document:
+    toc: no
 ---
 
 ```{r setup, include=FALSE}
@@ -29,7 +29,7 @@ The most important changes for end-users are:
 
 1. New functions including `drop1()`, `contest()`, `as_lmerModLmerTest()`, `show_test()`, and `ranova()` -- see details below.
 
-Given that the codebase has been rewritten completely from scratch it is not unlikely that a few 'childhood diseases' are lurking in the details. Please help us cure out such maladies and report bugs if you see them at https://github.com/runehaubo/lmerTestR/issues.
+Given that the codebase has been rewritten completely from scratch it is not unlikely that a few 'childhood diseases' are lurking in the details. Please help us cure out such maladies and report bugs if you see them at https://github.com/runehaubo/lmerTestR/issues. Comments and suggestions are most welcome.
 
 The new user interface is almost 100% backward compatible with previous versions (see details below). An up-to-date version of this document is available [here](https://github.com/runehaubo/lmerTestR/tree/master/pkg_notes/new_lmerTest.pdf).
 
@@ -49,7 +49,7 @@ Methods for `'lmerModLmerTest'` as well as `'lmerMod'` objects -- the latter avo
 
 1. A `show_test()` function which operates on anova tables and LS-means tables (produced by `ls_means`) makes it possible to see exactly which functions of the coefficients are being tested. This is very helpful when differences between type I, II and III anova tables are being considered and discussed.  
 
-1. An `ls_means` functions is provided as an alias for (the perhaps not so intuitively named) `lsmeansLT` function. As the name implies the function computes the so-called least-squares means (classical Yates contrasts) as well as pairwise differences of these.
+1. An `ls_means` functions is provided as an alias for the `lsmeansLT`. As the name implies the function computes the so-called least-squares means (classical Yates contrasts) as well as pairwise differences of these.
 
 1. `lmerTest::lmer` returns an object of class `'lmerModLmerTest'` (previously `'merModLmerTest'`) to clarify that `'lmerModLmerTest'` extends `'lmerMod'` -- not `'merMod'`. The `merMod` class includes generalized and nonlinear mixed models and **lmerTest** is only designed for _linear_ mixed models.
 
@@ -67,7 +67,7 @@ Methods for `'lmerModLmerTest'` as well as `'lmerMod'` objects -- the latter avo
 
 The user interface has been updated with new functionality and extra features as described above. We have tried our best to keep the new version backward compatible, but a few things from the old API have been changed out of necessity: 
 
-1. In `step()` the argument `type` is now being ignored as `drop1()` is always used for reduction of the fixed-effect structure. `type` used to indicate the type of anova table to use for tests of fixed-effect terms, but since it only makes sense to remove marginal terms and `drop1()` provides the test of these terms it does not make sense to use anything but `drop1()` to test the fixed-effect terms. Furthermore type II and III anova tables provide identical tests of marginal terms. Additionally, the arguments `fixed.calc`, `lsmeans.calc`, `difflsmeans.calc`, and `test.effs` are deprecated and attempts to set them leads to a warning; also `keep.effs` has been reduced to `keep`.
+1. In `step()` the argument `type` is now being ignored (with a warning) as `drop1()` is always used for reduction of the fixed-effect structure. `type` used to indicate the type of anova table to use for tests of fixed-effect terms, but since it only makes sense to remove marginal terms and `drop1()` provides the test of these terms it does not make sense to use anything but `drop1()` to test the fixed-effect terms. Furthermore type II and III anova tables provide identical tests of marginal terms. Additionally, the arguments `fixed.calc`, `lsmeans.calc`, `difflsmeans.calc`, and `test.effs` are deprecated and attempts to set them leads to a warning; also `keep.effs` has been reduced to `keep`.
  
 1. The documented behavior of `rand` (which is based on `ranova`) has not changed, but 
 being a new implementation it may behave differently in 'corner' cases.
@@ -78,7 +78,7 @@ being a new implementation it may behave differently in 'corner' cases.
 
 <!-- 1. In the previous **lmerTest** package `lsmeansLT` was provided as an alias for `lsmeans` (and the latter deprecated) to resolve conflicts with the **lsmeans** package. Since **emmeans** is taking over from **lsmeans** we have decided to revive `lsmeans`. -->
 
-1. Plot methods for `step` and `lsmeans` objects have been rewritten and may behave differently. These plot methods are mostly provided for backward compatibility. In general we recommend plot methods provided by the **emmeans** package for plots if LS-means.
+<!-- 1. Plot methods for `step` and `lsmeans` objects have been rewritten and may behave differently. These plot methods are mostly provided for backward compatibility. In general we recommend plot methods provided by the **emmeans** package for plots if LS-means. -->
 
 
 ## Plans for future releases:
@@ -155,6 +155,9 @@ lmerTest_summary <- function(object, ...) {
 }
 ```
 
+3. In practice you include these two functions in a file, say `<my-package>/R/lmerTest_utils.R` and then change all calls of the type `lmerTest::anova` and `lmerTest::summary` to `lmerTest_anova` and `lmerTest_summary` respectively. You will also need to add `importFrom(methods, as)`, `importFrom(utils, packageVersion)` and `importFrom(stats, anova)` to the `NAMESPACE` file if they are not there already; also add `methods` under `Imports` in the `DESCRIPTION` file. 
+
+4. When the new version of **lmerTest** is on CRAN you don't need (but can use) `lmerTest_anova` and `lmerTest_summary` in your package anymore. Going forward all that is needed is `summary(object)` and `anova(object)` (without `lmerTest::` prepended!) if `object` is of class `lmerModLmerTest`. If `object` is of class `lmerMod` (i.e. fitted with `lme4::lmer`) then you need to coerce to class `lmerModLmerTest` before you can use the `anova` and `summary` methods from `lmerTest`: first `obj <- as_lmerModLmerTest(object)` (or `obj <- lmerTest::as_lmerModLmerTest(object)`) then `summary(obj)` or `anova(obj)`.
 
 <!-- ## Key features of the update: -->
 
