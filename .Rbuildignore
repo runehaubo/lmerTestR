@@ -8,6 +8,7 @@ README.md
 ^revdep$
 ^revdep_archive$
 ^pkg_notes$
+^misc$
 TODO.md
 .Rhistory
 ^.*\.Rproj$
