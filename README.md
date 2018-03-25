@@ -4,7 +4,7 @@ This is the repo for the _new_ **lmerTest** package, the old package is availabl
 
 ## Main features
 
-The **lmerTest** package provides $p$-values in type I, II or III `anova` and `summary`
+The **lmerTest** package provides _p_-values in type I, II or III `anova` and `summary`
 tables for linear mixed models (`lmer` model fits cf. **lme4**) via Satterthwaite's degrees of freedom method; a Kenward-Roger method is also available via the **pbkrtest**
 package. Model selection and assessment methods include `step`, `drop1`, anova-like 
 tables for random effects (`ranova`), least-square means (LS-means; `ls_means`) 
@@ -49,7 +49,7 @@ If you haven't already installed a previous version of **lmerTest** you need to 
 An alternative is to use 
 ```
 library("devtools")
-install_github("runehaubo/lmerTest", dependencies=TRUE)
+install_github("runehaubo/lmerTestR", dependencies=TRUE)
 ```
 but that requires you to install all dependent packages from source (which only works if you have the correct compilers installed and set up correctly); installing the pre-compiled packages from CRAN is usually easier.
 
