@@ -1,4 +1,14 @@
 # test_ranova.R
+
+# Test functionality _before_ attaching lmerTest
+stopifnot(!"lmerTest" %in% .packages()) # ensure that lmerTest is NOT attached
+data("sleepstudy", package="lme4")
+f <- function(form, data) lmerTest::lmer(form, data=data)
+form <- "Reaction ~ Days + (Days|Subject)"
+fm <- f(form, data=sleepstudy)
+lmerTest::ranova(fm)
+lmerTest::step(fm)
+
 library(lmerTest)
 
 # WRE says "using if(requireNamespace("pkgname")) is preferred, if possible."
@@ -154,19 +164,12 @@ step(fm)
 ranova(fm) # OK
 detach(sleepstudy)
 
-# Evaluating in a function leads to an error:
+# Evaluating in a function works:
 f <- function(form, data) lmer(form, data=data)
-form <- formula("Reaction ~ Days + (Days|Subject)")
+form <- "Reaction ~ Days + (Days|Subject)"
 fm <- f(form, data=sleepstudy)
-assertError(ranova(fm))
-assertError(step(fm))
-
-# Evaluating in parent environment does not help:
-f <- function(form, data) eval.parent(lmer(form, data=data))
-form <- formula("Reaction ~ Days + (Days|Subject)")
-fm <- f(form, data=sleepstudy)
-assertError(ranova(fm))
-assertError(step(fm))
+ranova(fm)
+step(fm)
 
 #####################################################################
 # Model with 2 ranef covarites:

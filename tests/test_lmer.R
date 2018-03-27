@@ -1,4 +1,29 @@
 # test_lmer.R
+
+stopifnot(!"lmerTest" %in% .packages()) # ensure that lmerTest is NOT attached
+data("sleepstudy", package="lme4")
+f <- function(form, data) lmerTest::lmer(form, data=data)
+form <- "Reaction ~ Days + (Days|Subject)"
+fm <- f(form, data=sleepstudy)
+anova(fm)
+summary(fm)
+
+# cf. GitHub issue #2:
+test <- function() {
+  tmp <- sleepstudy
+  m <- lmerTest::lmer(Reaction ~ Days + (Days | Subject), data = tmp)
+  summary(m)
+}
+test()
+test <- function() {
+  tmp <- sleepstudy
+  m <- lme4::lmer(Reaction ~ Days + (Days | Subject), data = tmp)
+  if(requireNamespace("lmerTest", quietly = TRUE)) {
+    summary(lmerTest::as_lmerModLmerTest(m))
+  }
+}
+test()
+
 library(lmerTest)
 
 # WRE says "using if(requireNamespace("pkgname")) is preferred, if possible."

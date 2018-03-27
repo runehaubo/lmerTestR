@@ -162,11 +162,27 @@ as_lmerModLmerTest <- function(model, tol=1e-8) {
   if(!inherits(model, "lmerMod"))
     stop("model not of class 'lmerMod': cannot coerce to class 'lmerModLmerTest")
   # Extract deviance function and REML indicator
-  # if 'control' is not set we suppress potential message about rank deficient X:
-  devfun <- if("control" %in% names(as.list(getCall(model))))
-    update(model, devFunOnly=TRUE) else
-      update(model, devFunOnly=TRUE,
-             control=lmerControl(check.rankX = "silent.drop.cols"))
+  # 'Tricks' to ensure that we get the data to construct devfun even when
+  # lmerTest is not attached:
+  mc <- getCall(model)
+  args <- c(as.list(mc), devFunOnly=TRUE)
+  # if 'control' is not set we suppress potential message about rank deficient X
+  # when evaulating devfun:
+  if(!"control" %in% names(as.list(mc)))
+    args$control <- lme4::lmerControl(check.rankX = "silent.drop.cols")
+  Call <- as.call(c(list(quote(lme4::lmer)), args[-1]))
+  ff <- environment(formula(model))
+  pf <- parent.frame()  ## save parent frame in case we need it
+  sf <- sys.frames()[[1]]
+  ff2 <- environment(model)
+  devfun <- tryCatch(eval(Call, envir=ff),
+                     error=function(e) {
+                       tryCatch(eval(call, envir=sf),
+                                error=function(e) {
+                                  tryCatch(eval(call, envir=pf),
+                                           error=function(e) {
+                                             eval(call, envir=ff2)
+                                           })})})
   is_reml <- getME(model, "is_REML")
   # Coerce 'lme4-model' to 'lmerModLmerTest':
   res <- as(model, "lmerModLmerTest")
