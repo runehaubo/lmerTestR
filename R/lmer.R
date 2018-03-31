@@ -29,6 +29,7 @@
 #
 # --- utility functions: ---
 #
+# as_lmerModLT
 # devfun_vp
 # get_covbeta
 #
@@ -107,14 +108,72 @@ lmer <- function(formula, data = NULL, REML = TRUE,
                  control = lmerControl(), start = NULL, verbose = 0L,
                  subset, weights, na.action, offset, contrasts = NULL,
                  devFunOnly = FALSE, ...) {
-  mc <- match.call()
+  orig_call <- mc <- match.call()
   mc[[1L]] <- quote(lme4::lmer)
   model <- eval.parent(mc)
+  if(devFunOnly) return(model)
   # Make an lmerModLmerTest object:
-  model <- as_lmerModLmerTest(model)
+  args <- as.list(mc)
+  args$devFunOnly <- TRUE
+  # args <- c(as.list(mc), devFunOnly=TRUE)
+  # if 'control' is not set we suppress potential message about rank deficient X
+  # when evaluating devfun:
+  if(!"control" %in% names(as.list(mc)))
+    args$control <- lme4::lmerControl(check.rankX = "silent.drop.cols")
+  Call <- as.call(c(list(quote(lme4::lmer)), args[-1]))
+  devfun <- eval.parent(Call)
+  res <- as_lmerModLT(model, devfun)
   # Restore the right 'call' in model:
-  model@call[[1L]] <- quote(lmer)
-  return(model)
+  res@call <- orig_call
+  return(res)
+}
+
+##############################################
+######## as_lmerModLT()
+##############################################
+as_lmerModLT <- function(model, devfun, tol=1e-8) {
+  is_reml <- getME(model, "is_REML")
+  # Coerce 'lme4-model' to 'lmerModLmerTest':
+  res <- as(model, "lmerModLmerTest")
+  # Set relevant slots of the new model object:
+  res@sigma <- sigma(model)
+  res@vcov_beta <- as.matrix(vcov(model))
+  varpar_opt <- unname(c(res@theta, res@sigma))
+  # Compute Hessian:
+  h <- numDeriv::hessian(func=devfun_vp, x=varpar_opt, devfun=devfun,
+                         reml=is_reml)
+  # Eigen decompose the Hessian:
+  eig_h <- eigen(h, symmetric=TRUE)
+  evals <- eig_h$values
+  neg <- evals < -tol
+  pos <- evals > tol
+  zero <- evals > -tol & evals < tol
+  if(sum(neg) > 0) { # negative eigenvalues
+    eval_chr <- if(sum(neg) > 1) "eigenvalues" else "eigenvalue"
+    evals_num <- paste(sprintf("%1.1e", evals[neg]), collapse = " ")
+    warning(sprintf("Model failed to converge with %d negative %s: %s",
+                    sum(neg), eval_chr, evals_num), call.=FALSE)
+  }
+  # Note: we warn about negative AND zero eigenvalues:
+  if(sum(zero) > 0) { # some eigenvalues are zero
+    eval_chr <- if(sum(zero) > 1) "eigenvalues" else "eigenvalue"
+    evals_num <- paste(sprintf("%1.1e", evals[zero]), collapse = " ")
+    warning(sprintf("Model may not have converged with %d %s close to zero: %s",
+                    sum(zero), eval_chr, evals_num))
+  }
+  # Compute vcov(varpar):
+  pos <- eig_h$values > tol
+  q <- sum(pos)
+  # Using the Moore-Penrose generalized inverse for h:
+  h_inv <- with(eig_h, {
+    vectors[, pos, drop=FALSE] %*% diag(1/values[pos], nrow=q) %*%
+      t(vectors[, pos, drop=FALSE]) })
+  res@vcov_varpar <- 2 * h_inv # vcov(varpar)
+  # Compute Jacobian of cov(beta) for each varpar and save in list:
+  Jac <- numDeriv::jacobian(func=get_covbeta, x=varpar_opt, devfun=devfun)
+  res@Jac_list <- lapply(1:ncol(Jac), function(i)
+    array(Jac[, i], dim=rep(length(res@beta), 2))) # k-list of jacobian matrices
+  res
 }
 
 ##############################################
@@ -157,13 +216,12 @@ lmer <- function(formula, data = NULL, REML = TRUE,
 #' bm <- as_lmerModLmerTest(m)
 #' slotNames(bm)
 #'
-#' @keywords internal
 as_lmerModLmerTest <- function(model, tol=1e-8) {
   if(!inherits(model, "lmerMod"))
     stop("model not of class 'lmerMod': cannot coerce to class 'lmerModLmerTest")
-  # Extract deviance function and REML indicator
+  # Get devfun:
   # 'Tricks' to ensure that we get the data to construct devfun even when
-  # lmerTest is not attached:
+  # lmerTest is not attached or called inside a function:
   mc <- getCall(model)
   args <- c(as.list(mc), devFunOnly=TRUE)
   # if 'control' is not set we suppress potential message about rank deficient X
@@ -175,57 +233,17 @@ as_lmerModLmerTest <- function(model, tol=1e-8) {
   pf <- parent.frame()  ## save parent frame in case we need it
   sf <- sys.frames()[[1]]
   ff2 <- environment(model)
-  devfun <- tryCatch(eval(Call, envir=ff),
+  devfun <- tryCatch(eval(Call, envir=pf),
                      error=function(e) {
-                       tryCatch(eval(call, envir=sf),
+                       tryCatch(eval(call, envir=ff),
                                 error=function(e) {
-                                  tryCatch(eval(call, envir=pf),
+                                  tryCatch(eval(call, envir=ff2),
                                            error=function(e) {
-                                             eval(call, envir=ff2)
+                                             eval(call, envir=sf)
                                            })})})
-  is_reml <- getME(model, "is_REML")
-  # Coerce 'lme4-model' to 'lmerModLmerTest':
-  res <- as(model, "lmerModLmerTest")
-  # Set relevant slots of the new model object:
-  res@sigma <- sigma(model)
-  res@vcov_beta <- as.matrix(vcov(model))
-  varpar_opt <- unname(c(res@theta, res@sigma))
-  # Compute Hessian:
-  h <- numDeriv::hessian(func=devfun_vp, x=varpar_opt, devfun=devfun,
-                         reml=is_reml)
-  # Eigen decompose the Hessian:
-  eig_h <- eigen(h, symmetric=TRUE)
-  evals <- eig_h$values
-  neg <- evals < -tol
-  pos <- evals > tol
-  zero <- evals > -tol & evals < tol
-  if(sum(neg) > 0) { # negative eigenvalues
-    eval_chr <- if(sum(neg) > 1) "eigenvalues" else "eigenvalue"
-    evals_num <- paste(sprintf("%1.1e", evals[neg]), collapse = " ")
-    warning(sprintf("Model failed to converge with %d negative %s: %s",
-                    sum(neg), eval_chr, evals_num), call.=FALSE)
-  }
-  # Note: we warn about negative AND zero eigenvalues:
-  if(sum(zero) > 0) { # some eigenvalues are zero
-    eval_chr <- if(sum(zero) > 1) "eigenvalues" else "eigenvalue"
-    evals_num <- paste(sprintf("%1.1e", evals[zero]), collapse = " ")
-    warning(sprintf("Model may not have converged with %d %s close to zero: %s",
-                    sum(zero), eval_chr, evals_num))
-
-  }
-  # Compute vcov(varpar):
-  pos <- eig_h$values > tol
-  q <- sum(pos)
-  # Using the Moore-Penrose generalized inverse for h:
-  h_inv <- with(eig_h, {
-    vectors[, pos, drop=FALSE] %*% diag(1/values[pos], nrow=q) %*%
-      t(vectors[, pos, drop=FALSE]) })
-  res@vcov_varpar <- 2 * h_inv # vcov(varpar)
-  # Compute Jacobian of cov(beta) for each varpar and save in list:
-  Jac <- numDeriv::jacobian(func=get_covbeta, x=varpar_opt, devfun=devfun)
-  res@Jac_list <- lapply(1:ncol(Jac), function(i)
-    array(Jac[, i], dim=rep(length(res@beta), 2))) # k-list of jacobian matrices
-  return(res)
+  if(!is.function(devfun) || names(formals(devfun)[1]) != "theta")
+    stop("Unable to extract deviance function from model fit")
+  as_lmerModLT(model, devfun, tol=tol)
 }
 
 

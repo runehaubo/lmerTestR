@@ -43,4 +43,3 @@ the class definition in \code{\link{lmerModLmerTest}}) and
 \author{
 Rune Haubo B. Christensen
 }
-\keyword{internal}

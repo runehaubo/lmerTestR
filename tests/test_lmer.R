@@ -44,6 +44,38 @@ stopifnot(
 )
 
 #####################################################################
+# Test evaluation of update inside a function:
+myupdate <- function(m, ...) {
+  update(m, ...)
+}
+
+data("sleepstudy", package="lme4")
+fm1 <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy)
+tmp <- sleepstudy
+rm(sleepstudy)
+fmA <- update(fm1, data = tmp) # works
+fmB <- myupdate(fm1, data = tmp) # also works
+# Same except for 'call':
+fmB@call <- fmA@call
+stopifnot(isTRUE(all.equal(fmA, fmB)))
+# Based on bug-report by Henrik Singmann, github issue #3
+
+#####################################################################
+# Check that devFunOnly argument works:
+data("sleepstudy", package="lme4")
+fun <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy, devFunOnly = TRUE)
+stopifnot(is.function(fun) && names(formals(fun)[1]) == "theta")
+fm1 <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy)
+fun <- update(fm1, devFunOnly=TRUE)
+stopifnot(is.function(fun) && names(formals(fun)[1]) == "theta")
+# devFunOnly = FALSE:
+notfun <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy, devFunOnly = FALSE)
+stopifnot(inherits(notfun, "lmerModLmerTest"))
+# Partial matching:
+notfun <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy, devFun = FALSE)
+stopifnot(inherits(notfun, "lmerModLmerTest"))
+
+#####################################################################
 # Use of as_lmerModLmerTest
 data("sleepstudy", package="lme4")
 m <- lme4::lmer(Reaction ~ Days + (Days | Subject), sleepstudy)
