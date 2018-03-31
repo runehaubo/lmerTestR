@@ -235,11 +235,11 @@ as_lmerModLmerTest <- function(model, tol=1e-8) {
   ff2 <- environment(model)
   devfun <- tryCatch(eval(Call, envir=pf),
                      error=function(e) {
-                       tryCatch(eval(call, envir=ff),
+                       tryCatch(eval(Call, envir=ff),
                                 error=function(e) {
-                                  tryCatch(eval(call, envir=ff2),
+                                  tryCatch(eval(Call, envir=ff2),
                                            error=function(e) {
-                                             eval(call, envir=sf)
+                                             eval(Call, envir=sf)
                                            })})})
   if(!is.function(devfun) || names(formals(devfun)[1]) != "theta")
     stop("Unable to extract deviance function from model fit")
