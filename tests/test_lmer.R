@@ -61,6 +61,18 @@ stopifnot(isTRUE(all.equal(fmA, fmB)))
 # Based on bug-report by Henrik Singmann, github issue #3
 
 #####################################################################
+# Test error message from as_lmerModLmerTest:
+data("sleepstudy", package="lme4")
+myfit <- function(formula, data) {
+  lme4::lmer(formula = formula, data = data)
+}
+fm2 <- myfit(Reaction ~ Days + (Days|Subject), sleepstudy)
+m <- assertError(as_lmerModLmerTest(fm2))
+stopifnot(
+  grepl("Unable to extract deviance function from model fit", m[[1]], fixed=TRUE)
+)
+
+#####################################################################
 # Check that devFunOnly argument works:
 data("sleepstudy", package="lme4")
 fun <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy, devFunOnly = TRUE)

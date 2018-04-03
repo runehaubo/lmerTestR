@@ -239,9 +239,11 @@ as_lmerModLmerTest <- function(model, tol=1e-8) {
                                 error=function(e) {
                                   tryCatch(eval(Call, envir=ff2),
                                            error=function(e) {
-                                             eval(Call, envir=sf)
-                                           })})})
-  if(!is.function(devfun) || names(formals(devfun)[1]) != "theta")
+                                             tryCatch(eval(Call, envir=sf),
+                                                      error=function(e) {
+                                                        "error" })})})})
+  if((is.character(devfun) && devfun == "error") ||
+     !is.function(devfun) || names(formals(devfun)[1]) != "theta")
     stop("Unable to extract deviance function from model fit")
   as_lmerModLT(model, devfun, tol=tol)
 }
