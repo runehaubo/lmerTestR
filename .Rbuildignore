@@ -13,3 +13,5 @@ NEWS.html
 TODO.md
 .Rhistory
 ^.*\.Rproj$
+^\.travis.yml$
+
