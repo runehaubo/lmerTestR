@@ -1,0 +1,35 @@
+# .travis.yml for Travis CI
+# https://docs.travis-ci.com/user/languages/r
+# https://github.com/craigcitro/r-travis/wiki/Porting-to-native-R-support-in-Travis
+
+language: r
+r:
+  - oldrel
+  - release
+  - devel
+cache: packages
+# helpful when preparing your package for submission to CRAN
+warnings_are_errors: true
+# No need for sudo as R is natively supported now.
+sudo: false
+# r_build_args: --no-build-vignettes
+# r_check_args: --as-cran --no-build-vignettes 
+
+# Need chicago.bst for the vignette bibliographi:
+before_install:
+  - tlmgr install chicago
+
+# need to add nloptr this way to make it build in 'oldrel':
+addons:
+  apt:
+    packages:
+      - libnlopt-dev
+
+env:
+ global:
+   - CRAN: http://cran.rstudio.com
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change

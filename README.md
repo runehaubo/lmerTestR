@@ -2,6 +2,12 @@
 
 This is the repo for the _new_ **lmerTest** package, the old package is available [here](https://github.com/runehaubo/lmerTest).
 
+[![Build Status](https://travis-ci.org/runehaubo/lmerTestR.svg?branch=master)](https://travis-ci.org/runehaubo/lmerTestR)
+[![cran version](http://www.r-pkg.org/badges/version/lmerTest)](https://cran.r-project.org/package=lmerTest)
+[![downloads](https://cranlogs.r-pkg.org/badges/lmerTest)](https://cran.r-project.org/package=lmerTest)
+[![total downloads](http://cranlogs.r-pkg.org/badges/grand-total/lmerTest)](http://cranlogs.r-pkg.org/badges/grand-total/lmerTest)
+[![Research software impact](http://depsy.org/api/package/cran/lmerTest/badge.svg)](http://depsy.org/package/r/lmerTest)
+
 ## Main features
 
 The **lmerTest** package provides _p_-values in type I, II or III `anova` and `summary`
