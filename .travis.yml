@@ -13,11 +13,11 @@ warnings_are_errors: true
 # No need for sudo as R is natively supported now.
 sudo: false
 # r_build_args: --no-build-vignettes
-# r_check_args: --as-cran --no-build-vignettes 
+# r_check_args: --as-cran --no-build-vignettes
 
-# Need chicago.bst for the vignette bibliographi:
-before_install:
-  - tlmgr install chicago
+# chicago.bst not needed for the vignette bibliographi:
+# before_install:
+#   - tlmgr install chicago
 
 # need to add nloptr this way to make it build in 'oldrel':
 addons:
