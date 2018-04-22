@@ -33,6 +33,7 @@ assertError <- function(expr, ...)
 assertWarning <- function(expr, ...)
   if(requireNamespace("tools")) tools::assertWarning(expr, ...) else invisible()
 
+TOL <- 1e-4
 
 #####################################################################
 # Check that lme4::lmer and lmerTest::lmer have the same arguments
@@ -57,7 +58,7 @@ fmA <- update(fm1, data = tmp) # works
 fmB <- myupdate(fm1, data = tmp) # also works
 # Same except for 'call':
 fmB@call <- fmA@call
-stopifnot(isTRUE(all.equal(fmA, fmB)))
+stopifnot(isTRUE(all.equal(fmA, fmB, tolerance=TOL)))
 # Based on bug-report by Henrik Singmann, github issue #3
 
 #####################################################################
@@ -124,6 +125,6 @@ stopifnot(
   inherits(m, "lmerModLmerTest"),
   inherits(m1, "lmerModLmerTest"),
   inherits(m2, "lmerModLmerTest"),
-  all.equal(m1, m2)
+  all.equal(m1, m2, tolerance=1e-6)
 )
 

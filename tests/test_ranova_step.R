@@ -18,6 +18,7 @@ assertError <- function(expr, ...)
 assertWarning <- function(expr, ...)
   if(requireNamespace("tools")) tools::assertWarning(expr, ...) else invisible()
 
+TOL <- 1e-4
 #####################################################################
 data("sleepstudy", package="lme4")
 
@@ -37,7 +38,7 @@ get_model(stp)
 (ana <- anova(fm1, fm2, refit=FALSE))
 
 stopifnot(
-  all.equal(an[2L, "LRT"], ana[2L, "Chisq"])
+  all.equal(an[2L, "LRT"], ana[2L, "Chisq"], tolerance=TOL)
 )
 
 # Illustrate complete.test argument:
@@ -50,7 +51,7 @@ LRT <- 2*c(logLik(fm1, REML=TRUE) - logLik(fm3, REML=TRUE)) # LRT
 stopifnot(
   nrow(an) == 2L,
   an[2L, "Df"] == 3L,
-  all.equal(an[2L, "LRT"], LRT)
+  all.equal(an[2L, "LRT"], LRT, tolerance=TOL)
 )
 
 ## _NULL_ model:
@@ -67,9 +68,9 @@ lm2 <- lm(Reaction ~ Days, sleepstudy)
 (an1 <- ranova(fm1))
 (an2 <- anova(fm1, lm2))
 stopifnot(
-  all.equal(an1[2, "LRT"], an2[2, "Chisq"]),
-  all.equal(an1[2, "Df"], an2[2, "Chi Df"]),
-  all.equal(an1[1:2, "logLik"], an2[2:1, "logLik"])
+  all.equal(an1[2, "LRT"], an2[2, "Chisq"], tolerance=TOL),
+  all.equal(an1[2, "Df"], an2[2, "Chi Df"], tolerance=TOL),
+  all.equal(an1[1:2, "logLik"], an2[2:1, "logLik"], tolerance=TOL)
 )
 
 # Expect warnings when old (version < 3.0-0) arguments are used:
@@ -115,7 +116,7 @@ fm1 <- lmer(Reaction ~ Days + (-1 + Days|Subject), sleepstudy)
 step(fm1)
 (an3 <- ranova(fm1)) # no test of non-nested models
 stopifnot(
-  all.equal(an, an3, check.attributes=FALSE)
+  all.equal(an, an3, check.attributes=FALSE, tolerance=TOL)
 )
 
 # Example where comparison of non-nested models is generated
@@ -153,7 +154,7 @@ fm <- lmer(Coloursaturation ~ TVset * Picture +
 step(fm)
 (an2 <- ranova(fm))
 stopifnot(
-  all.equal(an1, an2, check.attributes=FALSE)
+  all.equal(an1, an2, check.attributes=FALSE, tolerance=TOL)
 )
 
 #####################################################################
@@ -177,7 +178,7 @@ step(fm)
 # Model of the form (x1 + x2 | gr):
 model <- lmer(Preference ~ sens2 + Homesize + (sens1 + sens2 | Consumer)
               , data=carrots)
-step(model, )
+step(model)
 stopifnot(
   nrow(ranova(model)) == 3L,
   nrow(ranova(model, reduce.terms = FALSE)) == 2L
@@ -206,8 +207,8 @@ an2 <- ranova(model)
 an2b <- ranova(model, reduce.terms = FALSE)
 
 stopifnot(
-  all.equal(an1, an2, check.attributes=FALSE),
-  all.equal(an1b, an2b, check.attributes=FALSE)
+  all.equal(an1, an2, check.attributes=FALSE, tolerance=TOL),
+  all.equal(an1b, an2b, check.attributes=FALSE, tolerance=TOL)
 )
 
 ####### Polynomial terms:
