@@ -128,6 +128,17 @@ lmer <- function(formula, data = NULL, REML = TRUE,
   return(res)
 }
 
+#' @rawNamespace
+#' if(getRversion() >= "3.3.0") {
+#'   importFrom("stats", sigma)
+#' } else {
+#'   export(sigma)
+#' }
+#'
+if(getRversion() < "3.3") {
+  sigma <- function(object, ...) UseMethod("sigma")
+}
+
 ##############################################
 ######## as_lmerModLT()
 ##############################################
@@ -205,7 +216,7 @@ as_lmerModLT <- function(model, devfun, tol=1e-8) {
 #' \code{\link{lmer}}
 #'
 #' @importFrom numDeriv hessian jacobian
-#' @importFrom stats vcov update sigma
+#' @importFrom stats vcov update
 #' @importFrom lme4 getME
 #'
 #' @author Rune Haubo B. Christensen
