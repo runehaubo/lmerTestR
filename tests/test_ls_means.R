@@ -2,6 +2,8 @@
 
 library(lmerTest)
 
+TOL <- 1e-4
+
 ########### Basic model structures:
 
 # Factor * covariate:
@@ -13,7 +15,7 @@ stopifnot(
   ncol(lsm) == 7L,
   # Balanced, so LS-means equal raw means:
   isTRUE(all.equal(c(with(cake, tapply(angle, recipe, mean))), lsm[, "Estimate"],
-                   check.attributes=FALSE))
+                   check.attributes=FALSE, tolerance=TOL))
 )
 
 # Pairwise differences of LS-means:
@@ -21,9 +23,9 @@ plsm <- ls_means(model, pairwise = TRUE)
 plsm2 <- difflsmeans(model)
 C <- as.matrix(lmerTest:::get_pairs(rownames(lsm)))
 stopifnot(
-  isTRUE(all.equal(plsm, plsm2)),
+  isTRUE(all.equal(plsm, plsm2, tolerance=TOL)),
   isTRUE(all.equal(plsm[, "Estimate"], c(lsm[, "Estimate"] %*% C),
-                   check.attributes=FALSE))
+                   check.attributes=FALSE, tolerance=TOL))
 )
 
 # Contrasts vectors:
@@ -38,7 +40,7 @@ stopifnot(
   ncol(lsm) == 7L,
   # Balanced, so LS-means equal raw means:
   isTRUE(all.equal(lsm[1:3, ], lsm2[1:3, ],
-                   check.attributes=FALSE))
+                   check.attributes=FALSE, tolerance=TOL))
 )
 
 
@@ -48,7 +50,7 @@ cake2$temperature <- factor(cake2$temperature, ordered = FALSE)
 model <- lmer(angle ~ recipe * temperature + (1|recipe:replicate), cake2)
 (lsm3 <- ls_means(model))
 stopifnot(
-  isTRUE(all.equal(lsm2, lsm3, check.attributes=FALSE))
+  isTRUE(all.equal(lsm2, lsm3, check.attributes=FALSE, tolerance=TOL))
 )
 
 # Covariate (only):
@@ -76,7 +78,7 @@ model <- lmer(angle ~ recipe * temperature + (1|recipe:replicate), cake2)
 stopifnot(
   nrow(lsm4) == 3L,
   ncol(lsm4) == 7L,
-  isTRUE(all.equal(lsm3[1:3, ], lsm4, check.attributes=FALSE))
+  isTRUE(all.equal(lsm3[1:3, ], lsm4, check.attributes=FALSE, tolerance=TOL))
 )
 
 # KR:
@@ -129,7 +131,7 @@ model <- lmer(angle ~ recipe * temperature + (1|recipe:replicate), cake3,
 # show_tests(lsm7)
 # show_tests(lsm8)
 stopifnot(
-  isTRUE(all.equal(lsm7, lsm8, check.attributes=FALSE))
+  isTRUE(all.equal(lsm7, lsm8, check.attributes=FALSE, tolerance=TOL))
 )
 
 # ambient contrasts not contr.treatment:
@@ -140,7 +142,7 @@ model <- lmer(angle ~ recipe * temperature + (1|recipe:replicate), cake3)
 options(contrasts = c("contr.treatment", "contr.poly"))
 options("contrasts")
 stopifnot(
-  isTRUE(all.equal(lsm7, lsm9, check.attributes=FALSE))
+  isTRUE(all.equal(lsm7, lsm9, check.attributes=FALSE, tolerance=TOL))
 )
 
 

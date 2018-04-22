@@ -18,7 +18,7 @@ m
 # check that fit has a zero variance
 vc <- as.data.frame(VarCorr(m))
 stopifnot(isTRUE(
-  all.equal(0, vc[vc$grp == "g", "sdcor"], tol=1e-4)
+  all.equal(0, vc[vc$grp == "g", "sdcor"], tolerance=1e-4)
 ))
 # The hessian/vcov is actually positive definite:
 stopifnot(isTRUE(

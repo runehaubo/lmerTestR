@@ -8,6 +8,7 @@ assertError <- function(expr, ...)
   if(requireNamespace("tools")) tools::assertError(expr, ...) else invisible()
 assertWarning <- function(expr, ...)
   if(requireNamespace("tools")) tools::assertWarning(expr, ...) else invisible()
+TOL <- 1e-4
 
 data("sleepstudy", package="lme4")
 
@@ -27,7 +28,7 @@ tests2 <- show_tests(an2)
 
 stopifnot(
   # Tests are the same:
-  isTRUE(all.equal(an1, an2, check.attributes = FALSE)),
+  isTRUE(all.equal(an1, an2, check.attributes = FALSE, tolerance=TOL)),
   # But contrast matrices are not:
   all(!mapply(function(x, y) isTRUE(all.equal(x, y)), tests1, tests2))
 )

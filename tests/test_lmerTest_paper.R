@@ -43,16 +43,16 @@ L <- cbind(array(0, dim=c(6, 6)), diag(6))
 (ran_C <- ranova(m.carrots))
 
 # Compare to validated outputs:
-tol <- 1e-4
+TOL <- 1e-4
 stopifnot(
-  isTRUE(all.equal(an8.2_save, an8.2, check.attributes = FALSE, tolerance=tol)),
-  isTRUE(all.equal(ankr8.2_save, ankr8.2, check.attributes = FALSE, tolerance=tol)),
-  isTRUE(all.equal(sum8.3_save, sum8.3, check.attributes = FALSE, tolerance=tol)),
+  isTRUE(all.equal(an8.2_save, an8.2, check.attributes = FALSE, tolerance=TOL)),
+  isTRUE(all.equal(ankr8.2_save, ankr8.2, check.attributes = FALSE, tolerance=TOL)),
+  isTRUE(all.equal(sum8.3_save, sum8.3, check.attributes = FALSE, tolerance=TOL)),
   isTRUE(all.equal(elim_tab_random8.4_save, elim_tab_random8.4,
-                   check.attributes = FALSE, tolerance=tol)),
+                   check.attributes = FALSE, tolerance=TOL)),
   isTRUE(all.equal(elim_tab_fixed8.4_save, elim_tab_fixed8.4,
-                   check.attributes = FALSE, tolerance=tol)),
-  isTRUE(all.equal(an8.4_save, an8.4, check.attributes = FALSE, tolerance=tol)),
-  isTRUE(all.equal(con1_8.5_save, con1_8.5, check.attributes = FALSE, tolerance=tol)),
-  isTRUE(all.equal(con2_8.5_save, con2_8.5, check.attributes = FALSE, tolerance=tol))
+                   check.attributes = FALSE, tolerance=TOL)),
+  isTRUE(all.equal(an8.4_save, an8.4, check.attributes = FALSE, tolerance=TOL)),
+  isTRUE(all.equal(con1_8.5_save, con1_8.5, check.attributes = FALSE, tolerance=TOL)),
+  isTRUE(all.equal(con2_8.5_save, con2_8.5, check.attributes = FALSE, tolerance=TOL))
 )

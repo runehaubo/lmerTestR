@@ -18,12 +18,13 @@ m.carrots <- lmer(Preference ~ sens2*Frequency*Income
 an.m <- anova(m.carrots)
 
 TOL <- 1e-4
+TOL2 <- 1e-5
 # with 4 decimals should agree with SAS output
 # numbers before decimals should agree with SAS output
 stopifnot(
   all.equal(an.m[,"Pr(>F)"],
             c(2e-5, 0.15512,  0.06939, 0.08223, 0.52459, 0.03119, 0.48344),
-            tol = TOL),
+            tolerance = TOL),
   all.equal(round(an.m$DenDF), c(83, 83, 83, 83, 83, 83, 83))
 )
 
@@ -34,7 +35,7 @@ stopifnot(
                      0.088231, 0.846000, 0.354472, 0.526318, 0.020646, 0.010188,
                      0.031242, 0.055356, 0.694689, 0.099382, 0.28547,
                      0.977774, 0.855653, 0.427737, 0.321086, 0.417465 , 0.204385, 0.784437,
-                     0.681434, 0.106180, 0.149122, 0.390870, 0.273686), tol=TOL,
+                     0.681434, 0.106180, 0.149122, 0.390870, 0.273686), tolerance=TOL,
                    check.attributes = FALSE))
 )
 
@@ -56,17 +57,16 @@ m <- lmer(Informed.liking ~ Product*Information*Gender
 
 
 lsm <- lsmeansLT(m, which = "Product")
-head(lsm)
+# head(lsm)
 
-TOL <- 1e-5
 stopifnot(
   isTRUE(all.equal(lsm[, "Estimate"], c(5.8084, 5.1012, 6.0909, 5.9256),
                    tol=TOL, check.attributes = FALSE)),
-  isTRUE(all.equal(round(lsm[, "t value"], 2), c(24.93, 21.89, 26.14, 25.43), tol=TOL,
+  isTRUE(all.equal(round(lsm[, "t value"], 2), c(24.93, 21.89, 26.14, 25.43), tolerance=TOL,
                    check.attributes = FALSE)),
-  isTRUE(all.equal(lsm[, "lower"], c(5.3499, 4.6428, 5.6324, 5.4672), tol=TOL,
+  isTRUE(all.equal(lsm[, "lower"], c(5.3499, 4.6428, 5.6324, 5.4672), tolerance=TOL,
                    check.attributes = FALSE)),
-  isTRUE(all.equal(lsm[, "upper"], c(6.2668, 5.5597, 6.5493, 6.3840), tol=TOL,
+  isTRUE(all.equal(lsm[, "upper"], c(6.2668, 5.5597, 6.5493, 6.3840), tolerance=TOL,
                    check.attributes = FALSE))
 )
 
@@ -86,9 +86,8 @@ summary(m.carrots)
 # coef(summary(fm))
 # Here the F value is a little greater than the squared t-value (as expected)
 
-TOL <- 1e-5
-stopifnot(all.equal(an.1[, "F value"], c(56.5394, 4169.87), tol = TOL),
-          all.equal(an.3[, "F value"], c(54.8206, 4169.87), tol = TOL))
+stopifnot(all.equal(an.1[, "F value"], c(56.5394, 4169.87), tolerance = TOL2),
+          all.equal(an.3[, "F value"], c(54.8206, 4169.87), tolerance = TOL2))
 
 
 ################################################################################
@@ -106,14 +105,13 @@ model <- lmer(y ~ a*b + (1|f), data=dd)
 model2 <- lmer(y ~ b*a + (1|f), data=dd)
 (an <- anova(model, type=2))
 (an2 <- anova(model2, type=2))
-TOL <- 1e-5
 stopifnot(
-  isTRUE(all.equal(an,an2[c(2,1,3),], check.attributes = FALSE, tol=TOL))
+  isTRUE(all.equal(an,an2[c(2,1,3),], check.attributes = FALSE, tolerance=TOL2))
 )
 
 ## check the results are the same as from SAS proc mixed
 stopifnot(
-  isTRUE(all.equal(an[,"F value"], c(3.90131, 1.32753, 0.99565), tol = 1e-5))
+  isTRUE(all.equal(an[,"F value"], c(3.90131, 1.32753, 0.99565), tolerance=TOL2))
 )
 ################################################################################
 ## Check type II and III anova tables versus SAS
@@ -123,7 +121,7 @@ m.carrots <- lmer(Preference ~ sens2*Homesize
 (ancar <- anova(m.carrots, type=2))
 
 stopifnot(
-  isTRUE(all.equal(ancar[,"F value"], c(54.8361, 5.16138, 1.03035), tol = 1e-4))
+  isTRUE(all.equal(ancar[,"F value"], c(54.8361, 5.16138, 1.03035), tolerance = TOL))
 )
 
 m <- lmer(Informed.liking ~ Product*Age
@@ -131,7 +129,7 @@ m <- lmer(Informed.liking ~ Product*Age
 (an <- anova(m, type=2))
 
 stopifnot(
-  isTRUE(all.equal(an[,"F value"], c(2.48135, .005387, 1.48451), tol = 1e-5))
+  isTRUE(all.equal(an[,"F value"], c(2.48135, .005387, 1.48451), tolerance = TOL2))
 )
 
 
@@ -143,10 +141,10 @@ fm <- lmer(Preference ~ sens2*Homesize*sens1 + (1|Product),
 stopifnot(
   isTRUE(all.equal(ant2[,"F value"],
                    c(16.4842, 14.0010, .526076, 1.18144,
-                     .107570, .335177, 1.05946), tol = 1e-4)),
+                     .107570, .335177, 1.05946), tolerance = TOL)),
   isTRUE(all.equal(ant3[,"F value"],
                    c(16.9140, 14.0010,.481148, 1.18144,
-                     .074201, .335177, 1.05946), tol = 1e-4))
+                     .074201, .335177, 1.05946), tolerance = TOL))
 )
 
 ################################################################################

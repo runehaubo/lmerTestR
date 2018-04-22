@@ -11,11 +11,11 @@ an.sat <- anova(lmerout)
 anova(lmerout, ddf="lme4")
 TOL <- 1e-5
 stopifnot(isTRUE(all.equal(
-  an.sat[,"DenDF"], c(2, 10, 10), tol=TOL
+  an.sat[,"DenDF"], c(2, 10, 10), tolerance=TOL
 )))
 
 stopifnot(isTRUE(
-  all.equal(an.sat[,"Pr(>F)"], c(0.0224955602, 1e-11, 0.020905569), tol=TOL)
+  all.equal(an.sat[,"Pr(>F)"], c(0.0224955602, 1e-11, 0.020905569), tolerance=TOL)
 ))
 
 # if(require(pbkrtest))

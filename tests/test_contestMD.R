@@ -92,7 +92,7 @@ model <- lmer(angle ~ recipe * temp + (1|recipe:replicate), cake)
 ct <- contestMD(model, L, rhs = 0)
 ct2 <- contestMD(model, L, rhs = c(2, 2))
 stopifnot(
-  isTRUE(all.equal(ct[1, ], an[1, ], check.attributes=FALSE)),
+  isTRUE(all.equal(ct[1, ], an[1, ], check.attributes=FALSE, tolerance=1e-6)),
   ct[, "F value"] < ct2[, "F value"]
 )
 

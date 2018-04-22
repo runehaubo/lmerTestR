@@ -8,6 +8,8 @@ assertError <- function(expr, ...)
 assertWarning <- function(expr, ...)
   if(requireNamespace("tools")) tools::assertWarning(expr, ...) else invisible()
 
+TOL <- 1e-4
+
 data("sleepstudy", package="lme4")
 
 ####################################
@@ -51,11 +53,11 @@ Lmat <- diag(length(fixef(fm)))
 rownames(coef_mat_KR) <- rownames(coef_mat) <- rownames(coef_mat_lme4)
 stopifnot(isTRUE(
   all.equal(as.data.frame(coef_mat_lme4),
-            coef_mat[, c("Estimate", "Std. Error", "t value")])
+            coef_mat[, c("Estimate", "Std. Error", "t value")], tolerance=TOL)
 ))
 stopifnot(isTRUE(
   all.equal(as.data.frame(coef_mat_lme4),
-            coef_mat_KR[, c("Estimate", "Std. Error", "t value")], tol=1e-4)
+            coef_mat_KR[, c("Estimate", "Std. Error", "t value")], tolerance=TOL)
 ))
 
 # Test of 0-length beta
@@ -77,7 +79,7 @@ contest1D(fm, L=c(0, 1), rhs = 10.467)
 (ct1 <- contest1D(fm, L=cbind(c(0, 1)), rhs = 10))
 (ct2 <- contestMD(fm, L=rbind(c(0, 1)), rhs = 10))
 stopifnot(
-  isTRUE(all.equal(ct1[, "t value"]^2, ct2[, "F value"]))
+  isTRUE(all.equal(ct1[, "t value"]^2, ct2[, "F value"], tolerance=1e-6))
 )
 
 ## Test 'lmerMod' method:
