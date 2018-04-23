@@ -8,7 +8,7 @@ Authors@R: c(person("Alexandra", "Kuznetsova", role = c("aut")),
                    person("Rune", "Haubo Bojesen Christensen", role =  c("aut"),
 		   email = "Rune@ChristensenStatistics.dk"))
 Depends:
-    R (>= 3.2.5)
+    R (>= 3.2.5),
     lme4 (>= 1.1-10),
     stats,
     methods
