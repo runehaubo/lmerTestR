@@ -137,6 +137,17 @@ lmer <- function(formula, data = NULL, REML = TRUE,
 #'
 if(getRversion() < "3.3") {
   sigma <- function(object, ...) UseMethod("sigma")
+
+  sigma.merMod <- function (object, ...)
+  {
+    dc <- object@devcomp
+    dd <- dc$dims
+    if (dd[["useSc"]])
+      dc$cmp[[if (dd[["REML"]])
+        "sigmaREML"
+        else "sigmaML"]]
+    else 1
+  }
 }
 
 ##############################################

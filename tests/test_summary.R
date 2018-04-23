@@ -7,7 +7,12 @@ assertError <- function(expr, ...)
 assertWarning <- function(expr, ...)
   if(requireNamespace("tools")) tools::assertWarning(expr, ...) else invisible()
 
+# Kenward-Roger only available with pbkrtest and only then validated in R >= 3.3.3
+# (faulty results for R < 3.3.3 may be due to unstated dependencies in pbkrtest)
+has_pbkrtest <- requireNamespace("pbkrtest", quietly = TRUE) && getRversion() >= "3.3.3"
+
 library(lmerTest)
+
 data("sleepstudy", package="lme4")
 data("cake", package="lme4")
 
@@ -62,9 +67,11 @@ stopifnot(isTRUE(
 stopifnot(isTRUE(
   all.equal(an1, an3)
 ))
-(summary(fm, ddf="Kenward-Roger"))
 (summary(fm, ddf="lme4"))
-assertError(summary(fm, ddf="KR")) ## Error on incorrect arg.
+if(has_pbkrtest) {
+  (summary(fm, ddf="Kenward-Roger"))
+  assertError(summary(fm, ddf="KR")) ## Error on incorrect arg.
+}
 
 ## lme4 method:
 an1 <- summary(fm, ddf="lme4")
@@ -85,14 +92,15 @@ stopifnot(all(
 
 # Test printed output
 # - KR
-(sfm <- summary(fm, ddf="Kenward-Roger"))
-x <- capture.output(sfm)
-txt <- c("lmerModLmerTest", "t-tests use Kenward-Roger's method",
-         "df", "t value", "Pr(>|t|)")
-stopifnot(all(
-  sapply(txt, function(text) any(grepl(text, x)))
-))
-
+if(has_pbkrtest) {
+  (sfm <- summary(fm, ddf="Kenward-Roger"))
+  x <- capture.output(sfm)
+  txt <- c("lmerModLmerTest", "t-tests use Kenward-Roger's method",
+           "df", "t value", "Pr(>|t|)")
+  stopifnot(all(
+    sapply(txt, function(text) any(grepl(text, x)))
+  ))
+}
 
 ####################################
 ## Test 'boundary' fixef structures:
@@ -104,9 +112,11 @@ m <- lmer(Reaction ~ -1 + (Days | Subject), sleepstudy)
 stopifnot(length(fixef(m)) == 0L)
 stopifnot(
   nrow(coef(summary(m))) == 0L,
-  nrow(coef(summary(m, ddf="Kenward-Roger"))) == 0L,
   nrow(coef(summary(m, ddf="lme4"))) == 0L
 )
+if(has_pbkrtest){
+  stopifnot(nrow(coef(summary(m, ddf="Kenward-Roger"))) == 0L)
+}
 
 # Example with intercept only:
 m <- lmer(Reaction ~ (Days | Subject), sleepstudy)
@@ -115,9 +125,11 @@ stopifnot(length(fixef(m)) == 1L,
           names(fixef(m)) == "(Intercept)")
 stopifnot(
   nrow(coef(summary(m))) == 1L,
-  nrow(coef(summary(m, ddf="Kenward-Roger"))) == 1L,
   nrow(coef(summary(m, ddf="lme4"))) == 1L
 )
+if(has_pbkrtest){
+  stopifnot(nrow(coef(summary(m, ddf="Kenward-Roger"))) == 1L)
+}
 
 # Example with >1 fixef without intercept:
 m <- lmer(Reaction ~ Days - 1 + I(Days^2) + (Days | Subject), sleepstudy)
@@ -125,7 +137,9 @@ stopifnot(length(fixef(m)) == 2L,
           names(fixef(m)) == c("Days", "I(Days^2)"))
 stopifnot(
   nrow(coef(summary(m))) == 2L,
-  nrow(coef(summary(m, ddf="Kenward-Roger"))) == 2L,
   nrow(coef(summary(m, ddf="lme4"))) == 2L
 )
+if(has_pbkrtest){
+  stopifnot(nrow(coef(summary(m, ddf="Kenward-Roger"))) == 2L)
+}
 

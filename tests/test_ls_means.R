@@ -3,6 +3,9 @@
 library(lmerTest)
 
 TOL <- 1e-4
+# Kenward-Roger only available with pbkrtest and only then validated in R >= 3.3.3
+# (faulty results for R < 3.3.3 may be due to unstated dependencies in pbkrtest)
+has_pbkrtest <- requireNamespace("pbkrtest", quietly = TRUE) && getRversion() >= "3.3.3"
 
 ########### Basic model structures:
 
@@ -82,7 +85,8 @@ stopifnot(
 )
 
 # KR:
-(lsm5 <- ls_means(model, which = "recipe", ddf = "Kenward-Roger"))
+if(has_pbkrtest)
+  (lsm5 <- ls_means(model, which = "recipe", ddf = "Kenward-Roger"))
 
 # level:
 (lsm6 <- ls_means(model, which = "recipe", level=0.99))

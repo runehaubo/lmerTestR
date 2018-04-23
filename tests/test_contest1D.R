@@ -9,6 +9,9 @@ assertWarning <- function(expr, ...)
   if(requireNamespace("tools")) tools::assertWarning(expr, ...) else invisible()
 
 TOL <- 1e-4
+# Kenward-Roger only available with pbkrtest and only then validated in R >= 3.3.3
+# (faulty results for R < 3.3.3 may be due to unstated dependencies in pbkrtest)
+has_pbkrtest <- requireNamespace("pbkrtest", quietly = TRUE) && getRversion() >= "3.3.3"
 
 data("sleepstudy", package="lme4")
 
@@ -23,7 +26,8 @@ L <- c(0, 1, 0)
 contest1D(fm, L)
 contest1D(fm, L, confint = TRUE)
 contest1D(fm, L, confint = TRUE, level=0.99)
-contest1D(fm, L, ddf="Kenward-Roger")
+if(has_pbkrtest)
+  contest1D(fm, L, ddf="Kenward-Roger")
 
 # Test too long L
 assertError(contest1D(fm, c(0, 1, 1, 1)))
@@ -47,32 +51,39 @@ assertError(contest1D(fm, list(c(0, 1, 0))))
 Lmat <- diag(length(fixef(fm)))
 (coef_mat <- lmerTest:::rbindall(lapply(1:ncol(Lmat), function(i)
   contest1D(fm, Lmat[i, ]))))
-(coef_mat_KR <- lmerTest:::rbindall(lapply(1:ncol(Lmat), function(i)
-  contest1D(fm, Lmat[i, ], ddf="Kenward-Roger"))))
 (coef_mat_lme4 <- coef(summary(fm, ddf="lme4")))
-rownames(coef_mat_KR) <- rownames(coef_mat) <- rownames(coef_mat_lme4)
+rownames(coef_mat) <- rownames(coef_mat_lme4)
 stopifnot(isTRUE(
   all.equal(as.data.frame(coef_mat_lme4),
             coef_mat[, c("Estimate", "Std. Error", "t value")], tolerance=TOL)
 ))
-stopifnot(isTRUE(
-  all.equal(as.data.frame(coef_mat_lme4),
-            coef_mat_KR[, c("Estimate", "Std. Error", "t value")], tolerance=TOL)
-))
 
+if(has_pbkrtest) {
+  (coef_mat_KR <- lmerTest:::rbindall(lapply(1:ncol(Lmat), function(i)
+    contest1D(fm, Lmat[i, ], ddf="Kenward-Roger"))))
+  rownames(coef_mat_KR) <- rownames(coef_mat_lme4)
+  stopifnot(isTRUE(
+    all.equal(as.data.frame(coef_mat_lme4),
+              coef_mat_KR[, c("Estimate", "Std. Error", "t value")], tolerance=TOL)
+  ))
+}
 # Test of 0-length beta
 fm1 <- lmer(Reaction ~ 0 + (1|Subject) + (0+Days|Subject),
             sleepstudy)
 stopifnot(length(fixef(fm1)) == 0L)
-(ans <- contest1D(fm1, numeric(0L), ddf="Kenward-Roger"))
-stopifnot(nrow(ans) == 0L)
+if(has_pbkrtest) {
+  (ans <- contest1D(fm1, numeric(0L), ddf="Kenward-Roger"))
+  stopifnot(nrow(ans) == 0L)
+}
 
 ## Test rhs argument:
 fm <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy)
 contest1D(fm, L=cbind(0, 1))
-contest1D(fm, L=cbind(0, 1), ddf="Kenward-Roger")
 contest1D(fm, L=cbind(0, 1), rhs=10)
-contest1D(fm, L=cbind(0, 1), ddf="Kenward-Roger", rhs=10)
+if(has_pbkrtest) {
+  contest1D(fm, L=cbind(0, 1), ddf="Kenward-Roger")
+  contest1D(fm, L=cbind(0, 1), ddf="Kenward-Roger", rhs=10)
+}
 
 contest1D(fm, L=c(0, 1), rhs = 10.467)
 
@@ -90,5 +101,6 @@ L <- c(0, 1, 0)
 contest1D(fm, L)
 contest1D(fm, L, confint = TRUE)
 contest1D(fm, L, confint = TRUE, level=0.99)
-contest1D(fm, L, ddf="Kenward-Roger")
+if(has_pbkrtest)
+  contest1D(fm, L, ddf="Kenward-Roger")
 

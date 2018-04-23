@@ -2,6 +2,10 @@
 
 library(lmerTest)
 
+# Kenward-Roger only available with pbkrtest and only then validated in R >= 3.3.3
+# (faulty results for R < 3.3.3 may be due to unstated dependencies in pbkrtest)
+has_pbkrtest <- requireNamespace("pbkrtest", quietly = TRUE) && getRversion() >= "3.3.3"
+
 # Read in data set
 load(system.file("testdata","test_paper_objects.RData", package="lmerTest"))
 
@@ -10,7 +14,9 @@ load(system.file("testdata","test_paper_objects.RData", package="lmerTest"))
 tv <- lmer(Sharpnessofmovement ~ TVset * Picture + (1 | Assessor) +
              (1 | Assessor:TVset) + (1 | Assessor:Picture), data = TVbo)
 (an8.2 <- anova(tv))
-(ankr8.2 <- anova(tv, type=2, ddf="Kenward-Roger"))
+
+if(has_pbkrtest)
+  (ankr8.2 <- anova(tv, type=2, ddf="Kenward-Roger"))
 
 ## Section 8.3:
 m.carrots <- lmer(Preference ~ sens1 + sens2 + (1 + sens1 + sens2 | Consumer) +
@@ -46,7 +52,6 @@ L <- cbind(array(0, dim=c(6, 6)), diag(6))
 TOL <- 1e-4
 stopifnot(
   isTRUE(all.equal(an8.2_save, an8.2, check.attributes = FALSE, tolerance=TOL)),
-  isTRUE(all.equal(ankr8.2_save, ankr8.2, check.attributes = FALSE, tolerance=TOL)),
   isTRUE(all.equal(sum8.3_save, sum8.3, check.attributes = FALSE, tolerance=TOL)),
   isTRUE(all.equal(elim_tab_random8.4_save, elim_tab_random8.4,
                    check.attributes = FALSE, tolerance=TOL)),
@@ -56,3 +61,9 @@ stopifnot(
   isTRUE(all.equal(con1_8.5_save, con1_8.5, check.attributes = FALSE, tolerance=TOL)),
   isTRUE(all.equal(con2_8.5_save, con2_8.5, check.attributes = FALSE, tolerance=TOL))
 )
+if(has_pbkrtest) {
+  stopifnot(
+    isTRUE(all.equal(ankr8.2_save, ankr8.2, check.attributes = FALSE, tolerance=TOL))
+  )
+}
+

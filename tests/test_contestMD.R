@@ -8,6 +8,10 @@ assertError <- function(expr, ...)
 assertWarning <- function(expr, ...)
   if(requireNamespace("tools")) tools::assertWarning(expr, ...) else invisible()
 
+# Kenward-Roger only available with pbkrtest and only then validated in R >= 3.3.3
+# (faulty results for R < 3.3.3 may be due to unstated dependencies in pbkrtest)
+has_pbkrtest <- requireNamespace("pbkrtest", quietly = TRUE) && getRversion() >= "3.3.3"
+
 data("sleepstudy", package="lme4")
 
 ####################################
@@ -22,24 +26,29 @@ contestMD(fm, L)
 
 # Tests of ddf arg:
 contestMD(fm, L, ddf="Sat")
-contestMD(fm, L, ddf="Kenward-Roger")
+if(has_pbkrtest)
+  contestMD(fm, L, ddf="Kenward-Roger")
 assertError(contestMD(fm, L, ddf="sat")) # Invalid ddf arg.
 
 # Tests of simple 2-df test:
 (ans <- contestMD(fm, L[2:3, ], ddf="Sat"))
 stopifnot(nrow(ans) == 1L,
           ans$NumDF == 2L)
-(ans <- contestMD(fm, L[2:3, ], ddf="Kenward-Roger"))
-stopifnot(nrow(ans) == 1L,
-          ans$NumDF == 2L)
+if(has_pbkrtest) {
+  (ans <- contestMD(fm, L[2:3, ], ddf="Kenward-Roger"))
+  stopifnot(nrow(ans) == 1L,
+            ans$NumDF == 2L)
+}
 
 # Tests of simple 1-df test:
 (ans <- contestMD(fm, L[3, , drop=FALSE], ddf="Sat"))
 stopifnot(nrow(ans) == 1L,
           ans$NumDF == 1L)
-(ans <- contestMD(fm, L[3, , drop=FALSE], ddf="Kenward-Roger"))
-stopifnot(nrow(ans) == 1L,
-          ans$NumDF == 1L)
+if(has_pbkrtest) {
+  (ans <- contestMD(fm, L[3, , drop=FALSE], ddf="Kenward-Roger"))
+  stopifnot(nrow(ans) == 1L,
+            ans$NumDF == 1L)
+}
 
 # Test of vector input:
 (ans <- contestMD(fm, L[3, ], ddf="Sat")) # OK since length(L[3, ]) == length(fixef(fm))
@@ -53,9 +62,11 @@ assertError(contestMD(fm, list(L[3, , drop=FALSE]), ddf="Sat")) # Need L to be a
 
 # zero-row L's are allowed (if ncol(L) is correct):
 ans1 <- contestMD(fm, L[0, , drop=FALSE], ddf="Sat")
-ans2 <- contestMD(fm, L[0, , drop=FALSE], ddf="Kenward-Roger")
-stopifnot(nrow(ans1) == 0L,
-          nrow(ans2) == 0L)
+stopifnot(nrow(ans1) == 0L)
+if(has_pbkrtest) {
+  ans2 <- contestMD(fm, L[0, , drop=FALSE], ddf="Kenward-Roger")
+  stopifnot(nrow(ans2) == 0L)
+}
 
 # Test wrong ncol(L):
 assertError(contestMD(fm, L[2:3, 2:3])) # need ncol(L) == length(fixef(fm))
@@ -65,11 +76,13 @@ L <- rbind(c(1, 0, 1),
            c(0, 1, 0),
            c(1, -1, 1))
 ans <- contestMD(fm, L)
-ans_KR <- contestMD(fm, L, ddf="Kenward-Roger")
 stopifnot(nrow(L) == 3L,
           qr(L)$rank == 2,
-          ans$NumDF == 2,
-          ans_KR$NumDF == 2)
+          ans$NumDF == 2)
+if(has_pbkrtest) {
+  ans_KR <- contestMD(fm, L, ddf="Kenward-Roger")
+  stopifnot(ans_KR$NumDF == 2)
+}
 
 # Test of 0-length beta
 fm1 <- lmer(Reaction ~ 0 + (1|Subject) + (0+Days|Subject),
@@ -99,18 +112,23 @@ stopifnot(
 L2 <- rbind(L, L[1, ] + L[2, ]) # rank deficient!
 contestMD(model, L2, rhs = c(0, 0, 0)) # no warning
 assertWarning(contestMD(model, L2, rhs = c(2, 2, 2))) # warning since L2 is rank def.
-assertWarning(contestMD(model, L2, rhs = c(2, 2, 2), ddf="Kenward-Roger"))
+if(has_pbkrtest)
+  assertWarning(contestMD(model, L2, rhs = c(2, 2, 2), ddf="Kenward-Roger"))
 
 fm <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy)
 contestMD(fm, L=cbind(0, 1))
-contestMD(fm, L=cbind(0, 1), ddf="Kenward-Roger")
 contestMD(fm, L=cbind(0, 1), rhs=10)
-contestMD(fm, L=cbind(0, 1), ddf="Kenward-Roger", rhs=10)
+if(has_pbkrtest) {
+  contestMD(fm, L=cbind(0, 1), ddf="Kenward-Roger")
+  contestMD(fm, L=cbind(0, 1), ddf="Kenward-Roger", rhs=10)
+}
 
 
 ## Test 'lmerMod' method:
 fm <- lme4::lmer(Reaction ~ Days + (Days|Subject), sleepstudy)
 contestMD(fm, L=cbind(0, 1))
-contestMD(fm, L=cbind(0, 1), ddf="Kenward-Roger")
 contestMD(fm, L=cbind(0, 1), rhs=10)
-contestMD(fm, L=cbind(0, 1), ddf="Kenward-Roger", rhs=10)
+if(has_pbkrtest) {
+  contestMD(fm, L=cbind(0, 1), ddf="Kenward-Roger")
+  contestMD(fm, L=cbind(0, 1), ddf="Kenward-Roger", rhs=10)
+}
