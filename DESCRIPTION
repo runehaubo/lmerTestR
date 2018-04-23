@@ -1,28 +1,37 @@
 Package: lmerTest
 Type: Package
-Title: Tests in Linear Mixed Effects Models 
+Title: Tests in Linear Mixed Effects Models
 Version: 3.0-0.9001
 Authors@R: c(person("Alexandra", "Kuznetsova", role = c("aut")),
                    person("Per", "Bruun Brockhoff", role = c("aut", "ths", "cre"),
                    email = "perbb@dtu.dk"),
                    person("Rune", "Haubo Bojesen Christensen", role =  c("aut"),
 		   email = "Rune@ChristensenStatistics.dk"))
-Depends: lme4 (>= 1.0), stats, methods
-Imports: numDeriv, MASS, ggplot2
-Suggests: pbkrtest, tools
-Description: Provides p-values in type I, II or III anova and summary
-    tables for lmer model fits (cf. lme4) via Satterthwaite's degrees of 
-    freedom method. A Kenward-Roger method is also available via the pbkrtest
-    package. Model selection methods include step, drop1 and anova-like 
-    tables for random effects (ranova). Methods for Least-Square means (LS-means) 
-    and tests of linear contrasts of fixed effects are also available.
+Depends:
+    R (>= 3.2.5),
+    lme4 (>= 1.1-10),
+    stats,
+    methods
+Imports:
+    numDeriv,
+    MASS,
+    ggplot2
+Suggests:
+    pbkrtest (>= 0.4-3),
+    tools
+Description: Provides p-values in type I, II or III anova and summary tables
+    for lmer model fits (cf. lme4) via Satterthwaite's degrees of freedom method. A
+    Kenward-Roger method is also available via the pbkrtest package. Model selection
+    methods include step, drop1 and anova-like tables for random effects (ranova).
+    Methods for Least-Square means (LS-means) and tests of linear contrasts of fixed
+    effects are also available.
 License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
 URL: https://github.com/runehaubo/lmerTestR
 BugReports: https://github.com/runehaubo/lmerTestR/issues
 RoxygenNote: 6.0.1
-Collate: 
+Collate:
     'anova_contrasts.R'
     'contest.R'
     'contrast_utils.R'

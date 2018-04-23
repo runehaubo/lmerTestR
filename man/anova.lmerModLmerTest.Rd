@@ -43,7 +43,11 @@ reports scaled F-statistics and associated denominator degrees-of-freedom.
 data("sleepstudy", package="lme4")
 m <- lmer(Reaction ~ Days + (Days | Subject), sleepstudy)
 anova(m) # with p-values from F-tests using Satterthwaite's denominator df
-anova(m, ddf="lme4")
+anova(m, ddf="lme4") # no p-values
+
+# Use the Kenward-Roger method
+if(requireNamespace("pbkrtest", quietly = TRUE))
+  summary(m, ddf="Kenward-Roger")
 
 \dontshow{
   an1 <- anova(m) # with p-values from F-tests using Satterthwaite's denominator df

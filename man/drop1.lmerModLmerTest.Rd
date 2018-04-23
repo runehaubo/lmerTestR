@@ -49,8 +49,9 @@ models are being (re)fitted.
 
 # Basic usage:
 fm <- lmer(angle ~ recipe + temp + (1|recipe:replicate), cake)
-drop1(fm)
-drop1(fm, ddf="Kenward-Roger") # Alternative DenDF and F-test method
+drop1(fm) # Using Satterthwaite degrees of freedom
+if(requireNamespace("pbkrtest", quietly = TRUE))
+  drop1(fm, ddf="Kenward-Roger") # Alternative DenDF and F-test method
 drop1(fm, ddf="lme4", test="Chi") # Asymptotic Likelihood ratio tests
 
 # Consider a rank-deficient design matrix:

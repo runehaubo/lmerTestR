@@ -80,7 +80,8 @@ NULL
 #' coef(summary(fm))
 #'
 #' # Use the Kenward-Roger method
-#' summary(fm, ddf="Kenward-Roger")
+#' if(requireNamespace("pbkrtest", quietly = TRUE))
+#'   summary(fm, ddf="Kenward-Roger")
 #'
 #' # The lme4-summary table:
 #' summary(fm, ddf="lme4") # same as summary(as(fm, "lmerMod"))
@@ -88,16 +89,20 @@ NULL
 #' \dontshow{
 #'   # Check that summaries are as expected:
 #'   summ_fm <- coef(summary(fm))
-#'   summ_fm_kr <- coef(summary(fm, ddf="Kenward-Roger"))
 #'   summ_fm_lme4 <- coef(summary(fm, ddf="lme4"))
 #'   stopifnot(
 #'     all(colnames(summ_fm) == c("Estimate", "Std. Error", "df", "t value", "Pr(>|t|)")),
-#'     all(colnames(summ_fm_kr) == c("Estimate", "Std. Error", "df", "t value", "Pr(>|t|)")),
 #'     all(colnames(summ_fm_lme4) == c("Estimate", "Std. Error", "t value")),
 #'     all(!(is.na(summ_fm))),
-#'     all(!(is.na(summ_fm_kr))),
 #'     all(!(is.na(summ_fm_lme4)))
 #'   )
+#'  if(requireNamespace("pbkrtest", quietly = TRUE) && getRversion() >= "3.3.3") {
+#'     summ_fm_kr <- coef(summary(fm, ddf="Kenward-Roger"))
+#'      stopifnot(
+#'        all(colnames(summ_fm_kr) == c("Estimate", "Std. Error", "df", "t value", "Pr(>|t|)")),
+#'        all(!(is.na(summ_fm_kr)))
+#'     )
+#'  }
 #' }
 summary.lmerModLmerTest <- function(object, ...,
                                     ddf=c("Satterthwaite", "Kenward-Roger", "lme4")) {

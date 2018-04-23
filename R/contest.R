@@ -307,6 +307,10 @@ get_KR1D <- function(model, L) {
   if(!requireNamespace("pbkrtest", quietly = TRUE))
     stop("pbkrtest package required for Kenward-Roger's method",
          call.=FALSE)
+  ## Add warning as faulty results have been seen with R version 3.3.2 cf https://github.com/hojsgaard/pbkrtest/issues/1
+  ## It may also be related to the Matrix version: an unstated dependency in pbkrtest.
+  if(getRversion() < "3.3.2")
+    warning("Kenward-Roger may give faulty results with R <= 3.3.2")
   vcov_beta_adj <- try(pbkrtest::vcovAdj(model), silent=TRUE) # Adjusted vcov(beta)
   if(inherits(vcov_beta_adj, "try-error")) return(list(error=TRUE))
   var_con_adj <- qform(L, as.matrix(vcov_beta_adj)) # variance of contrast
@@ -409,6 +413,8 @@ contestMD.lmerModLmerTest <- function(model, L, rhs=0,
     if(!requireNamespace("pbkrtest", quietly = TRUE))
       stop("pbkrtest package required for Kenward-Roger's method",
            call.=FALSE)
+    if(getRversion() < "3.3.2") # See comments above.
+      warning("Kenward-Roger may give faulty results with R <= 3.3.2")
     if(qr(L)$rank < nrow(L) && !all(rhs == 0))
       warning("Contrast is rank deficient and test may be affected")
     betaH <- if(all(rhs == 0)) 0 else drop(MASS::ginv(L) %*% rhs)
