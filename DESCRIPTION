@@ -1,7 +1,7 @@
 Package: lmerTest
 Type: Package
 Title: Tests in Linear Mixed Effects Models
-Version: 3.0-1.9001
+Version: 3.0-1.9002
 Authors@R: c(person("Alexandra", "Kuznetsova", role = c("aut")),
                    person("Per", "Bruun Brockhoff", role = c("aut", "ths", "cre"),
                    email = "perbb@dtu.dk"),
@@ -31,13 +31,14 @@ LazyData: true
 URL: https://github.com/runehaubo/lmerTestR
 BugReports: https://github.com/runehaubo/lmerTestR/issues
 RoxygenNote: 6.0.1
-Collate:
+Collate: 
     'anova_contrasts.R'
     'contest.R'
     'contrast_utils.R'
     'data_documentation.R'
     'drop1.R'
     'estimability.R'
+    'legacy.R'
     'lmer.R'
     'lmerTest.R'
     'lmer_anova.R'
