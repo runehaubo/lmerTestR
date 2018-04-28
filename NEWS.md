@@ -1,3 +1,13 @@
+lmerTest 3.0-1
+------------------
+
+- over-sensitive tests (failing on Solaris) have reduced tolerance
+- `sigma` and `sigma.merMod` defined and exported for `R <= 3.3.0`
+- Warn if Kenward-Roger is used with `R <= 3.3.0` since it may give incorrect results
+- Add `lme4 (>= 1.1-10)` and `R (>= 3.2.5)` to `Depends` (last available version where `lmerTest` checks out)
+- `pbkrtest` package loaded conditional on availability in tests
+
+
 lmerTest 3.0-0
 ------------------
  

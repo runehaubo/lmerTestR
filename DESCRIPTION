@@ -1,7 +1,7 @@
 Package: lmerTest
 Type: Package
 Title: Tests in Linear Mixed Effects Models
-Version: 3.0-1
+Version: 3.0-1.9001
 Authors@R: c(person("Alexandra", "Kuznetsova", role = c("aut")),
                    person("Per", "Bruun Brockhoff", role = c("aut", "ths", "cre"),
                    email = "perbb@dtu.dk"),

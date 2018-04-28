@@ -38,7 +38,7 @@ Corresponding BibTeX entry:
 
 ## Discovered a bug?
 
-Please raise a new issue! Preferably add code that illustrates the problem using one of the datasets from the **lmerTest**.
+Please raise a new issue! Preferably add code that illustrates the problem using one of the datasets from **lmerTest**.
 
 ## Installation
 
