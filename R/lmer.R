@@ -27,6 +27,14 @@
 # lmerTest::lmer
 # as_lmerModLmerTest
 #
+# --- Generics: ---
+#
+# sigma - only for R < 3.3 to support older versions of R
+#
+# --- methods: ---
+#
+# sigma.merMod - only for R < 3.3 to support older versions of R
+#
 # --- utility functions: ---
 #
 # as_lmerModLT
