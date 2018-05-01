@@ -47,7 +47,7 @@ anova(m, ddf="lme4") # no p-values
 
 # Use the Kenward-Roger method
 if(requireNamespace("pbkrtest", quietly = TRUE))
-  summary(m, ddf="Kenward-Roger")
+  anova(m, ddf="Kenward-Roger")
 
 \dontshow{
   an1 <- anova(m) # with p-values from F-tests using Satterthwaite's denominator df
