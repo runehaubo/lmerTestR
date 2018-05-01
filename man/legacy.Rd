@@ -8,6 +8,7 @@
 \alias{lsmeansLT.merModLmerTest}
 \alias{difflsmeans.merModLmerTest}
 \alias{drop1.merModLmerTest}
+\alias{step.merModLmerTest}
 \title{Methods for Legacy lmerTest Objects}
 \usage{
 \method{anova}{merModLmerTest}(object, ..., type = c("III", "II", "I", "3",
@@ -27,6 +28,10 @@
 
 \method{drop1}{merModLmerTest}(object, scope, ddf = c("Satterthwaite",
   "Kenward-Roger", "lme4"), force_get_contrasts = FALSE, ...)
+
+\method{step}{merModLmerTest}(object, ddf = c("Satterthwaite",
+  "Kenward-Roger"), alpha.random = 0.1, alpha.fixed = 0.05,
+  reduce.fixed = TRUE, reduce.random = TRUE, keep, ...)
 }
 \arguments{
 \item{object}{an \code{lmerModLmerTest} object; the result of \code{lmer()}
@@ -62,6 +67,19 @@ marginal, use \code{drop.scope(terms(object))}.}
 \item{force_get_contrasts}{enforce computation of contrast matrices by a
 method in which the design matrices for full and restricted models are
 compared.}
+
+\item{alpha.random}{alpha for random effects elimination}
+
+\item{alpha.fixed}{alpha for fixed effects elimination}
+
+\item{reduce.fixed}{reduce fixed effect structure? \code{TRUE} by default.}
+
+\item{reduce.random}{reduce random effect structure? \code{TRUE} by default.}
+
+\item{keep}{an optional character vector of fixed effect terms which should
+not be considered for eliminated. Valid terms are given by
+\code{attr(terms(object), "term.labels")}. Terms that are marginal to terms
+in keep will also not be considered for eliminations.}
 }
 \description{
 Methods are defined for legacy lmerTest objects of class

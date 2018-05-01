@@ -162,3 +162,20 @@ drop1.merModLmerTest <- function(object, scope, ddf=c("Satterthwaite", "Kenward-
   object <- as_lmerModLmerTest(object)
   drop1(object=object, scope=scope, ddf=ddf, force_get_contrasts=FALSE, ...)
 }
+
+##############################################
+######## step method for merModLmerTest
+##############################################
+#' @rdname legacy
+#' @inheritParams step.lmerModLmerTest
+#' @export
+step.merModLmerTest <- function(object, ddf=c("Satterthwaite", "Kenward-Roger"),
+                                alpha.random=0.1, alpha.fixed=0.05,
+                                reduce.fixed=TRUE, reduce.random=TRUE,
+                                keep, ...) {
+  class(object) <- "lmerMod"
+  object <- as_lmerModLmerTest(object)
+  step(object, ddf=ddf, alpha.random=alpha.random, alpha.fixed=alpha.fixed,
+       reduce.fixed=reduce.fixed, reduce.random=reduce.random,
+       keep=keep, ...)
+}

@@ -32,6 +32,8 @@ stopifnot(
                    formals(lmerTest:::summary.lmerModLmerTest))),
   isTRUE(all.equal(formals(lmerTest:::drop1.merModLmerTest),
                    formals(lmerTest:::drop1.lmerModLmerTest))),
+  isTRUE(all.equal(formals(lmerTest:::step.merModLmerTest),
+                   formals(lmerTest:::step.lmerModLmerTest))),
   isTRUE(all.equal(formals(lmerTest:::ls_means.merModLmerTest),
                    formals(lmerTest:::ls_means.lmerModLmerTest))),
   isTRUE(all.equal(formals(lmerTest:::difflsmeans.merModLmerTest),
@@ -53,6 +55,7 @@ contest(fm1, c(0, 1))
 contest(fm1, c(0, 1), joint=FALSE)
 drop1(fm1)
 ranova(fm1)
+step(fm1)
 
 fm1new <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy)
 stopifnot(
@@ -87,6 +90,7 @@ L <- diag(nbeta)
 L[1:4, ] <- 0
 contest(fm2, L)
 contest(fm2, diag(nbeta), joint=FALSE)
+step(fm2)
 
 fm2new <- lmer(Informed.liking ~ Product + Information + Gender +
                  (1|Product:Consumer), data=ham)
