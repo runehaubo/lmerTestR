@@ -2,8 +2,11 @@
 title: "Satterthwaite’s Method for Degrees of Freedom in Linear Mixed Models"
 author: "Rune Haubo B Christensen"
 date: "`r Sys.Date()`"
-output: 
+output:
   html_document:
+    toc: TRUE
+	keep_md: TRUE
+  pdf_document:
     toc: TRUE
 ---
 
@@ -16,14 +19,15 @@ knitr::opts_chunk$set(echo = TRUE, collapse = TRUE)
 
 Satterthwaite's method for degrees of freedom has many applications with the Welch-Satterthwaite two-sample $t$-test allowing for different variances as the most well-known example. Confidence intervals for linear functions of mean squares is another example as is $t$ and $F$-tests for contrasts of the mean-value parameters or so-called fixed-effects in linear mixed models which is the topic of this note. 
 
-In applications of linear mixed models to balanced datasets it is often possible to derive known integer denominator degrees of freedom for $t$-statistics for individual parameters (or one-dimensional contrasts) and $F$-statistics for model terms (or multi-dimensional contrasts). These statistics are convenient since they follow exact $t$ and $F$-distributions thus exempting the need for asymptotic Wald or likelihood ratio tests whose small-sample behavior is dubious and often anti-conservative -- even for rather large samples. [We can think of the Wald test as an $F$-test with infinite denominator df so in experiments which are balanced exept for one or a few missing observations the denominator df from the corresponding balanced experiment provides an upper bound for the denominator df with the ubalanced dataset. The likelihood ratio test can be viewed as a small adjustment to the Wald test but otherwise with the same caveats.]
+In applications of linear mixed models to balanced datasets it is often possible to derive known integer denominator degrees of freedom for $t$-statistics for individual parameters (or one-dimensional contrasts) and $F$-statistics for model terms (or multi-dimensional contrasts). These statistics are convenient since they follow exact $t$ and $F$-distributions thus exempting the need for asymptotic Wald or likelihood ratio tests whose small-sample behavior is dubious and often anti-conservative -- even for rather large samples. 
+[We can think of the Wald test as an $F$-test with infinite denominator df so in experiments which are balanced except for one or a few missing observations the denominator df from the corresponding balanced experiment provides an upper bound for the denominator df with the unbalanced dataset. The likelihood ratio test can be viewed as a small adjustment to the Wald test but otherwise with the same caveats.]
 But balance is a fragile aspect which is easily lost due to a missing observation even in well-designed experiments. In such cases it is concerning and inconvenient having to resort to the asymptotic tests when intuitively we would expect an _approximate_ $F$-test to be much more accurate. Essentially, Satterthwaite's method produces such an approximate $t$ or $F$-test and if in fact an exact $F$-test exists this is produced. Simulations [1, 2] have shown these approximate $F$-tests to be an important improvement over the asymptotic tests in many situations.
 
 In this note we describe the development of Satterthwaite's method [3] for estimation of denominator degrees of freedom in $t$ and $F$-test for contrasts of mean-value parameters in linear mixed models. It is worth noting that the Welch-Satterthwaite two-sample $t$-test is in fact a special case of the more general case presented here. We also exemplify how the actual computations can be done using the implementation of linear mixed models in the **lme4** package [4] for $\mathsf R$.
 
 In the remainder of this section we briefly introduce a class of multivariate normal models and the class of linear mixed models. We also briefly introduce the $t$-test for one-dimensional contrasts of the mean-value parameters. 
 
-In the next section we describe the development of Satterthwaite's method for estimation of denominator degrees of freedom in $t$-tests of one-dimensional contrasts. After describing how we address the computational challanges involved we present an example where $t$-tests of the mean-value parameters are evaluated in an unbalanced dataset.
+In the next section we describe the development of Satterthwaite's method for estimation of denominator degrees of freedom in $t$-tests of one-dimensional contrasts. After describing how we address the computational challenges involved we present an example where $t$-tests of the mean-value parameters are evaluated in an unbalanced dataset.
 
 The following section extends the application of Satterthwaite's method for denominator degrees of freedom from one-dimensional contrasts leading to $t$-tests on one numerator degree of freedom to multi-dimensional contrasts leading to $F$-tests on multiple numerator degrees of freedom. Also here is an example given on an unbalanced dataset.
 
@@ -97,12 +101,12 @@ This has the advantage that the gradient is not tied to a particular $L$ and $\m
 
 ## Computational approach
 
-The computational challange is essentially to evaluate the denominator in the expression for $\hat\nu(\hat\tau)$, which amounts to computing the gradient $f{'}(\hat\tau)$ and variance-covariance matrix of the variance parameter vector $\mathsf{V}(\hat\tau)$. We will now address these challanges in turn starting with the latter.
+The computational challenge is essentially to evaluate the denominator in the expression for $\hat\nu(\hat\tau)$, which amounts to computing the gradient $f{'}(\hat\tau)$ and variance-covariance matrix of the variance parameter vector $\mathsf{V}(\hat\tau)$. We will now address these challenges in turn starting with the latter.
 
 The variance-covariance matrix of the variance parameter vector $\mathsf{V}(\hat\tau)$ can be computed as the inverse of Hessian of the negative log-likelihood function with respect to the variance-parameters.
-Conveniently the **lme4** package provides a simple way to extract a deviance function from a linear mixed model fit. The deviance is a scaled version of the log-likelihood function for the model so numerically computing the Hessian of the deviance function provides an estimate of the covariance matrix of the variance parameters. One minor challange is that the residual variance, $\sigma$ is profiled out of the deviance function as implemented in **lme4**, so the deviance function cannot be used directly as it comes. A variant of the deviance function has to be written that operates on the variance parameters, $\tau$. Using the `hessian` function from the **numDeriv** package [5] conveniently and accurately evaluates the Hessian numerically.
+Conveniently the **lme4** package provides a simple way to extract a deviance function from a linear mixed model fit. The deviance is a scaled version of the log-likelihood function for the model so numerically computing the Hessian of the deviance function provides an estimate of the covariance matrix of the variance parameters. One minor challenge is that the residual variance, $\sigma$ is profiled out of the deviance function as implemented in **lme4**, so the deviance function cannot be used directly as it comes. A variant of the deviance function has to be written that operates on the variance parameters, $\tau$. Using the `hessian` function from the **numDeriv** package [5] conveniently and accurately evaluates the Hessian numerically.
 
-The variance-covariance matrix of $\beta$ can also be expressed as a function of the variance parameters using the same deviance function. Using the `jacobian` function from **numDeriv** allows ud to numerically evaluate $\mathcal J$ at $\hat\tau$. Having computed $\mathsf{V}(\hat\tau)$ and $\mathcal J$ its only a matter of putting the different quantities together to compute the estimate of the denominator degrees of freedom.
+The variance-covariance matrix of $\beta$ can also be expressed as a function of the variance parameters using the same deviance function. Using the `jacobian` function from **numDeriv** allows us to numerically evaluate $\mathcal J$ at $\hat\tau$. Having computed $\mathsf{V}(\hat\tau)$ and $\mathcal J$ its only a matter of putting the different quantities together to compute the estimate of the denominator degrees of freedom.
 
 ## Example: Computing denominator df for a $t$-test using `lme4::lmer`
 
@@ -137,7 +141,7 @@ The parameters that characterize the model can be summarized as
                 theta=getME(model, "theta"),
                 sigma=sigma(model)))
 ```
-and the consumer random effect standard deviation can be retreived with 
+and the consumer random effect standard deviation can be retrieved with 
 ```{r}
 with(parlist, theta*sigma)
 ```
@@ -255,9 +259,9 @@ Often it is of interest to assess an hypothesis on more than one linear function
 $$H_0:\; L\beta = 0$$
 were the $q\times p$ matrix $L$ has rank $q$ with $1 < q \leq p$ and $p$ is the length of the $\beta$-vector. 
 
-The convential $F$-statistic for this hypothesis reads
+The conventional $F$-statistic for this hypothesis reads
 $$F = \frac{1}{q} (L\hat\beta)^\top (L \mathsf V_\hat\tau(\hat\beta)L^\top)^{-1} (L\hat\beta)$$
-which is seen to reduce to the square of the $t$-statistic considered above for $q=1$. Dispite its name, this statistic only follows an exact $F$-distribution with $q$ numerator degrees of freedom and known denominator degrees of freedom in special cases (such as orthogonal or balanced designs.) 
+which is seen to reduce to the square of the $t$-statistic considered above for $q=1$. Despite its name, this statistic only follows an exact $F$-distribution with $q$ numerator degrees of freedom and known denominator degrees of freedom in special cases (such as orthogonal or balanced designs.) 
 
 In the general case we are interested in estimating an appropriate denominator degrees of freedom for $F$ assuming $q$ numerator degrees of freedom. 
 
@@ -317,7 +321,7 @@ and compute the variance of the contrasts $\mathsf V_\hat\tau (L\hat\beta) = L \
 cov_Lbeta <- L %*% cov_beta %*% t(L) # Var(contrast) = Var(Lbeta)
 ```
 
-We then compute the eigen-decompostion $\mathsf V(L\hat\beta) = P^\top D P$ and extract the rank, eigenvectors and eigenvalues:
+We then compute the eigen-decomposition $\mathsf V(L\hat\beta) = P^\top D P$ and extract the rank, eigenvectors and eigenvalues:
 ```{r}
 # Get eigen decomposition of vcov(Lbeta):
 eig_VLbeta <- eigen(cov_Lbeta)
@@ -327,7 +331,7 @@ q <- sum(positive) # rank(VLbeta)
 (d <- eig_VLbeta$values)
 ```
 
-The new constrast vectors are then $\tilde L = P^\top L$
+The new contrast vectors are then $\tilde L = P^\top L$
 ```{r}
 PtL <- crossprod(P, L) # q x p matrix
 ```
@@ -422,16 +426,20 @@ thus the estimate of the degrees of freedom $\nu$ for the $F$-statistic is just 
 
 # References
 
-[1] Kuznetsova, A., Brockhoff, P., & Christensen, R. (2017). "lmerTest Package: Tests in Linear Mixed Effects Models." Journal of Statistical Software, 82(13), 1--26. doi:http://dx.doi.org/10.18637/jss.v082.i13
+[1] Kuznetsova, A., Brockhoff, P., & Christensen, R. (2017). "lmerTest Package: Tests in Linear Mixed Effects Models." Journal of Statistical Software, 82(13), 1--26. 
+[doi:10.18637/jss.v082.i13](https://doi.org/10.18637/jss.v082.i13)
 
-[2] Schaalje GB, McBride JB, Fellingham GW (2002). "Adequacy of Approximations to Distributions of Test Statistics in Complex Mixed Linear Models." Journal of Agricultural, Biological, and Environmental Statistics, 7(4), 512–524. doi:10.1198/108571102726.
+[2] Schaalje GB, McBride JB, Fellingham GW (2002). "Adequacy of Approximations to Distributions of Test Statistics in Complex Mixed Linear Models." Journal of Agricultural, Biological, and Environmental Statistics, 7(4), 512--524. 
+[doi:10.1198/108571102726](https://doi.org/10.1198/108571102726].
 
-[3] Satterthwaite FE (1946). "An Approximate Distribution of Estimates of Variance Components." Biometrics Bulletin, 2(6), 110-–114. doi:10.2307/3002019.
+[3] Satterthwaite FE (1946). "An Approximate Distribution of Estimates of Variance Components." Biometrics Bulletin, 2(6), 110--114. 
+[doi:10.2307/3002019](https://doi.org/10.2307/3002019).
 
-[4] Bates DM, Mäechler M, Bolker B, Walker S (2015). "Fitting Linear Mixed-Effects Models Using lme4." Journal of Statistical Software, 67(1), 1–-48. doi:10.18637/jss.v067.i01.
+[4] Bates DM, Mächler M, Bolker B, Walker S (2015). "Fitting Linear Mixed-Effects Models Using lme4." Journal of Statistical Software, 67(1), 1--48. [doi:10.18637/jss.v067.i01](https://doi.org/10.18637/jss.v067.i01).
 
 [5] Dahl DB (2016). numDeriv: Accurate Numerical Derivatives. R package version 2016.8--1, URL https://CRAN.R-project.org/package=numDeriv.
 
-[6] Fai AH, Cornelius PL (1996). "Approximate F-Tests of Multiple Degree of Freedom Hypotheses in Generalised Least Squares Analyses of Unbalanced Split-Plot Experiments."" Journal of Statistical Computation and Simulation, 54(4), 363–378. doi:10.1080/00949659608811740.
+[6] Fai AH, Cornelius PL (1996). "Approximate F-Tests of Multiple Degree of Freedom Hypotheses in Generalised Least Squares Analyses of Unbalanced Split-Plot Experiments."" Journal of Statistical Computation and Simulation, 54(4), 363--378. 
+[doi:10.1080/00949659608811740](https://doi.org/10.1080/00949659608811740).
 
 
