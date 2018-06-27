@@ -34,6 +34,7 @@
 # --- methods: ---
 #
 # sigma.merMod - only for R < 3.3 to support older versions of R
+# update.lmerModLmerTest - added in lmerTest version 3.0-1.9002
 #
 # --- utility functions: ---
 #
@@ -331,4 +332,51 @@ get_covbeta <- function(varpar, devfun) {
   devfun(theta) # evaluate REML or ML deviance 'criterion'
   df_envir <- environment(devfun) # extract model environment
   sigma^2 * tcrossprod(df_envir$pp$RXi()) # vcov(beta)
+}
+
+##############################################
+######## update.lmerModLmerTest()
+##############################################
+## We need our own update method for lmerModLmerTest objects because relying on
+## lme4::update.merMod will sometimes return an object of class "lmerMod"
+## instead of "lmerModLmerTest". This for instance happened if formula was a
+## character vector, e.g.:
+##   form <- "Informed.liking ~ Product+Information+
+##   (1|Consumer) + (1|Product:Consumer) + (1|Information:Consumer)"
+##   m <- lmer(form, data=ham)
+##   class(m)                        # "lmerModLmerTest"
+##   class(update(m, ~.- Product))   # "lmerMod"
+## in versions < 3.0-1.9002.
+##
+#' @importFrom stats getCall update.formula
+#' @export
+#' @keywords internal
+update.lmerModLmerTest <- function(object, formula., ..., evaluate = TRUE) {
+  if(is.null(call <- getCall(object)))
+    stop("object should contain a 'call' component")
+  extras <- match.call(expand.dots = FALSE)$...
+  if(!missing(formula.))
+    call$formula <- update.formula(formula(object), formula.)
+  if(length(extras) > 0) {
+    existing <- !is.na(match(names(extras), names(call)))
+    for(a in names(extras)[existing]) call[[a]] <- extras[[a]]
+    if(any(!existing)) {
+      call <- c(as.list(call), extras[!existing])
+      call <- as.call(call)
+    }
+  }
+  if(evaluate) {
+    ff <- environment(formula(object))
+    pf <- parent.frame()
+    sf <- sys.frames()[[1]]
+    res <- tryCatch(eval(call, envir = ff), error = function(e) {
+      tryCatch(eval(call, envir = sf), error = function(e) {
+        eval(call, pf)
+      })
+    })
+    # 'res' may be "lmerMod" instead of "lmerModLmerTest" in which case we
+    # coerce to "lmerModLmerTest":
+    if(inherits(res, "lmerMod") && !inherits(res, "lmerModLmerTest"))
+      as_lmerModLmerTest(res) else res
+  } else call
 }

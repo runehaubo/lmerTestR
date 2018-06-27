@@ -164,6 +164,10 @@ step.lmerModLmerTest <- function(object, ddf=c("Satterthwaite", "Kenward-Roger")
   # Reduce random and fixed parts:
   red_random <- eval.parent(reduce_random(object, alpha=alpha.random))
   model <- attr(red_random, "model")
+  # 'model' may be 'lmerMod' rather than 'lmerModLmerTest', so we coerce to
+  # 'lmerModLmerTest' if required:
+  if(!inherits(model, "lmerModLmerTest"))
+    model <- as_lmerModLmerTest(model)
   red_fixed <- eval.parent(reduce_fixed(model, ddf=ddf,
                                         alpha=alpha.fixed, keep=keep))
   # get 'reduction' tables:
@@ -324,7 +328,7 @@ reduce_random <- function(model, alpha=0.1) {
       ran <- ranova_lm(newfit, REML=reml)
       break
     }
-    newfit <- eval.parent(update(newfit, formula = newform))
+    newfit <- eval.parent(update(newfit, formula. = newform))
     # newfit <- update(newfit, formula = newform)
     ran <- ranova(newfit)
     forms <- attr(ran, "formulae")
