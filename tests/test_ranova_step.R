@@ -27,7 +27,6 @@ data("sleepstudy", package="lme4")
 fm1 <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy)
 (an <- rand(fm1)) # 2 df test
 (an <- ranova(fm1)) # 2 df test
-?rand
 step(fm1)
 stopifnot(
   nrow(an) == 2L,
