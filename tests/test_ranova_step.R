@@ -7,6 +7,7 @@ f <- function(form, data) lmerTest::lmer(form, data=data)
 form <- "Reaction ~ Days + (Days|Subject)"
 fm <- f(form, data=sleepstudy)
 lmerTest::ranova(fm)
+lmerTest::rand(fm)
 lmerTest::step(fm)
 
 library(lmerTest)
@@ -24,7 +25,9 @@ data("sleepstudy", package="lme4")
 
 # Test reduction of (Days | Subject) to (1 | Subject):
 fm1 <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy)
+(an <- rand(fm1)) # 2 df test
 (an <- ranova(fm1)) # 2 df test
+?rand
 step(fm1)
 stopifnot(
   nrow(an) == 2L,

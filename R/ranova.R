@@ -199,6 +199,7 @@ ranova <- function(model, reduce.terms=TRUE, ...) {
 }
 
 #' @rdname ranova
+#' @export
 rand <- ranova
 
 ##############################################
