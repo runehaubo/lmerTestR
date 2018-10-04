@@ -54,7 +54,7 @@
 #' Generic Step Function
 #'
 #' Generic step function with default method \code{stats::step}. This
-#' contruction ensures that \code{stats::step} still works on \code{lm}
+#' construction ensures that \code{stats::step} still works on \code{lm}
 #' objects etc. after loading the \pkg{lmerTest} package.
 #'
 #' @param object a model object.
