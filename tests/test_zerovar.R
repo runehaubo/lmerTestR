@@ -4,7 +4,9 @@ library(lmerTest)
 data("sleepstudy", package="lme4")
 
 # Baseline fit:
-m0 <- lmer(Reaction ~ Days +  (Days | Subject), sleepstudy)
+m0 <- lmer(Reaction ~ Days +  (Days | Subject), sleepstudy,
+           control=lmerControl(optimizer="bobyqa"))
+## default optimizer does not converge proporly
 m0
 (an0 <- anova(m0))
 
