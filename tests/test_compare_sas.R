@@ -74,7 +74,8 @@ stopifnot(
 # Not actually 'hard-coded' tests versus SAS results...
 
 m.carrots <- lmer(Preference ~ 0 + sens2 + Homesize +
-                    (1+sens2 | Consumer), data=carrots)
+                    (1+sens2 | Consumer), data=carrots,
+                  control=lmerControl(optimizer="bobyqa"))
 summary(m.carrots)
 
 (an.1 <- anova(m.carrots, type=1))

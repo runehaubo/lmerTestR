@@ -1,19 +1,16 @@
 ---
 title: "Satterthwaite’s Method for Degrees of Freedom in Linear Mixed Models"
 author: "Rune Haubo B Christensen"
-date: "Jan 2018 -- (last edit: `r Sys.Date()`)"
+date: "Jan 2018 -- (last edit: 2018-05-07)"
 output:
   html_document:
     keep_md: yes
     toc: yes
   pdf_document:
-    toc: yes
+    toc: no
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, collapse = TRUE)
-# source("functions/functions.R")
-```
+
 
 # Introduction
 
@@ -111,24 +108,51 @@ The variance-covariance matrix of $\beta$ can also be expressed as a function of
 ## Example: Computing denominator df for a $t$-test using `lme4::lmer`
 
 In this example we will consider the `ham` dataset from the **lmerTest** package [1] in which 81 consumers evaluated 4 products twice leading to 648 observations. The dataset is balanced, but we randomly select and use 580 observations (corresponding to approximately 90%) making the dataset unbalanced. An initial fit of the data using `lmer` from the **lme4** package reads:
-```{r}
+
+```r
 library(lme4)
+## Loading required package: Matrix
 data(ham, package="lmerTest")
 set.seed(12345)
 model <- lmer(Informed.liking ~ Product + (1|Consumer), 
               data = ham[sample(x=1:nrow(ham), size=580, replace=FALSE), ])
 summary(model, corr=FALSE)
+## Linear mixed model fit by REML ['lmerMod']
+## Formula: Informed.liking ~ Product + (1 | Consumer)
+##    Data: ham[sample(x = 1:nrow(ham), size = 580, replace = FALSE), ]
+## 
+## REML criterion at convergence: 2577.6
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -2.5390 -0.7312  0.1439  0.7539  2.6129 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev.
+##  Consumer (Intercept) 0.8872   0.9419  
+##  Residual             4.3870   2.0945  
+## Number of obs: 580, groups:  Consumer, 81
+## 
+## Fixed effects:
+##             Estimate Std. Error t value
+## (Intercept)   5.7576     0.2066  27.865
+## Product2     -0.7049     0.2477  -2.846
+## Product3      0.3800     0.2474   1.536
+## Product4      0.1679     0.2515   0.668
 ```
 
 Suppose now that we are interested in the contrast
-```{r}
+
+```r
 L <- c(0, 1, 0, 0) 
 ```
 which simply picks out the second coefficient; the estimate of the difference between product 2 and product 1. 
 
 The estimate of this contrast $L^\top \beta$ is then computed with:
-```{r}
+
+```r
 (estimate <- drop(t(L) %*% fixef(model)))
+## [1] -0.7049069
 ```
 
 ### Computing the variance-covariance matrix of the variance parameters
@@ -136,27 +160,45 @@ The estimate of this contrast $L^\top \beta$ is then computed with:
 In this model the variance-covariance parameters are collected in the 2-vector $\tau = [\sigma_c, \sigma]$; the square root of the random-effect variance for consumers and the residual standard deviation. `lmer` however, profiles out the residual standard deviation of the (restricted) profile likelihood and operates with vector $\theta$ of _relative_ variance parameters. In this model $\theta = \sigma_c / \sigma$.
 
 The parameters that characterize the model can be summarized as
-```{r}
+
+```r
 (parlist <- list(beta=fixef(model),
                 theta=getME(model, "theta"),
                 sigma=sigma(model)))
+## $beta
+## (Intercept)    Product2    Product3    Product4 
+##   5.7575878  -0.7049069   0.3800059   0.1678970 
+## 
+## $theta
+## Consumer.(Intercept) 
+##            0.4497018 
+## 
+## $sigma
+## [1] 2.094517
 ```
 and the consumer random effect standard deviation can be retrieved with 
-```{r}
+
+```r
 with(parlist, theta*sigma)
+## Consumer.(Intercept) 
+##            0.9419082
 ```
 
 A function that directly evaluates the model deviance (REML or ML criterion) can be obtained directly from the model fit:
-```{r}
+
+```r
 devfun <- update(model, devFunOnly=TRUE)
 ```
 Being a function of $\theta$, we can calculate the deviance at $\hat\theta$ with 
-```{r}
+
+```r
 devfun(parlist$theta)
+## [1] 2578.689
 ```
 
 To compute the variance-covariance matrix of $\tau$ by numerically evaluating the Hessian of the log-likelihood function, we need to re-implement the deviance function as a function of the unique variance-covariance parameters ($\tau$) -- not only the relative variance parameters ($\theta$). Utilizing the deviance function as a function of $\theta$ and some particulars of the implementation of linear mixed models in `lmer` as described in [4] we can implement this as:
-```{r}
+
+```r
 devfun_varpar <- function(varpar, devfun, reml) {
   # Computes deviance as a function of 'varpar=c(theta, sigma)'
   # devfun: deviance function as a function of theta only.
@@ -178,33 +220,43 @@ devfun_varpar <- function(varpar, devfun, reml) {
 ```
 
 This function returns the same deviance but as a function of a different parameter vector:
-```{r}
+
+```r
 is_reml <- getME(model, "is_REML")
 varpar_opt <- unname(c(parlist$theta, parlist$sigma)) 
 devfun_varpar(varpar_opt, devfun, reml=is_reml)
+## [1] 2578.69
 ```
 
 We can now obtain the hessian for $\tau$ of the deviance function with the numerical approximation provided in the **numDeriv** package:
-```{r}
+
+```r
 library(numDeriv)
 h <- hessian(func=devfun_varpar, x=varpar_opt, devfun=devfun, reml=is_reml)  
 ```
 Before inverting `h`, we check that it is positive definite by confirming that all its eigenvalues are positive:
-```{r}
+
+```r
 eig_h <- eigen(h, symmetric=TRUE)
 eig_h$values
+## [1] 678.7790 319.9707
 stopifnot(all(eig_h$values > 0))
 ```
 Inverting and scaling `h` provides the asymptotic variance-covariance matrix of the variance parameters at their estimate $\mathsf{V}(\hat\tau)$:
-```{r}
+
+```r
 h_inv <- with(eig_h, vectors %*% diag(1/values) %*% t(vectors))
 (cov_varpar <- 2 * h_inv)
+##              [,1]         [,2]
+## [1,]  0.004850301 -0.001632753
+## [2,] -0.001632753  0.004346738
 ```
 
 ### Computing the gradient of $f(\hat\tau)$
 
 To compute $f'(\hat\tau) = L^\top \{ \nabla_\tau \mathsf V_\tau(\hat\beta) \} L \, \big |_{\tau=\hat\tau}$ we first implement $\mathsf V_\tau(\hat\beta)$ as a function of $\tau$:
-```{r}
+
+```r
 get_covbeta <- function(varpar, devfun) {
   # Compute cov(beta) as a function of varpar
   #
@@ -221,36 +273,44 @@ get_covbeta <- function(varpar, devfun) {
 }
 ```
 Then evaluate the gradient (Jacobian), $\mathcal J = \nabla_\theta \mathsf V_\theta(\hat\beta)$ numerically using the `jacobian` function from the **numDeriv** package and organize it as a list (of length $k$) of $p\times p$ matrices: 
-```{r}
+
+```r
 Jac <- jacobian(func=get_covbeta, x=varpar_opt, devfun=devfun)
 Jac_list <- lapply(1:ncol(Jac), function(i)
   array(Jac[, i], dim=rep(length(parlist$beta), 2))) # k-list of jacobian matrices
 ```
 Left and right multiplying each matrix by $L^\top$ and $L$ respectively gives the gradient vector (of length $k$):
-```{r}
+
+```r
 (grad_var_Lbeta <- vapply(Jac_list, function(x) 
   sum(L * x %*% L), numeric(1L))) # = {L' Jac L}_i
+## [1] 0.001220431 0.058577025
 ```
 
 ### Putting it all together
 
 We now have all elements for the denominator of $\hat\nu(\hat\tau)$. The only element in the numerator, the estimated covariance matrix of the contrast $L^\top \beta$ is then simply
 $\mathsf V(L^\top \hat\beta) = L^\top \mathsf V_{\hat\tau}(\hat\beta) L$ is simple to evaluate since `vcov(model)` extracts $\mathsf V_{\hat\tau}(\hat\beta)$:
-```{r}
+
+```r
 cov_beta <- as.matrix(vcov(model))
 # Compute vcov(Lbeta)
 (var_Lbeta <- drop(t(L) %*% cov_beta %*% L))
+## [1] 0.06135319
 # Alternative: (var_con <- get_covbeta(varpar_opt, devfun))
 ```
 
 Collecting all elements gives the following coefficient table:
-```{r}
+
+```r
 se.estimate <- sqrt(var_Lbeta)
 satt_denom <- sum(grad_var_Lbeta * (cov_varpar %*% grad_var_Lbeta)) # g'Ag
 ddf <- drop(2 * var_Lbeta^2 / satt_denom) # denominator DF
 tstat <- estimate/se.estimate
 pvalue <- 2 * pt(abs(tstat), df = ddf, lower.tail = FALSE)
 data.frame(estimate, se=se.estimate, tstat, ddf, pvalue)
+##     estimate        se     tstat      ddf      pvalue
+## 1 -0.7049069 0.2476958 -2.845858 512.5355 0.004606577
 ```
 
 # Satterthwaite's method for multi-df $F$-tests
@@ -311,38 +371,49 @@ $$\mathsf E(Q) = \sum_{m=1}^q \mathsf E(t_{\nu_m}^2) = \sum_{m=1}^q \mathsf E(F_
 ## Example: Computing denominator df for an $F$-test using `lme4::lmer`
 
 Considering the example above, we start by defining the contrast matrix, $L$ and form the contrast estimate $L\hat\beta$:
-```{r}
+
+```r
 L <- rbind(c(0, 1, 0, 0),
            c(0, 0, 1, 0))
 (Lbeta <- drop(L %*% parlist$beta))
+## [1] -0.7049069  0.3800059
 ```
 and compute the variance of the contrasts $\mathsf V_\hat\tau (L\hat\beta) = L \mathsf V_\hat\tau (\hat\beta) L^\top$:
-```{r}
+
+```r
 cov_Lbeta <- L %*% cov_beta %*% t(L) # Var(contrast) = Var(Lbeta)
 ```
 
 We then compute the eigen-decomposition $\mathsf V(L\hat\beta) = P^\top D P$ and extract the rank, eigenvectors and eigenvalues:
-```{r}
+
+```r
 # Get eigen decomposition of vcov(Lbeta):
 eig_VLbeta <- eigen(cov_Lbeta)
 positive <- eig_VLbeta$values > 1e-8
 q <- sum(positive) # rank(VLbeta)
 (P <- eig_VLbeta$vectors)
+##            [,1]       [,2]
+## [1,] -0.7078991  0.7063136
+## [2,] -0.7063136 -0.7078991
 (d <- eig_VLbeta$values)
+## [1] 0.09299887 0.02956529
 ```
 
 The new contrast vectors are then $\tilde L = P^\top L$
-```{r}
+
+```r
 PtL <- crossprod(P, L) # q x p matrix
 ```
 from which we can compute the $t^2$ values and $F$-statistic:
-```{r}
+
+```r
 t2 <- drop(PtL %*% parlist$beta)^2 / d
 Fvalue <- sum(t2) / q
 ```
 
 For the new contrast vectors $\tilde L_m = (P^\top L)_m$ for $m =1,\ldots, q$ we compute the gradient $f'(\hat\tau)_m$:
-```{r}
+
+```r
 grad_PLcov <- lapply(1:q, function(m) {
   vapply(Jac_list, function(J) sum(PtL[m, ] * J %*% PtL[m, ]), numeric(1L))  
 })
@@ -350,25 +421,32 @@ grad_PLcov <- lapply(1:q, function(m) {
 
 The $m$'th denominator degree of freedom estimate is then 
 $\hat\nu_m =  2d_m^2 (f'(\hat\tau)_m^\top A f'(\hat\tau)_m^\top)^{-1}$:
-```{r}
+
+```r
 nu_m <- vapply(1:2, function(m) {
   denom <- sum(grad_PLcov[[m]] * (cov_varpar %*% grad_PLcov[[m]])) # g'Ag
   2*(d[m])^2 / denom # 2d_m^2 / g'Ag
 }, numeric(1L))
 nu_m
+## [1] 522.1259 452.9268
 ```
 
 From $\mathsf E(Q)$ we then evaluate the estimated denominator degrees of freedom for the $F$-statistic:
-```{r}
+
+```r
 EQ <- sum(nu_m / (nu_m - 2))
 (ddf <- 2 * EQ / (EQ - q)) # nu
+## [1] 485.0607
 ```
 
 In summary we have the following approximate $F$-test:
-```{r}
+
+```r
 pvalue <- pf(q=Fvalue, df1=q, df2=ddf, lower.tail=FALSE)
 data.frame('F value'=Fvalue, ndf=q, ddf=ddf, 'p-value'=pvalue, 
            check.names = FALSE)
+##    F value ndf      ddf     p-value
+## 1 10.23206   2 485.0607 4.44075e-05
 ```
 
 

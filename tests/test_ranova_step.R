@@ -7,6 +7,7 @@ f <- function(form, data) lmerTest::lmer(form, data=data)
 form <- "Reaction ~ Days + (Days|Subject)"
 fm <- f(form, data=sleepstudy)
 lmerTest::ranova(fm)
+lmerTest::rand(fm)
 lmerTest::step(fm)
 
 library(lmerTest)
@@ -24,6 +25,7 @@ data("sleepstudy", package="lme4")
 
 # Test reduction of (Days | Subject) to (1 | Subject):
 fm1 <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy)
+(an <- rand(fm1)) # 2 df test
 (an <- ranova(fm1)) # 2 df test
 step(fm1)
 stopifnot(
@@ -167,10 +169,26 @@ detach(sleepstudy)
 
 # Evaluating in a function works:
 f <- function(form, data) lmer(form, data=data)
-form <- "Reaction ~ Days + (Days|Subject)"
-fm <- f(form, data=sleepstudy)
+form <- "Informed.liking ~ Product+Information+
+            (1|Consumer) + (1|Product:Consumer) + (1|Information:Consumer)"
+fm <- f(form, data=ham)
 ranova(fm)
-step(fm)
+step_res <- step(fm)
+stopifnot(
+  all(c("Sum Sq", "Mean Sq", "NumDF", "DenDF", "F value", "Pr(>F)") %in%
+        colnames(step_res$fixed))
+)
+
+# Check that step works when form is a character vector
+m <- lmer(form, data=ham)
+step_res <- step(m)
+(drop1_table <- attr(step_res, "drop1"))
+stopifnot(
+  all(c("Sum Sq", "Mean Sq", "NumDF", "DenDF", "F value", "Pr(>F)") %in%
+        colnames(drop1_table))
+)
+# In version < 3.0-1.9002 attr(step_res, "drop1") picked up lme4::drop1.merMod
+# and returned an AIC table after the model had been update'd.
 
 #####################################################################
 # Model with 2 ranef covarites:

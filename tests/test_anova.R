@@ -266,7 +266,12 @@ if(has_pbkrtest) {
 }
 
 # Example with 1 fixef without intercept:
-m <- lmer(Reaction ~ Days - 1 + (Days | Subject), sleepstudy)
+# for packageVersion("lme4") < 1.1.20
+# mOld <- lmer(Reaction ~ Days - 1 + (Days | Subject), sleepstudy)
+# for packageVersion("lme4") >= 1.1.20 we need to specify the old default
+# optimizer to get the model to converge well enough.
+m <- lmer(Reaction ~ Days - 1 + (Days | Subject), sleepstudy,
+          control=lmerControl(optimizer="bobyqa"))
 # m <- lmer(Reaction ~ 0 + Days + (Days | Subject), sleepstudy) # alternative
 stopifnot(length(fixef(m)) == 1L,
           names(fixef(m)) == "Days")
@@ -373,3 +378,4 @@ stopifnot(
   isTRUE(all.equal(an1, an4, check.attributes=FALSE, tolerance=TOL)),
   isTRUE(all.equal(an1, an5, check.attributes=FALSE, tolerance=TOL))
 )
+

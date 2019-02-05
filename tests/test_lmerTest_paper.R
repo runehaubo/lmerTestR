@@ -12,7 +12,9 @@ load(system.file("testdata","test_paper_objects.RData", package="lmerTest"))
 # Evaluate code from paper:
 ## Section 8.2:
 tv <- lmer(Sharpnessofmovement ~ TVset * Picture + (1 | Assessor) +
-             (1 | Assessor:TVset) + (1 | Assessor:Picture), data = TVbo)
+             (1 | Assessor:TVset) + (1 | Assessor:Picture), data = TVbo,
+           control=lmerControl(optimizer="bobyqa"))
+
 (an8.2 <- anova(tv))
 
 if(has_pbkrtest)
@@ -20,7 +22,8 @@ if(has_pbkrtest)
 
 ## Section 8.3:
 m.carrots <- lmer(Preference ~ sens1 + sens2 + (1 + sens1 + sens2 | Consumer) +
-                    (1 | Product), data=carrots)
+                    (1 | Product), data=carrots,
+                  control=lmerControl(optimizer="bobyqa"))
 (sum8.3 <- coef(summary(m.carrots)))
 
 ## Section 8.4:
@@ -28,9 +31,9 @@ tv <- lmer(Sharpnessofmovement ~ TVset * Picture +
              (1 | Assessor:TVset) + (1 | Assessor:Picture) +
              (1 | Assessor:Picture:TVset) + (1 | Repeat) + (1 | Repeat:Picture) +
              (1 | Repeat:TVset) + (1 | Repeat:TVset:Picture) + (1 | Assessor),
-           data = TVbo)
+           data = TVbo,
+           control=lmerControl(optimizer="bobyqa"))
 st <- step(tv)
-names(st)
 (elim_tab_random8.4 <- st$random)
 (elim_tab_fixed8.4 <- st$fixed)
 (an8.4 <- anova(get_model(st)))

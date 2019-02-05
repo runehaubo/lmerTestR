@@ -62,6 +62,17 @@ stopifnot(isTRUE(all.equal(fmA, fmB, tolerance=TOL)))
 # Based on bug-report by Henrik Singmann, github issue #3
 
 #####################################################################
+# Test update when formula is a character vector:
+
+form <- "Informed.liking ~ Product+Information+
+            (1|Consumer) + (1|Product:Consumer) + (1|Information:Consumer)"
+m <- lmer(form, data=ham)
+class(m)
+class(update(m, ~.- Product))
+stopifnot(inherits(update(m, ~.- Product), "lmerModLmerTest"))
+
+# In version < 3.0-1.9002 class(update(m, ~.- Product)) was "lmerMod"
+#####################################################################
 # Test error message from as_lmerModLmerTest:
 data("sleepstudy", package="lme4")
 myfit <- function(formula, data) {
