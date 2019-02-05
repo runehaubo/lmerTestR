@@ -12,8 +12,8 @@
 \method{lsmeansLT}{lmerModLmerTest}(model, which = NULL, level = 0.95,
   ddf = c("Satterthwaite", "Kenward-Roger"), pairwise = FALSE, ...)
 
-\method{difflsmeans}{lmerModLmerTest}(model, which = NULL, level = 0.95,
-  ddf = c("Satterthwaite", "Kenward-Roger"), ...)
+\method{difflsmeans}{lmerModLmerTest}(model, which = NULL,
+  level = 0.95, ddf = c("Satterthwaite", "Kenward-Roger"), ...)
 }
 \arguments{
 \item{model}{a model object fitted with \code{\link{lmer}} (of class

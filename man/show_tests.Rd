@@ -7,7 +7,8 @@
 \usage{
 show_tests(object, ...)
 
-\method{show_tests}{default}(object, fractions = FALSE, names = TRUE, ...)
+\method{show_tests}{default}(object, fractions = FALSE, names = TRUE,
+  ...)
 }
 \arguments{
 \item{object}{a suitable object with an \code{"hypotheses"} attribute, e.g. an

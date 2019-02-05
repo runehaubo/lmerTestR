@@ -68,7 +68,7 @@ parts of the linear mixed model.}
 The computational approach is to let \code{lmerTest::lmer} compute the
 Hessian and derivatives needed for evaluation of degrees of freedom and
 t- and F-tests and to store these in the model object. The
-Hessian and derivaties are therefore computed only once per model fit
+Hessian and derivatives are therefore computed only once per model fit
 and reused with each call to \code{anova}, \code{summary}, etc. Evaluation of
 t and F-tests does not involve model re-fitting.
 

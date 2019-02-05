@@ -1,3 +1,8 @@
+lmerTest 3.1-0
+------------------
+
+- Adding support for legacy model fits, i.e. `merModLmerTest` objects generated with lmerTest version `< 3.0-0`. This includes defining the `merModLmerTest` class and `anova`, `summary`, `drop1`, `ls_means`, `lsmeansLT` and `difflsmeans` methods. The usual `lme4` methods also work with objects of class `merModLmerTest`.
+
 lmerTest 3.0-1
 ------------------
 
