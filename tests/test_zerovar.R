@@ -13,7 +13,8 @@ m0
 # Make a fit with a zero variance estimate:
 n <- nrow(sleepstudy)
 g <- factor(rep(1:2, c(n - 10, 10)))
-m <- lmer(Reaction ~ Days +  (Days | Subject) + (1|g), sleepstudy)
+m <- lmer(Reaction ~ Days +  (Days | Subject) + (1|g), sleepstudy,
+          control=lmerControl(optimizer="bobyqa"))
 m
 (an <- anova(m))
 
