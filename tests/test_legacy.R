@@ -57,7 +57,8 @@ drop1(fm1)
 ranova(fm1)
 step(fm1)
 
-fm1new <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy)
+fm1new <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy,
+               control=lmerControl(optimizer="bobyqa"))
 stopifnot(
   isTRUE(all.equal(drop1(fm1), drop1(fm1new), tol=TOL)),
   isTRUE(all.equal(ranova(fm1), ranova(fm1new), tol=TOL)),

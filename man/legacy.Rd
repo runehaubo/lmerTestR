@@ -11,8 +11,8 @@
 \alias{step.merModLmerTest}
 \title{Methods for Legacy lmerTest Objects}
 \usage{
-\method{anova}{merModLmerTest}(object, ..., type = c("III", "II", "I", "3",
-  "2", "1"), ddf = c("Satterthwaite", "Kenward-Roger", "lme4"))
+\method{anova}{merModLmerTest}(object, ..., type = c("III", "II", "I",
+  "3", "2", "1"), ddf = c("Satterthwaite", "Kenward-Roger", "lme4"))
 
 \method{summary}{merModLmerTest}(object, ..., ddf = c("Satterthwaite",
   "Kenward-Roger", "lme4"))

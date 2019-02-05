@@ -4,7 +4,8 @@
 \alias{show_tests.anova}
 \title{Show Hypothesis Tests in ANOVA Tables}
 \usage{
-\method{show_tests}{anova}(object, fractions = FALSE, names = TRUE, ...)
+\method{show_tests}{anova}(object, fractions = FALSE, names = TRUE,
+  ...)
 }
 \arguments{
 \item{object}{an anova table with a \code{"hypotheses"} attribute.}
