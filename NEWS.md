@@ -1,3 +1,9 @@
+lmerTest 3.1-1
+------------------
+
+- Sofie P Jensen is taking over as maintainer replacing Per B Brockhoff.
+- Fixing "noLD" CRAN issue (a check that ensures the package works on systems without long doubles). This was caused by an over sensitive test.
+
 lmerTest 3.1-0
 ------------------
 
