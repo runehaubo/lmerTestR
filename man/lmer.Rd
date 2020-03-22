@@ -4,9 +4,20 @@
 \alias{lmer}
 \title{Fit Linear Mixed-Effects Models}
 \usage{
-lmer(formula, data = NULL, REML = TRUE, control = lmerControl(),
-  start = NULL, verbose = 0L, subset, weights, na.action, offset,
-  contrasts = NULL, devFunOnly = FALSE, ...)
+lmer(
+  formula,
+  data = NULL,
+  REML = TRUE,
+  control = lmerControl(),
+  start = NULL,
+  verbose = 0L,
+  subset,
+  weights,
+  na.action,
+  offset,
+  contrasts = NULL,
+  devFunOnly = FALSE
+)
 }
 \arguments{
 \item{formula}{a two-sided linear formula object describing both the
@@ -16,12 +27,11 @@ lmer(formula, data = NULL, REML = TRUE, control = lmerControl(),
     distinguished by vertical bars (\code{|}) separating expressions
     for design matrices from grouping factors.  Two vertical bars
     (\code{||}) can be used to specify multiple uncorrelated random
-    effects for the same grouping variable. (Because of the way it is
-    implemented, the \code{||}-syntax \emph{works
-    only for design matrices containing
-    numeric (continuous) predictors}; to fit models with independent
-  categorical effects, see \code{\link{dummy}} or the \code{lmer_alt}
-  function from the \code{afex} package.) 
+    effects for the same grouping variable. %----------
+    (Because of the way it is implemented, the \code{||}-syntax \emph{works
+       only for design matrices containing numeric (continuous) predictors};
+     to fit models with independent categorical effects, see \code{\link[lme4]{dummy}}
+     or the \code{lmer_alt} function from the \href{https://CRAN.R-project.org/package=afex}{\pkg{afex}} package.)
 }
 
 \item{data}{an optional data frame containing the variables named in
@@ -39,7 +49,7 @@ lmer(formula, data = NULL, REML = TRUE, control = lmerControl(),
     optimize the REML criterion (as opposed to the log-likelihood)?}
 
 \item{control}{a list (of correct class, resulting from
-    \code{\link{lmerControl}()} or \code{\link{glmerControl}()}
+    \code{\link[lme4]{lmerControl}()} or \code{\link[lme4]{glmerControl}()}
     respectively) containing control parameters, including the nonlinear
     optimizer to be used and parameters to be passed through to the
     nonlinear optimizer, see the \code{*lmerControl} documentation for
@@ -65,9 +75,9 @@ lmer(formula, data = NULL, REML = TRUE, control = lmerControl(),
     Prior \code{weights} are \emph{not} normalized or standardized in
     any way.  In particular, the diagonal of the residual covariance
     matrix is the squared residual standard deviation parameter
-    \code{\link{sigma}} times the vector of inverse \code{weights}.
+    \code{\link[lme4]{sigma}} times the vector of inverse \code{weights}.
     Therefore, if the \code{weights} have relatively large magnitudes,
-    then in order to compensate, the \code{\link{sigma}} parameter will
+    then in order to compensate, the \code{\link[lme4]{sigma}} parameter will
     also need to have a relatively large magnitude.}
 
 \item{na.action}{a function that indicates what should happen when the
@@ -92,10 +102,6 @@ lmer(formula, data = NULL, REML = TRUE, control = lmerControl(),
     variables stored in its environment, it may not return
     \emph{exactly} the same values on subsequent calls (but the results
     should always be within machine tolerance).}
-
-\item{...}{other potential arguments.  A \code{method} argument was
-    used in earlier versions of the package.  Its functionality has been
-    replaced by the \code{REML} argument.}
 }
 \value{
 an S4 object of class \code{"lmerModLmerTest"}

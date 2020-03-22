@@ -4,8 +4,7 @@
 \alias{summary.lmerModLmerTest}
 \title{Summary Method for Linear Mixed Models}
 \usage{
-\method{summary}{lmerModLmerTest}(object, ..., ddf = c("Satterthwaite",
-  "Kenward-Roger", "lme4"))
+\method{summary}{lmerModLmerTest}(object, ..., ddf = c("Satterthwaite", "Kenward-Roger", "lme4"))
 }
 \arguments{
 \item{object}{an lmerModLmerTest object.}

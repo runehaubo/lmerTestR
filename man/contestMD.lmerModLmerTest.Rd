@@ -6,14 +6,25 @@
 \alias{contestMD.lmerMod}
 \title{Multiple Degrees-of-Freedom Contrast Tests}
 \usage{
-\method{contestMD}{lmerModLmerTest}(model, L, rhs = 0,
+\method{contestMD}{lmerModLmerTest}(
+  model,
+  L,
+  rhs = 0,
   ddf = c("Satterthwaite", "Kenward-Roger"),
-  eps = sqrt(.Machine$double.eps), ...)
+  eps = sqrt(.Machine$double.eps),
+  ...
+)
 
 calcSatterth(model, L)
 
-\method{contestMD}{lmerMod}(model, L, rhs = 0, ddf = c("Satterthwaite",
-  "Kenward-Roger"), eps = sqrt(.Machine$double.eps), ...)
+\method{contestMD}{lmerMod}(
+  model,
+  L,
+  rhs = 0,
+  ddf = c("Satterthwaite", "Kenward-Roger"),
+  eps = sqrt(.Machine$double.eps),
+  ...
+)
 }
 \arguments{
 \item{model}{a model object fitted with \code{lmer} from package

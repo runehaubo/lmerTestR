@@ -4,8 +4,13 @@
 \alias{drop1.lmerModLmerTest}
 \title{Drop Marginal Terms from Model}
 \usage{
-\method{drop1}{lmerModLmerTest}(object, scope, ddf = c("Satterthwaite",
-  "Kenward-Roger", "lme4"), force_get_contrasts = FALSE, ...)
+\method{drop1}{lmerModLmerTest}(
+  object,
+  scope,
+  ddf = c("Satterthwaite", "Kenward-Roger", "lme4"),
+  force_get_contrasts = FALSE,
+  ...
+)
 }
 \arguments{
 \item{object}{an \code{\link{lmer}} model fit (of class

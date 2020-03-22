@@ -5,9 +5,16 @@
 \alias{get_model.step_list}
 \title{Backward Elimination for Linear Mixed Models}
 \usage{
-\method{step}{lmerModLmerTest}(object, ddf = c("Satterthwaite",
-  "Kenward-Roger"), alpha.random = 0.1, alpha.fixed = 0.05,
-  reduce.fixed = TRUE, reduce.random = TRUE, keep, ...)
+\method{step}{lmerModLmerTest}(
+  object,
+  ddf = c("Satterthwaite", "Kenward-Roger"),
+  alpha.random = 0.1,
+  alpha.fixed = 0.05,
+  reduce.fixed = TRUE,
+  reduce.random = TRUE,
+  keep,
+  ...
+)
 
 \method{get_model}{step_list}(x, ...)
 }

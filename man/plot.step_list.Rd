@@ -4,9 +4,16 @@
 \alias{plot.step_list}
 \title{Plot LS-means for Backward Reduced Model}
 \usage{
-\method{plot}{step_list}(x, y = NULL, which = NULL, pairwise = FALSE,
-  mult = TRUE, level = 0.95, ddf = c("Satterthwaite",
-  "Kenward-Roger"), ...)
+\method{plot}{step_list}(
+  x,
+  y = NULL,
+  which = NULL,
+  pairwise = FALSE,
+  mult = TRUE,
+  level = 0.95,
+  ddf = c("Satterthwaite", "Kenward-Roger"),
+  ...
+)
 }
 \arguments{
 \item{x}{a \code{step_list} object; the result of running

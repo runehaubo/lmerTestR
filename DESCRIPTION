@@ -31,7 +31,7 @@ Encoding: UTF-8
 LazyData: true
 URL: https://github.com/runehaubo/lmerTestR
 BugReports: https://github.com/runehaubo/lmerTestR/issues
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.0
 Collate: 
     'anova_contrasts.R'
     'contest.R'

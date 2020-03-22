@@ -4,8 +4,7 @@
 \alias{show_tests.ls_means}
 \title{Show LS-means Hypothesis Tests and Contrasts}
 \usage{
-\method{show_tests}{ls_means}(object, fractions = FALSE, names = TRUE,
-  ...)
+\method{show_tests}{ls_means}(object, fractions = FALSE, names = TRUE, ...)
 }
 \arguments{
 \item{object}{an \code{ls_means} object.}

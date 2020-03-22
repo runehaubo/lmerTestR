@@ -4,7 +4,8 @@
 \name{TVbo}
 \alias{TVbo}
 \title{Sensory Assesment of B&O TVs}
-\format{\describe{
+\format{
+\describe{
 \item{Assessor}{factor with 8 levels assessors.}
 \item{TVset}{product factor with 3 levels.}
 \item{Picture}{product factor with 4 levels.}
@@ -14,7 +15,8 @@ characteristics on which the TV sets (products) are assessed:
 
 Coloursaturation, Colourbalance, Noise, Depth, Sharpness, Lightlevel,
 Contrast, Sharpnessofmovement, Flickeringstationary, Flickeringmovement,
-Distortion, Dimglasseffect, Cutting, Flossyedges, Elasticeffect.}
+Distortion, Dimglasseffect, Cutting, Flossyedges, Elasticeffect.
+}
 \usage{
 data(TVbo)
 }

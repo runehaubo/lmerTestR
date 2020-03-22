@@ -6,14 +6,31 @@
 \alias{difflsmeans.lmerModLmerTest}
 \title{LS-means for lmerTest Model Fits}
 \usage{
-\method{ls_means}{lmerModLmerTest}(model, which = NULL, level = 0.95,
-  ddf = c("Satterthwaite", "Kenward-Roger"), pairwise = FALSE, ...)
+\method{ls_means}{lmerModLmerTest}(
+  model,
+  which = NULL,
+  level = 0.95,
+  ddf = c("Satterthwaite", "Kenward-Roger"),
+  pairwise = FALSE,
+  ...
+)
 
-\method{lsmeansLT}{lmerModLmerTest}(model, which = NULL, level = 0.95,
-  ddf = c("Satterthwaite", "Kenward-Roger"), pairwise = FALSE, ...)
+\method{lsmeansLT}{lmerModLmerTest}(
+  model,
+  which = NULL,
+  level = 0.95,
+  ddf = c("Satterthwaite", "Kenward-Roger"),
+  pairwise = FALSE,
+  ...
+)
 
-\method{difflsmeans}{lmerModLmerTest}(model, which = NULL,
-  level = 0.95, ddf = c("Satterthwaite", "Kenward-Roger"), ...)
+\method{difflsmeans}{lmerModLmerTest}(
+  model,
+  which = NULL,
+  level = 0.95,
+  ddf = c("Satterthwaite", "Kenward-Roger"),
+  ...
+)
 }
 \arguments{
 \item{model}{a model object fitted with \code{\link{lmer}} (of class

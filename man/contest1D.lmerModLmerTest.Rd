@@ -5,12 +5,25 @@
 \alias{contest1D.lmerMod}
 \title{Contrast Tests in 1D}
 \usage{
-\method{contest1D}{lmerModLmerTest}(model, L, rhs = 0,
-  ddf = c("Satterthwaite", "Kenward-Roger"), confint = FALSE,
-  level = 0.95, ...)
+\method{contest1D}{lmerModLmerTest}(
+  model,
+  L,
+  rhs = 0,
+  ddf = c("Satterthwaite", "Kenward-Roger"),
+  confint = FALSE,
+  level = 0.95,
+  ...
+)
 
-\method{contest1D}{lmerMod}(model, L, rhs = 0, ddf = c("Satterthwaite",
-  "Kenward-Roger"), confint = FALSE, level = 0.95, ...)
+\method{contest1D}{lmerMod}(
+  model,
+  L,
+  rhs = 0,
+  ddf = c("Satterthwaite", "Kenward-Roger"),
+  confint = FALSE,
+  level = 0.95,
+  ...
+)
 }
 \arguments{
 \item{model}{a model object fitted with \code{lmer} from package

@@ -11,27 +11,59 @@
 \alias{step.merModLmerTest}
 \title{Methods for Legacy lmerTest Objects}
 \usage{
-\method{anova}{merModLmerTest}(object, ..., type = c("III", "II", "I",
-  "3", "2", "1"), ddf = c("Satterthwaite", "Kenward-Roger", "lme4"))
+\method{anova}{merModLmerTest}(
+  object,
+  ...,
+  type = c("III", "II", "I", "3", "2", "1"),
+  ddf = c("Satterthwaite", "Kenward-Roger", "lme4")
+)
 
-\method{summary}{merModLmerTest}(object, ..., ddf = c("Satterthwaite",
-  "Kenward-Roger", "lme4"))
+\method{summary}{merModLmerTest}(object, ..., ddf = c("Satterthwaite", "Kenward-Roger", "lme4"))
 
-\method{ls_means}{merModLmerTest}(model, which = NULL, level = 0.95,
-  ddf = c("Satterthwaite", "Kenward-Roger"), pairwise = FALSE, ...)
+\method{ls_means}{merModLmerTest}(
+  model,
+  which = NULL,
+  level = 0.95,
+  ddf = c("Satterthwaite", "Kenward-Roger"),
+  pairwise = FALSE,
+  ...
+)
 
-\method{lsmeansLT}{merModLmerTest}(model, which = NULL, level = 0.95,
-  ddf = c("Satterthwaite", "Kenward-Roger"), pairwise = FALSE, ...)
+\method{lsmeansLT}{merModLmerTest}(
+  model,
+  which = NULL,
+  level = 0.95,
+  ddf = c("Satterthwaite", "Kenward-Roger"),
+  pairwise = FALSE,
+  ...
+)
 
-\method{difflsmeans}{merModLmerTest}(model, which = NULL, level = 0.95,
-  ddf = c("Satterthwaite", "Kenward-Roger"), ...)
+\method{difflsmeans}{merModLmerTest}(
+  model,
+  which = NULL,
+  level = 0.95,
+  ddf = c("Satterthwaite", "Kenward-Roger"),
+  ...
+)
 
-\method{drop1}{merModLmerTest}(object, scope, ddf = c("Satterthwaite",
-  "Kenward-Roger", "lme4"), force_get_contrasts = FALSE, ...)
+\method{drop1}{merModLmerTest}(
+  object,
+  scope,
+  ddf = c("Satterthwaite", "Kenward-Roger", "lme4"),
+  force_get_contrasts = FALSE,
+  ...
+)
 
-\method{step}{merModLmerTest}(object, ddf = c("Satterthwaite",
-  "Kenward-Roger"), alpha.random = 0.1, alpha.fixed = 0.05,
-  reduce.fixed = TRUE, reduce.random = TRUE, keep, ...)
+\method{step}{merModLmerTest}(
+  object,
+  ddf = c("Satterthwaite", "Kenward-Roger"),
+  alpha.random = 0.1,
+  alpha.fixed = 0.05,
+  reduce.fixed = TRUE,
+  reduce.random = TRUE,
+  keep,
+  ...
+)
 }
 \arguments{
 \item{object}{an \code{lmerModLmerTest} object; the result of \code{lmer()}
