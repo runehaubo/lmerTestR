@@ -69,11 +69,7 @@ form <- "Informed.liking ~ Product+Information+
 m <- lmer(form, data=ham)
 class(m)
 class(update(m, ~.- Product))
-<<<<<<< Updated upstream
 stopifnot(inherits(update(m, ~.- Product), "lmerModLmerTest"))
-=======
-stopifnot(inherits(class(update(m, ~.- Product)), "lmerModLmerTest"))
->>>>>>> Stashed changes
 
 # In version < 3.0-1.9002 class(update(m, ~.- Product)) was "lmerMod"
 #####################################################################
