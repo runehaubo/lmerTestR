@@ -1,5 +1,5 @@
 #############################################################################
-#    Copyright (c) 2013-2018 Alexandra Kuznetsova, Per Bruun Brockhoff, and
+#    Copyright (c) 2013-2020 Alexandra Kuznetsova, Per Bruun Brockhoff, and
 #    Rune Haubo Bojesen Christensen
 #
 #    This file is part of the lmerTest package for R (*lmerTest*)
