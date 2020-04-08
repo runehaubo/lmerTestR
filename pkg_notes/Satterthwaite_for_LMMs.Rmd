@@ -40,7 +40,7 @@ $$Y = X\beta + \varepsilon$$
 with $\varepsilon \sim N(0, V_\tau)$, $X$ being a $n\times p$ design matrix, $V_\tau$ being the variance-covariance matrix of the residuals $\varepsilon$ (as well as of the observations $Y$), and $\tau$ is the (usually small) $k$-vector of unique variance-covariance parameters. The $p$-vector of mean-value parameters $\beta$ can be profiled out of the likelihood function since the estimate $\hat\beta_\tau$ given a value for $\tau$ can be expressed by the generalized least squares (GLS) estimator as the solution to 
 $$X^\top V_\tau^{-1} X \hat\beta = X^\top V^{-1}_\tau y $$
 where $y$ is the observed value of $Y$. The asymptotic variance-covariance matrix of $\hat\beta$ is
-$$\mathsf V_\tau (\hat\beta) = X^\top V_\tau^{-1} X$$
+$$\mathsf V_\tau (\hat\beta) = \left( X^\top V_\tau^{-1} X \right)^{-1}$$
 which is a function of $\tau$ (only) and denoted $\mathsf V_\hat\tau (\hat\beta)$ when evaluated at the (ML or REML) estimate $\hat\tau$. Note that the distribution of $Y$ and therefore the likelihood function for the model, only depends on the, usually small, parameter vector, $\tau$.
 
 The linear mixed model may be written
