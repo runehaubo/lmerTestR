@@ -4,7 +4,8 @@
 \name{carrots}
 \alias{carrots}
 \title{Consumer Preference Mapping of Carrots}
-\format{\describe{
+\format{
+\describe{
 \item{Consumer}{factor with 103 levels: numbering identifying consumers.}
 \item{Frequency}{factor with 5 levels; "How often do you eat carrots?"
 1: once a week or more, 2: once
@@ -29,7 +30,8 @@ businessman/ self-employment, 6: student, 7: retired}
 \item{sens1}{first sensory variable derived from a PCA.}
 \item{sens2}{second sensory variable derived from a PCA.}
 \item{Product}{factor on 12 levels.}
-}}
+}
+}
 \source{
 Per Bruun Brockhoff, The Royal Veterinary and Agricultural University,
 Denmark.

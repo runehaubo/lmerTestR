@@ -4,8 +4,7 @@
 \alias{nullspace}
 \title{Nullspace}
 \usage{
-nullspace(A, type = c("right", "left"),
-  tol = sqrt(.Machine$double.eps))
+nullspace(A, type = c("right", "left"), tol = sqrt(.Machine$double.eps))
 }
 \arguments{
 \item{A}{a numeric matrix.}

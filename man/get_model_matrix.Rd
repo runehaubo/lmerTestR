@@ -4,8 +4,7 @@
 \alias{get_model_matrix}
 \title{Extract or remake model matrix from model}
 \usage{
-get_model_matrix(model, type = c("extract", "remake"),
-  contrasts = "restore")
+get_model_matrix(model, type = c("extract", "remake"), contrasts = "restore")
 }
 \arguments{
 \item{model}{an \code{lm} or \code{lmerMod} model object.}

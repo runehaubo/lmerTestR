@@ -4,14 +4,16 @@
 \name{ham}
 \alias{ham}
 \title{Conjoint Study of Dry Cured Ham}
-\format{\describe{
+\format{
+\describe{
 \item{Consumer}{factor with 81 levels: numbering identifying consumers.}
 \item{Product}{factor with four levels.}
 \item{Informed.liking}{numeric: hedonic liking for the products.}
 \item{Information}{factor with two levels.}
 \item{Gender}{factor with two levels.}
 \item{Age}{numeric: age of Consumer.}
-}}
+}
+}
 \usage{
 data(ham)
 }

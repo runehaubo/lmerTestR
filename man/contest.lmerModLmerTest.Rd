@@ -5,15 +5,31 @@
 \alias{contest.lmerMod}
 \title{Test of Contrasts}
 \usage{
-\method{contest}{lmerModLmerTest}(model, L, rhs = 0, joint = TRUE,
-  collect = TRUE, confint = TRUE, level = 0.95,
-  check_estimability = FALSE, ddf = c("Satterthwaite", "Kenward-Roger",
-  "lme4"), ...)
+\method{contest}{lmerModLmerTest}(
+  model,
+  L,
+  rhs = 0,
+  joint = TRUE,
+  collect = TRUE,
+  confint = TRUE,
+  level = 0.95,
+  check_estimability = FALSE,
+  ddf = c("Satterthwaite", "Kenward-Roger", "lme4"),
+  ...
+)
 
-\method{contest}{lmerMod}(model, L, rhs = 0, joint = TRUE,
-  collect = TRUE, confint = TRUE, level = 0.95,
-  check_estimability = FALSE, ddf = c("Satterthwaite", "Kenward-Roger",
-  "lme4"), ...)
+\method{contest}{lmerMod}(
+  model,
+  L,
+  rhs = 0,
+  joint = TRUE,
+  collect = TRUE,
+  confint = TRUE,
+  level = 0.95,
+  check_estimability = FALSE,
+  ddf = c("Satterthwaite", "Kenward-Roger", "lme4"),
+  ...
+)
 }
 \arguments{
 \item{model}{a model object fitted with \code{lmer} from package

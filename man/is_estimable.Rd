@@ -4,8 +4,12 @@
 \alias{is_estimable}
 \title{Estimability of Contrasts}
 \usage{
-is_estimable(contrast, nullspace = NULL, X = NULL,
-  tol = sqrt(.Machine$double.eps))
+is_estimable(
+  contrast,
+  nullspace = NULL,
+  X = NULL,
+  tol = sqrt(.Machine$double.eps)
+)
 }
 \arguments{
 \item{contrast}{a numeric matrix where each row is a contrast vector for
