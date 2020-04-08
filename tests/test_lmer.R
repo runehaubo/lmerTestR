@@ -37,12 +37,22 @@ TOL <- 1e-4
 
 #####################################################################
 # Check that lme4::lmer and lmerTest::lmer have the same arguments
+
 lmer_args <- formals(lme4::lmer)
+names(lmer_args)
 lmerTest_args <- formals(lmerTest::lmer)
-stopifnot(
-  all.equal(names(lmer_args), names(lmerTest_args)),
-  all.equal(lmer_args, lmerTest_args)
-)
+seq_args <- seq_along(lmerTest_args)
+if(packageVersion("lme4") > '1.1.21') {
+  stopifnot(
+    all.equal(names(lmer_args), names(lmerTest_args)),
+    all.equal(lmer_args, lmerTest_args)
+  )
+} else { # Older versions of 'lme4' has a "..." argument:
+  stopifnot(
+    all.equal(names(lmer_args)[seq_args], names(lmerTest_args[seq_args])),
+    all.equal(lmer_args[seq_args], lmerTest_args[seq_args])
+  )
+}
 
 #####################################################################
 # Test evaluation of update inside a function:
