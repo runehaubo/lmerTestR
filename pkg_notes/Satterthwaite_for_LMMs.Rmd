@@ -40,8 +40,8 @@ $$Y = X\beta + \varepsilon$$
 with $\varepsilon \sim N(0, V_\tau)$, $X$ being a $n\times p$ design matrix, $V_\tau$ being the variance-covariance matrix of the residuals $\varepsilon$ (as well as of the observations $Y$), and $\tau$ is the (usually small) $k$-vector of unique variance-covariance parameters. The $p$-vector of mean-value parameters $\beta$ can be profiled out of the likelihood function since the estimate $\hat\beta_\tau$ given a value for $\tau$ can be expressed by the generalized least squares (GLS) estimator as the solution to 
 $$X^\top V_\tau^{-1} X \hat\beta = X^\top V^{-1}_\tau y $$
 where $y$ is the observed value of $Y$. The asymptotic variance-covariance matrix of $\hat\beta$ is
-$$\mathsf V_\tau (\hat\beta) = \left( X^\top V_\tau^{-1} X \right)^{-1}$$
-which is a function of $\tau$ (only) and denoted $\mathsf V_\hat\tau (\hat\beta)$ when evaluated at the (ML or REML) estimate $\hat\tau$. Note that the distribution of $Y$ and therefore the likelihood function for the model, only depends on the, usually small, parameter vector, $\tau$.
+$$\mathsf{V}_{\tau} (\hat\beta) = \left( X^\top V_\tau^{-1} X \right)^{-1}$$
+which is a function of $\tau$ (only) and denoted $\mathsf{V}_{\hat\tau} (\hat\beta)$ when evaluated at the (ML or REML) estimate $\hat\tau$. Note that the distribution of $Y$ and therefore the likelihood function for the model, only depends on the, usually small, parameter vector, $\tau$.
 
 The linear mixed model may be written
 $$Y = X\beta + Zb + \epsilon$$
@@ -260,26 +260,23 @@ $$H_0:\; L\beta = 0$$
 were the $q\times p$ matrix $L$ has rank $q$ with $1 < q \leq p$ and $p$ is the length of the $\beta$-vector. 
 
 The conventional $F$-statistic for this hypothesis reads
-$$F = \frac{1}{q} (L\hat\beta)^\top (L \mathsf V_\hat\tau(\hat\beta)L^\top)^{-1} (L\hat\beta)$$
+$$F = \frac{1}{q} (L\hat\beta)^\top (L \mathsf V_{\hat\tau}(\hat\beta)L^\top)^{-1} (L\hat\beta)$$
 which is seen to reduce to the square of the $t$-statistic considered above for $q=1$. Despite its name, this statistic only follows an exact $F$-distribution with $q$ numerator degrees of freedom and known denominator degrees of freedom in special cases (such as orthogonal or balanced designs.) 
 
 In the general case we are interested in estimating an appropriate denominator degrees of freedom for $F$ assuming $q$ numerator degrees of freedom. 
 
 Following Fai and Cornelius (1996) [6] we eigen-decompose the variance-covariance matrix of $L\hat\beta$:
-$$\mathsf V_\hat\tau(L\hat\beta) = L \mathsf V_\hat\tau(\hat\beta)L^\top = PDP^\top$$
+$$\mathsf{V}_{\hat\tau}(L\hat\beta) = L \mathsf{V}_{\hat\tau}(\hat\beta) L^{\top} = PDP^{\top}$$
 such that we may write
-$$\begin{align} qF\equiv Q & = (L\hat\beta)^\top P D^{-1}P^\top (L\hat\beta) & \\
- & = \hat\beta^\top L^\top P D^{-1}P^\top L\hat\beta & \\
- & = (P^\top L \hat\beta)^\top D^{-1} (P^\top L \hat\beta) & \\
- & =  \sum_{m=1}^q \frac{(P^\top L \hat\beta)_m^2}{d_m} = \sum_{m=1}^q t_m^2 & \\
-\end{align}$$ 
+$$\begin{aligned} qF\equiv Q & = (L \hat\beta)^{\top} P D^{-1}P^{\top} (L \hat\beta) & \\ & = \hat\beta^{\top} L^{\top} P D^{-1}P^{\top} L \hat\beta & \\ & = (P^{\top} L \hat\beta)^{\top} D^{-1} (P^{\top} L \hat\beta) & \\ & =  \sum_{m=1}^{q} \frac{(P^{\top} L \hat\beta)_{m}^{2}}{d_{m}} = \sum_{m=1}^{q} t_{m}^{2} \\ \end{aligned}$$
+
 where $(P^\top L \hat\beta)_m$ denotes the $m$'th element of the $q$-vector $P^\top L \hat\beta$ ($P^\top$ is an orthonormal $q\times q$ rotation matrix), and $d_m$ is the $m$'th diagonal element of $D$; the diagonal matrix of eigenvalues.
 
 Thus $Q$ is being rewritten as a sum of $q$ independent variables that have the form of the square of $t$-statistics each on one "numerator-degree of freedom". 
 
 In equivalence with (and multidimensional extension of) the 1D case above let
-$$f(\hat\tau) \equiv P^\top L \mathsf V_\hat\tau(\hat\beta) L^\top P = \tilde L \mathsf V_\hat\tau(\hat\beta) \tilde L^\top = D, \quad \mathrm{with} \quad \tilde L = P^\top L$$
-be the diagonal matrix of eigenvalues (of $\mathsf V_\hat\tau(L\hat\beta)$) and let $f(\hat\tau)_m = d_m$ denote the $m$'th eigenvalue. 
+$$f(\hat\tau) \equiv P^\top L \mathsf V_{\hat\tau}(\hat\beta) L^\top P = \tilde L \mathsf V_{\hat\tau}(\hat\beta) \tilde L^\top = D, \quad \mathrm{with} \quad \tilde L = P^\top L$$
+be the diagonal matrix of eigenvalues (of $\mathsf V_{\hat\tau}(L\hat\beta)$) and let $f(\hat\tau)_m = d_m$ denote the $m$'th eigenvalue. 
 
 Note also that the $m$th diagonal element of $f(\hat\tau)$ can be written
 <!-- $\tilde L \mathsf V_\tau(\hat\beta) \tilde L^\top$ is $\tilde L_m \mathsf V_\tau(\hat\beta) \tilde L_m^\top$ -->
@@ -316,12 +313,12 @@ L <- rbind(c(0, 1, 0, 0),
            c(0, 0, 1, 0))
 (Lbeta <- drop(L %*% parlist$beta))
 ```
-and compute the variance of the contrasts $\mathsf V_\hat\tau (L\hat\beta) = L \mathsf V_\hat\tau (\hat\beta) L^\top$:
+and compute the variance of the contrasts $\mathsf{V}_{\hat\tau} (L\hat\beta) = L \mathsf{V}_{\hat\tau} (\hat\beta) L^\top$:
 ```{r}
 cov_Lbeta <- L %*% cov_beta %*% t(L) # Var(contrast) = Var(Lbeta)
 ```
 
-We then compute the eigen-decomposition $\mathsf V(L\hat\beta) = P^\top D P$ and extract the rank, eigenvectors and eigenvalues:
+We then compute the eigen-decomposition $\mathsf{V}(L\hat\beta) = P^\top D P$ and extract the rank, eigenvectors and eigenvalues:
 ```{r}
 # Get eigen decomposition of vcov(Lbeta):
 eig_VLbeta <- eigen(cov_Lbeta)

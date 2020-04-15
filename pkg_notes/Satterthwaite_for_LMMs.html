@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 <meta name="author" content="Rune Haubo B Christensen" />
@@ -255,9 +255,7 @@ h6 {
 </style>
 
 
-</head>
 
-<body>
 
 <style type="text/css">
 .main-container {
@@ -271,30 +269,91 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
 }
+.html-widget {
+  margin-bottom: 20px;
+}
 button.code-folding-btn:focus {
   outline: none;
+}
+summary {
+  display: list-item;
 }
 </style>
 
 
 
-<div class="container-fluid main-container">
-
 <!-- tabsets -->
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-</script>
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
 
 <!-- code folding -->
 
 
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
 
 
 
@@ -304,8 +363,8 @@ $(document).ready(function () {
 
 
 <h1 class="title toc-ignore">Satterthwaite’s Method for Degrees of Freedom in Linear Mixed Models</h1>
-<h4 class="author"><em>Rune Haubo B Christensen</em></h4>
-<h4 class="date"><em>Jan 2018 – (last edit: 2018-05-07)</em></h4>
+<h4 class="author">Rune Haubo B Christensen</h4>
+<h4 class="date">Jan 2018 – (last edit: 2020-04-15)</h4>
 
 </div>
 
@@ -342,7 +401,7 @@ $(document).ready(function () {
 <!-- _The usual Welch-Satterthwaite two-sample $t$-test is actually a special-case when two samples are being compared allowing for different variances._ -->
 <div id="the-multivariate-normal-and-linear-mixed-models" class="section level2">
 <h2>The multivariate normal and linear mixed models</h2>
-<p>Satterthwaite’s method for denominator degrees of freedom as presented here is not only applicable to linear mixed models, but also to the more general class of multivariate normal models of which linear mixed models are a special case. The multivariate normal model can be written <span class="math display">\[Y = X\beta + \varepsilon\]</span> with <span class="math inline">\(\varepsilon \sim N(0, V_\tau)\)</span>, <span class="math inline">\(X\)</span> being a <span class="math inline">\(n\times p\)</span> design matrix, <span class="math inline">\(V_\tau\)</span> being the variance-covariance matrix of the residuals <span class="math inline">\(\varepsilon\)</span> (as well as of the observations <span class="math inline">\(Y\)</span>), and <span class="math inline">\(\tau\)</span> is the (usually small) <span class="math inline">\(k\)</span>-vector of unique variance-covariance parameters. The <span class="math inline">\(p\)</span>-vector of mean-value parameters <span class="math inline">\(\beta\)</span> can be profiled out of the likelihood function since the estimate <span class="math inline">\(\hat\beta_\tau\)</span> given a value for <span class="math inline">\(\tau\)</span> can be expressed by the generalized least squares (GLS) estimator as the solution to <span class="math display">\[X^\top V_\tau^{-1} X \hat\beta = X^\top V^{-1}_\tau y \]</span> where <span class="math inline">\(y\)</span> is the observed value of <span class="math inline">\(Y\)</span>. The asymptotic variance-covariance matrix of <span class="math inline">\(\hat\beta\)</span> is <span class="math display">\[\mathsf V_\tau (\hat\beta) = X^\top V_\tau^{-1} X\]</span> which is a function of <span class="math inline">\(\tau\)</span> (only) and denoted <span class="math inline">\(\mathsf V_\hat\tau (\hat\beta)\)</span> when evaluated at the (ML or REML) estimate <span class="math inline">\(\hat\tau\)</span>. Note that the distribution of <span class="math inline">\(Y\)</span> and therefore the likelihood function for the model, only depends on the, usually small, parameter vector, <span class="math inline">\(\tau\)</span>.</p>
+<p>Satterthwaite’s method for denominator degrees of freedom as presented here is not only applicable to linear mixed models, but also to the more general class of multivariate normal models of which linear mixed models are a special case. The multivariate normal model can be written <span class="math display">\[Y = X\beta + \varepsilon\]</span> with <span class="math inline">\(\varepsilon \sim N(0, V_\tau)\)</span>, <span class="math inline">\(X\)</span> being a <span class="math inline">\(n\times p\)</span> design matrix, <span class="math inline">\(V_\tau\)</span> being the variance-covariance matrix of the residuals <span class="math inline">\(\varepsilon\)</span> (as well as of the observations <span class="math inline">\(Y\)</span>), and <span class="math inline">\(\tau\)</span> is the (usually small) <span class="math inline">\(k\)</span>-vector of unique variance-covariance parameters. The <span class="math inline">\(p\)</span>-vector of mean-value parameters <span class="math inline">\(\beta\)</span> can be profiled out of the likelihood function since the estimate <span class="math inline">\(\hat\beta_\tau\)</span> given a value for <span class="math inline">\(\tau\)</span> can be expressed by the generalized least squares (GLS) estimator as the solution to <span class="math display">\[X^\top V_\tau^{-1} X \hat\beta = X^\top V^{-1}_\tau y \]</span> where <span class="math inline">\(y\)</span> is the observed value of <span class="math inline">\(Y\)</span>. The asymptotic variance-covariance matrix of <span class="math inline">\(\hat\beta\)</span> is <span class="math display">\[\mathsf{V}_{\tau} (\hat\beta) = \left( X^\top V_\tau^{-1} X \right)^{-1}\]</span> which is a function of <span class="math inline">\(\tau\)</span> (only) and denoted <span class="math inline">\(\mathsf{V}_{\hat\tau} (\hat\beta)\)</span> when evaluated at the (ML or REML) estimate <span class="math inline">\(\hat\tau\)</span>. Note that the distribution of <span class="math inline">\(Y\)</span> and therefore the likelihood function for the model, only depends on the, usually small, parameter vector, <span class="math inline">\(\tau\)</span>.</p>
 <p>The linear mixed model may be written <span class="math display">\[Y = X\beta + Zb + \epsilon\]</span> with random-effects <span class="math inline">\(b \sim N(0, G_\tau)\)</span> and residuals <span class="math inline">\(\epsilon \sim N(0, R_\tau)\)</span>. Noting that <span class="math inline">\(\mathsf E(Y)=X\beta\)</span> and <span class="math inline">\(\mathsf V(Y) \equiv V_\tau = Z G_\tau Z^\top + R_\tau\)</span> we essentially have the multivariate normal model with some structure imposed on <span class="math inline">\(V_\tau\)</span> with the same GLS estimator of <span class="math inline">\(\beta\)</span> and its asymptotic variance-covariance matrix.</p>
 </div>
 <div id="tests-of-vector-contrasts" class="section level2">
@@ -383,30 +442,30 @@ summary(model, corr=FALSE)
 ## Formula: Informed.liking ~ Product + (1 | Consumer)
 ##    Data: ham[sample(x = 1:nrow(ham), size = 580, replace = FALSE), ]
 ## 
-## REML criterion at convergence: 2577.6
+## REML criterion at convergence: 2560.7
 ## 
 ## Scaled residuals: 
 ##     Min      1Q  Median      3Q     Max 
-## -2.5390 -0.7312  0.1439  0.7539  2.6129 
+## -2.4794 -0.6766  0.1447  0.7477  2.4066 
 ## 
 ## Random effects:
 ##  Groups   Name        Variance Std.Dev.
-##  Consumer (Intercept) 0.8872   0.9419  
-##  Residual             4.3870   2.0945  
+##  Consumer (Intercept) 0.7408   0.8607  
+##  Residual             4.3152   2.0773  
 ## Number of obs: 580, groups:  Consumer, 81
 ## 
 ## Fixed effects:
 ##             Estimate Std. Error t value
-## (Intercept)   5.7576     0.2066  27.865
-## Product2     -0.7049     0.2477  -2.846
-## Product3      0.3800     0.2474   1.536
-## Product4      0.1679     0.2515   0.668</code></pre>
+## (Intercept)  5.84346    0.19790  29.528
+## Product2    -0.66197    0.24431  -2.709
+## Product3     0.20102    0.24476   0.821
+## Product4     0.08105    0.24656   0.329</code></pre>
 <p>Suppose now that we are interested in the contrast</p>
 <pre class="r"><code>L &lt;- c(0, 1, 0, 0) </code></pre>
 <p>which simply picks out the second coefficient; the estimate of the difference between product 2 and product 1.</p>
 <p>The estimate of this contrast <span class="math inline">\(L^\top \beta\)</span> is then computed with:</p>
 <pre class="r"><code>(estimate &lt;- drop(t(L) %*% fixef(model)))
-## [1] -0.7049069</code></pre>
+## [1] -0.6619655</code></pre>
 <div id="computing-the-variance-covariance-matrix-of-the-variance-parameters" class="section level3">
 <h3>Computing the variance-covariance matrix of the variance parameters</h3>
 <p>In this model the variance-covariance parameters are collected in the 2-vector <span class="math inline">\(\tau = [\sigma_c, \sigma]\)</span>; the square root of the random-effect variance for consumers and the residual standard deviation. <code>lmer</code> however, profiles out the residual standard deviation of the (restricted) profile likelihood and operates with vector <span class="math inline">\(\theta\)</span> of <em>relative</em> variance parameters. In this model <span class="math inline">\(\theta = \sigma_c / \sigma\)</span>.</p>
@@ -416,23 +475,23 @@ summary(model, corr=FALSE)
                 sigma=sigma(model)))
 ## $beta
 ## (Intercept)    Product2    Product3    Product4 
-##   5.7575878  -0.7049069   0.3800059   0.1678970 
+##  5.84345560 -0.66196549  0.20102196  0.08105489 
 ## 
 ## $theta
 ## Consumer.(Intercept) 
-##            0.4497018 
+##            0.4143353 
 ## 
 ## $sigma
-## [1] 2.094517</code></pre>
+## [1] 2.077314</code></pre>
 <p>and the consumer random effect standard deviation can be retrieved with</p>
 <pre class="r"><code>with(parlist, theta*sigma)
 ## Consumer.(Intercept) 
-##            0.9419082</code></pre>
+##            0.8607045</code></pre>
 <p>A function that directly evaluates the model deviance (REML or ML criterion) can be obtained directly from the model fit:</p>
 <pre class="r"><code>devfun &lt;- update(model, devFunOnly=TRUE)</code></pre>
 <p>Being a function of <span class="math inline">\(\theta\)</span>, we can calculate the deviance at <span class="math inline">\(\hat\theta\)</span> with</p>
 <pre class="r"><code>devfun(parlist$theta)
-## [1] 2578.689</code></pre>
+## [1] 2563.524</code></pre>
 <p>To compute the variance-covariance matrix of <span class="math inline">\(\tau\)</span> by numerically evaluating the Hessian of the log-likelihood function, we need to re-implement the deviance function as a function of the unique variance-covariance parameters (<span class="math inline">\(\tau\)</span>) – not only the relative variance parameters (<span class="math inline">\(\theta\)</span>). Utilizing the deviance function as a function of <span class="math inline">\(\theta\)</span> and some particulars of the implementation of linear mixed models in <code>lmer</code> as described in [4] we can implement this as:</p>
 <pre class="r"><code>devfun_varpar &lt;- function(varpar, devfun, reml) {
   # Computes deviance as a function of 'varpar=c(theta, sigma)'
@@ -456,21 +515,21 @@ summary(model, corr=FALSE)
 <pre class="r"><code>is_reml &lt;- getME(model, &quot;is_REML&quot;)
 varpar_opt &lt;- unname(c(parlist$theta, parlist$sigma)) 
 devfun_varpar(varpar_opt, devfun, reml=is_reml)
-## [1] 2578.69</code></pre>
+## [1] 2563.532</code></pre>
 <p>We can now obtain the hessian for <span class="math inline">\(\tau\)</span> of the deviance function with the numerical approximation provided in the <strong>numDeriv</strong> package:</p>
 <pre class="r"><code>library(numDeriv)
 h &lt;- hessian(func=devfun_varpar, x=varpar_opt, devfun=devfun, reml=is_reml)  </code></pre>
 <p>Before inverting <code>h</code>, we check that it is positive definite by confirming that all its eigenvalues are positive:</p>
 <pre class="r"><code>eig_h &lt;- eigen(h, symmetric=TRUE)
 eig_h$values
-## [1] 678.7790 319.9707
+## [1] 795.7477 353.1973
 stopifnot(all(eig_h$values &gt; 0))</code></pre>
 <p>Inverting and scaling <code>h</code> provides the asymptotic variance-covariance matrix of the variance parameters at their estimate <span class="math inline">\(\mathsf{V}(\hat\tau)\)</span>:</p>
 <pre class="r"><code>h_inv &lt;- with(eig_h, vectors %*% diag(1/values) %*% t(vectors))
 (cov_varpar &lt;- 2 * h_inv)
 ##              [,1]         [,2]
-## [1,]  0.004850301 -0.001632753
-## [2,] -0.001632753  0.004346738</code></pre>
+## [1,]  0.003828133 -0.001553014
+## [2,] -0.001553014  0.004347785</code></pre>
 </div>
 <div id="computing-the-gradient-of-fhattau" class="section level3">
 <h3>Computing the gradient of <span class="math inline">\(f(\hat\tau)\)</span></h3>
@@ -496,7 +555,7 @@ Jac_list &lt;- lapply(1:ncol(Jac), function(i)
 <p>Left and right multiplying each matrix by <span class="math inline">\(L^\top\)</span> and <span class="math inline">\(L\)</span> respectively gives the gradient vector (of length <span class="math inline">\(k\)</span>):</p>
 <pre class="r"><code>(grad_var_Lbeta &lt;- vapply(Jac_list, function(x) 
   sum(L * x %*% L), numeric(1L))) # = {L' Jac L}_i
-## [1] 0.001220431 0.058577025</code></pre>
+## [1] 0.0008652581 0.0580662870</code></pre>
 </div>
 <div id="putting-it-all-together" class="section level3">
 <h3>Putting it all together</h3>
@@ -504,7 +563,7 @@ Jac_list &lt;- lapply(1:ncol(Jac), function(i)
 <pre class="r"><code>cov_beta &lt;- as.matrix(vcov(model))
 # Compute vcov(Lbeta)
 (var_Lbeta &lt;- drop(t(L) %*% cov_beta %*% L))
-## [1] 0.06135319
+## [1] 0.05968911
 # Alternative: (var_con &lt;- get_covbeta(varpar_opt, devfun))</code></pre>
 <p>Collecting all elements gives the following coefficient table:</p>
 <pre class="r"><code>se.estimate &lt;- sqrt(var_Lbeta)
@@ -514,22 +573,19 @@ tstat &lt;- estimate/se.estimate
 pvalue &lt;- 2 * pt(abs(tstat), df = ddf, lower.tail = FALSE)
 data.frame(estimate, se=se.estimate, tstat, ddf, pvalue)
 ##     estimate        se     tstat      ddf      pvalue
-## 1 -0.7049069 0.2476958 -2.845858 512.5355 0.004606577</code></pre>
+## 1 -0.6619655 0.2443135 -2.709492 491.2089 0.006974127</code></pre>
 </div>
 </div>
 </div>
 <div id="satterthwaites-method-for-multi-df-f-tests" class="section level1">
 <h1>Satterthwaite’s method for multi-df <span class="math inline">\(F\)</span>-tests</h1>
 <p>Often it is of interest to assess an hypothesis on more than one linear function of the parameters such as <span class="math display">\[H_0:\; L\beta = 0\]</span> were the <span class="math inline">\(q\times p\)</span> matrix <span class="math inline">\(L\)</span> has rank <span class="math inline">\(q\)</span> with <span class="math inline">\(1 &lt; q \leq p\)</span> and <span class="math inline">\(p\)</span> is the length of the <span class="math inline">\(\beta\)</span>-vector.</p>
-<p>The conventional <span class="math inline">\(F\)</span>-statistic for this hypothesis reads <span class="math display">\[F = \frac{1}{q} (L\hat\beta)^\top (L \mathsf V_\hat\tau(\hat\beta)L^\top)^{-1} (L\hat\beta)\]</span> which is seen to reduce to the square of the <span class="math inline">\(t\)</span>-statistic considered above for <span class="math inline">\(q=1\)</span>. Despite its name, this statistic only follows an exact <span class="math inline">\(F\)</span>-distribution with <span class="math inline">\(q\)</span> numerator degrees of freedom and known denominator degrees of freedom in special cases (such as orthogonal or balanced designs.)</p>
+<p>The conventional <span class="math inline">\(F\)</span>-statistic for this hypothesis reads <span class="math display">\[F = \frac{1}{q} (L\hat\beta)^\top (L \mathsf V_{\hat\tau}(\hat\beta)L^\top)^{-1} (L\hat\beta)\]</span> which is seen to reduce to the square of the <span class="math inline">\(t\)</span>-statistic considered above for <span class="math inline">\(q=1\)</span>. Despite its name, this statistic only follows an exact <span class="math inline">\(F\)</span>-distribution with <span class="math inline">\(q\)</span> numerator degrees of freedom and known denominator degrees of freedom in special cases (such as orthogonal or balanced designs.)</p>
 <p>In the general case we are interested in estimating an appropriate denominator degrees of freedom for <span class="math inline">\(F\)</span> assuming <span class="math inline">\(q\)</span> numerator degrees of freedom.</p>
-<p>Following Fai and Cornelius (1996) [6] we eigen-decompose the variance-covariance matrix of <span class="math inline">\(L\hat\beta\)</span>: <span class="math display">\[\mathsf V_\hat\tau(L\hat\beta) = L \mathsf V_\hat\tau(\hat\beta)L^\top = PDP^\top\]</span> such that we may write <span class="math display">\[\begin{align} qF\equiv Q &amp; = (L\hat\beta)^\top P D^{-1}P^\top (L\hat\beta) &amp; \\
- &amp; = \hat\beta^\top L^\top P D^{-1}P^\top L\hat\beta &amp; \\
- &amp; = (P^\top L \hat\beta)^\top D^{-1} (P^\top L \hat\beta) &amp; \\
- &amp; =  \sum_{m=1}^q \frac{(P^\top L \hat\beta)_m^2}{d_m} = \sum_{m=1}^q t_m^2 &amp; \\
-\end{align}\]</span> where <span class="math inline">\((P^\top L \hat\beta)_m\)</span> denotes the <span class="math inline">\(m\)</span>’th element of the <span class="math inline">\(q\)</span>-vector <span class="math inline">\(P^\top L \hat\beta\)</span> (<span class="math inline">\(P^\top\)</span> is an orthonormal <span class="math inline">\(q\times q\)</span> rotation matrix), and <span class="math inline">\(d_m\)</span> is the <span class="math inline">\(m\)</span>’th diagonal element of <span class="math inline">\(D\)</span>; the diagonal matrix of eigenvalues.</p>
+<p>Following Fai and Cornelius (1996) [6] we eigen-decompose the variance-covariance matrix of <span class="math inline">\(L\hat\beta\)</span>: <span class="math display">\[\mathsf{V}_{\hat\tau}(L\hat\beta) = L \mathsf{V}_{\hat\tau}(\hat\beta) L^{\top} = PDP^{\top}\]</span> such that we may write <span class="math display">\[\begin{aligned} qF\equiv Q &amp; = (L \hat\beta)^{\top} P D^{-1}P^{\top} (L \hat\beta) &amp; \\ &amp; = \hat\beta^{\top} L^{\top} P D^{-1}P^{\top} L \hat\beta &amp; \\ &amp; = (P^{\top} L \hat\beta)^{\top} D^{-1} (P^{\top} L \hat\beta) &amp; \\ &amp; =  \sum_{m=1}^{q} \frac{(P^{\top} L \hat\beta)_{m}^{2}}{d_{m}} = \sum_{m=1}^{q} t_{m}^{2} \\ \end{aligned}\]</span></p>
+<p>where <span class="math inline">\((P^\top L \hat\beta)_m\)</span> denotes the <span class="math inline">\(m\)</span>’th element of the <span class="math inline">\(q\)</span>-vector <span class="math inline">\(P^\top L \hat\beta\)</span> (<span class="math inline">\(P^\top\)</span> is an orthonormal <span class="math inline">\(q\times q\)</span> rotation matrix), and <span class="math inline">\(d_m\)</span> is the <span class="math inline">\(m\)</span>’th diagonal element of <span class="math inline">\(D\)</span>; the diagonal matrix of eigenvalues.</p>
 <p>Thus <span class="math inline">\(Q\)</span> is being rewritten as a sum of <span class="math inline">\(q\)</span> independent variables that have the form of the square of <span class="math inline">\(t\)</span>-statistics each on one “numerator-degree of freedom”.</p>
-<p>In equivalence with (and multidimensional extension of) the 1D case above let <span class="math display">\[f(\hat\tau) \equiv P^\top L \mathsf V_\hat\tau(\hat\beta) L^\top P = \tilde L \mathsf V_\hat\tau(\hat\beta) \tilde L^\top = D, \quad \mathrm{with} \quad \tilde L = P^\top L\]</span> be the diagonal matrix of eigenvalues (of <span class="math inline">\(\mathsf V_\hat\tau(L\hat\beta)\)</span>) and let <span class="math inline">\(f(\hat\tau)_m = d_m\)</span> denote the <span class="math inline">\(m\)</span>’th eigenvalue.</p>
+<p>In equivalence with (and multidimensional extension of) the 1D case above let <span class="math display">\[f(\hat\tau) \equiv P^\top L \mathsf V_{\hat\tau}(\hat\beta) L^\top P = \tilde L \mathsf V_{\hat\tau}(\hat\beta) \tilde L^\top = D, \quad \mathrm{with} \quad \tilde L = P^\top L\]</span> be the diagonal matrix of eigenvalues (of <span class="math inline">\(\mathsf V_{\hat\tau}(L\hat\beta)\)</span>) and let <span class="math inline">\(f(\hat\tau)_m = d_m\)</span> denote the <span class="math inline">\(m\)</span>’th eigenvalue.</p>
 <p>Note also that the <span class="math inline">\(m\)</span>th diagonal element of <span class="math inline">\(f(\hat\tau)\)</span> can be written <!-- $\tilde L \mathsf V_\tau(\hat\beta) \tilde L^\top$ is $\tilde L_m \mathsf V_\tau(\hat\beta) \tilde L_m^\top$ --> <span class="math display">\[f(\hat\tau)_m = (\tilde L \mathsf V_{\hat\tau} (\hat\beta)\tilde L)_m = \tilde L_m \mathsf V_{\hat\tau} (\hat\beta)\tilde L_m\]</span></p>
 <p>The <span class="math inline">\(m\)</span>’th <span class="math inline">\(t\)</span>-statistic in the summation above can now be written as <span class="math display">\[t_m = \frac{\tilde L_m \hat\beta}{\sqrt{\tilde L_m \mathsf V_{\hat\tau}(\hat\beta)\tilde L_m}} \]</span> which clarifies the similarity with the <span class="math inline">\(t\)</span>-statistic considered in the 1-degree of freedom case above.</p>
 <p>We therefore proceed as in the 1D case to estimate the degrees of freedom <span class="math inline">\(\nu_m\)</span> for the <span class="math inline">\(q\)</span> <span class="math inline">\(t_m\)</span>-statistics with <span class="math display">\[\hat\nu_m(\hat\tau) = \frac{2f(\hat\tau)_m^2}{f'(\hat\tau)_m^\top \mathsf V(\hat\tau) f'(\hat\tau)_m} = \frac{2d_m^2}{f'(\hat\tau)_m^\top \mathsf V(\hat\tau) f'(\hat\tau)_m}\]</span> in which the gradient vector of length <span class="math inline">\(k\)</span> reads <span class="math display">\[f'(\hat\tau)_m = \tilde L^\top_m \{ \nabla_\tau \mathsf V_\tau(\hat\beta)|_{\tau = \hat\tau} \} \tilde L_m\]</span> as discussed in the 1D case above.</p>
@@ -541,20 +597,20 @@ data.frame(estimate, se=se.estimate, tstat, ddf, pvalue)
 <pre class="r"><code>L &lt;- rbind(c(0, 1, 0, 0),
            c(0, 0, 1, 0))
 (Lbeta &lt;- drop(L %*% parlist$beta))
-## [1] -0.7049069  0.3800059</code></pre>
-<p>and compute the variance of the contrasts <span class="math inline">\(\mathsf V_\hat\tau (L\hat\beta) = L \mathsf V_\hat\tau (\hat\beta) L^\top\)</span>:</p>
+## [1] -0.6619655  0.2010220</code></pre>
+<p>and compute the variance of the contrasts <span class="math inline">\(\mathsf{V}_{\hat\tau} (L\hat\beta) = L \mathsf{V}_{\hat\tau} (\hat\beta) L^\top\)</span>:</p>
 <pre class="r"><code>cov_Lbeta &lt;- L %*% cov_beta %*% t(L) # Var(contrast) = Var(Lbeta)</code></pre>
-<p>We then compute the eigen-decomposition <span class="math inline">\(\mathsf V(L\hat\beta) = P^\top D P\)</span> and extract the rank, eigenvectors and eigenvalues:</p>
+<p>We then compute the eigen-decomposition <span class="math inline">\(\mathsf{V}(L\hat\beta) = P^\top D P\)</span> and extract the rank, eigenvectors and eigenvalues:</p>
 <pre class="r"><code># Get eigen decomposition of vcov(Lbeta):
 eig_VLbeta &lt;- eigen(cov_Lbeta)
 positive &lt;- eig_VLbeta$values &gt; 1e-8
 q &lt;- sum(positive) # rank(VLbeta)
 (P &lt;- eig_VLbeta$vectors)
-##            [,1]       [,2]
-## [1,] -0.7078991  0.7063136
-## [2,] -0.7063136 -0.7078991
+##           [,1]       [,2]
+## [1,] 0.7058316 -0.7083797
+## [2,] 0.7083797  0.7058316
 (d &lt;- eig_VLbeta$values)
-## [1] 0.09299887 0.02956529</code></pre>
+## [1] 0.08984076 0.02975399</code></pre>
 <p>The new contrast vectors are then <span class="math inline">\(\tilde L = P^\top L\)</span></p>
 <pre class="r"><code>PtL &lt;- crossprod(P, L) # q x p matrix</code></pre>
 <p>from which we can compute the <span class="math inline">\(t^2\)</span> values and <span class="math inline">\(F\)</span>-statistic:</p>
@@ -570,17 +626,17 @@ Fvalue &lt;- sum(t2) / q</code></pre>
   2*(d[m])^2 / denom # 2d_m^2 / g'Ag
 }, numeric(1L))
 nu_m
-## [1] 522.1259 452.9268</code></pre>
+## [1] 501.4952 494.6459</code></pre>
 <p>From <span class="math inline">\(\mathsf E(Q)\)</span> we then evaluate the estimated denominator degrees of freedom for the <span class="math inline">\(F\)</span>-statistic:</p>
 <pre class="r"><code>EQ &lt;- sum(nu_m / (nu_m - 2))
 (ddf &lt;- 2 * EQ / (EQ - q)) # nu
-## [1] 485.0607</code></pre>
+## [1] 498.0469</code></pre>
 <p>In summary we have the following approximate <span class="math inline">\(F\)</span>-test:</p>
 <pre class="r"><code>pvalue &lt;- pf(q=Fvalue, df1=q, df2=ddf, lower.tail=FALSE)
 data.frame('F value'=Fvalue, ndf=q, ddf=ddf, 'p-value'=pvalue, 
            check.names = FALSE)
-##    F value ndf      ddf     p-value
-## 1 10.23206   2 485.0607 4.44075e-05</code></pre>
+##    F value ndf      ddf    p-value
+## 1 6.856825   2 498.0469 0.00115446</code></pre>
 </div>
 <div id="remarks" class="section level2">
 <h2>Remarks</h2>
@@ -629,6 +685,23 @@ $(document).ready(function () {
 
 
 </script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>
