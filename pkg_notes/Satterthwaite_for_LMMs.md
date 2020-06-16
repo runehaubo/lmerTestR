@@ -1,13 +1,13 @@
 ---
 title: "Satterthwaite’s Method for Degrees of Freedom in Linear Mixed Models"
 author: "Rune Haubo B Christensen"
-date: "Jan 2018 -- (last edit: 2018-05-07)"
+date: "Jan 2018 -- (last edit: 2020-04-15)"
 output:
   html_document:
     keep_md: yes
     toc: yes
   pdf_document:
-    toc: no
+    toc: yes
 ---
 
 
@@ -37,8 +37,8 @@ $$Y = X\beta + \varepsilon$$
 with $\varepsilon \sim N(0, V_\tau)$, $X$ being a $n\times p$ design matrix, $V_\tau$ being the variance-covariance matrix of the residuals $\varepsilon$ (as well as of the observations $Y$), and $\tau$ is the (usually small) $k$-vector of unique variance-covariance parameters. The $p$-vector of mean-value parameters $\beta$ can be profiled out of the likelihood function since the estimate $\hat\beta_\tau$ given a value for $\tau$ can be expressed by the generalized least squares (GLS) estimator as the solution to 
 $$X^\top V_\tau^{-1} X \hat\beta = X^\top V^{-1}_\tau y $$
 where $y$ is the observed value of $Y$. The asymptotic variance-covariance matrix of $\hat\beta$ is
-$$\mathsf V_\tau (\hat\beta) = X^\top V_\tau^{-1} X$$
-which is a function of $\tau$ (only) and denoted $\mathsf V_\hat\tau (\hat\beta)$ when evaluated at the (ML or REML) estimate $\hat\tau$. Note that the distribution of $Y$ and therefore the likelihood function for the model, only depends on the, usually small, parameter vector, $\tau$.
+$$\mathsf{V}_{\tau} (\hat\beta) = \left( X^\top V_\tau^{-1} X \right)^{-1}$$
+which is a function of $\tau$ (only) and denoted $\mathsf{V}_{\hat\tau} (\hat\beta)$ when evaluated at the (ML or REML) estimate $\hat\tau$. Note that the distribution of $Y$ and therefore the likelihood function for the model, only depends on the, usually small, parameter vector, $\tau$.
 
 The linear mixed model may be written
 $$Y = X\beta + Zb + \epsilon$$
@@ -121,24 +121,24 @@ summary(model, corr=FALSE)
 ## Formula: Informed.liking ~ Product + (1 | Consumer)
 ##    Data: ham[sample(x = 1:nrow(ham), size = 580, replace = FALSE), ]
 ## 
-## REML criterion at convergence: 2577.6
+## REML criterion at convergence: 2560.7
 ## 
 ## Scaled residuals: 
 ##     Min      1Q  Median      3Q     Max 
-## -2.5390 -0.7312  0.1439  0.7539  2.6129 
+## -2.4794 -0.6766  0.1447  0.7477  2.4066 
 ## 
 ## Random effects:
 ##  Groups   Name        Variance Std.Dev.
-##  Consumer (Intercept) 0.8872   0.9419  
-##  Residual             4.3870   2.0945  
+##  Consumer (Intercept) 0.7408   0.8607  
+##  Residual             4.3152   2.0773  
 ## Number of obs: 580, groups:  Consumer, 81
 ## 
 ## Fixed effects:
 ##             Estimate Std. Error t value
-## (Intercept)   5.7576     0.2066  27.865
-## Product2     -0.7049     0.2477  -2.846
-## Product3      0.3800     0.2474   1.536
-## Product4      0.1679     0.2515   0.668
+## (Intercept)  5.84346    0.19790  29.528
+## Product2    -0.66197    0.24431  -2.709
+## Product3     0.20102    0.24476   0.821
+## Product4     0.08105    0.24656   0.329
 ```
 
 Suppose now that we are interested in the contrast
@@ -152,7 +152,7 @@ The estimate of this contrast $L^\top \beta$ is then computed with:
 
 ```r
 (estimate <- drop(t(L) %*% fixef(model)))
-## [1] -0.7049069
+## [1] -0.6619655
 ```
 
 ### Computing the variance-covariance matrix of the variance parameters
@@ -167,21 +167,21 @@ The parameters that characterize the model can be summarized as
                 sigma=sigma(model)))
 ## $beta
 ## (Intercept)    Product2    Product3    Product4 
-##   5.7575878  -0.7049069   0.3800059   0.1678970 
+##  5.84345560 -0.66196549  0.20102196  0.08105489 
 ## 
 ## $theta
 ## Consumer.(Intercept) 
-##            0.4497018 
+##            0.4143353 
 ## 
 ## $sigma
-## [1] 2.094517
+## [1] 2.077314
 ```
 and the consumer random effect standard deviation can be retrieved with 
 
 ```r
 with(parlist, theta*sigma)
 ## Consumer.(Intercept) 
-##            0.9419082
+##            0.8607045
 ```
 
 A function that directly evaluates the model deviance (REML or ML criterion) can be obtained directly from the model fit:
@@ -193,7 +193,7 @@ Being a function of $\theta$, we can calculate the deviance at $\hat\theta$ with
 
 ```r
 devfun(parlist$theta)
-## [1] 2578.689
+## [1] 2563.524
 ```
 
 To compute the variance-covariance matrix of $\tau$ by numerically evaluating the Hessian of the log-likelihood function, we need to re-implement the deviance function as a function of the unique variance-covariance parameters ($\tau$) -- not only the relative variance parameters ($\theta$). Utilizing the deviance function as a function of $\theta$ and some particulars of the implementation of linear mixed models in `lmer` as described in [4] we can implement this as:
@@ -225,7 +225,7 @@ This function returns the same deviance but as a function of a different paramet
 is_reml <- getME(model, "is_REML")
 varpar_opt <- unname(c(parlist$theta, parlist$sigma)) 
 devfun_varpar(varpar_opt, devfun, reml=is_reml)
-## [1] 2578.69
+## [1] 2563.532
 ```
 
 We can now obtain the hessian for $\tau$ of the deviance function with the numerical approximation provided in the **numDeriv** package:
@@ -239,7 +239,7 @@ Before inverting `h`, we check that it is positive definite by confirming that a
 ```r
 eig_h <- eigen(h, symmetric=TRUE)
 eig_h$values
-## [1] 678.7790 319.9707
+## [1] 795.7477 353.1973
 stopifnot(all(eig_h$values > 0))
 ```
 Inverting and scaling `h` provides the asymptotic variance-covariance matrix of the variance parameters at their estimate $\mathsf{V}(\hat\tau)$:
@@ -248,8 +248,8 @@ Inverting and scaling `h` provides the asymptotic variance-covariance matrix of 
 h_inv <- with(eig_h, vectors %*% diag(1/values) %*% t(vectors))
 (cov_varpar <- 2 * h_inv)
 ##              [,1]         [,2]
-## [1,]  0.004850301 -0.001632753
-## [2,] -0.001632753  0.004346738
+## [1,]  0.003828133 -0.001553014
+## [2,] -0.001553014  0.004347785
 ```
 
 ### Computing the gradient of $f(\hat\tau)$
@@ -284,7 +284,7 @@ Left and right multiplying each matrix by $L^\top$ and $L$ respectively gives th
 ```r
 (grad_var_Lbeta <- vapply(Jac_list, function(x) 
   sum(L * x %*% L), numeric(1L))) # = {L' Jac L}_i
-## [1] 0.001220431 0.058577025
+## [1] 0.0008652581 0.0580662870
 ```
 
 ### Putting it all together
@@ -296,7 +296,7 @@ $\mathsf V(L^\top \hat\beta) = L^\top \mathsf V_{\hat\tau}(\hat\beta) L$ is simp
 cov_beta <- as.matrix(vcov(model))
 # Compute vcov(Lbeta)
 (var_Lbeta <- drop(t(L) %*% cov_beta %*% L))
-## [1] 0.06135319
+## [1] 0.05968911
 # Alternative: (var_con <- get_covbeta(varpar_opt, devfun))
 ```
 
@@ -310,7 +310,7 @@ tstat <- estimate/se.estimate
 pvalue <- 2 * pt(abs(tstat), df = ddf, lower.tail = FALSE)
 data.frame(estimate, se=se.estimate, tstat, ddf, pvalue)
 ##     estimate        se     tstat      ddf      pvalue
-## 1 -0.7049069 0.2476958 -2.845858 512.5355 0.004606577
+## 1 -0.6619655 0.2443135 -2.709492 491.2089 0.006974127
 ```
 
 # Satterthwaite's method for multi-df $F$-tests
@@ -320,26 +320,23 @@ $$H_0:\; L\beta = 0$$
 were the $q\times p$ matrix $L$ has rank $q$ with $1 < q \leq p$ and $p$ is the length of the $\beta$-vector. 
 
 The conventional $F$-statistic for this hypothesis reads
-$$F = \frac{1}{q} (L\hat\beta)^\top (L \mathsf V_\hat\tau(\hat\beta)L^\top)^{-1} (L\hat\beta)$$
+$$F = \frac{1}{q} (L\hat\beta)^\top (L \mathsf V_{\hat\tau}(\hat\beta)L^\top)^{-1} (L\hat\beta)$$
 which is seen to reduce to the square of the $t$-statistic considered above for $q=1$. Despite its name, this statistic only follows an exact $F$-distribution with $q$ numerator degrees of freedom and known denominator degrees of freedom in special cases (such as orthogonal or balanced designs.) 
 
 In the general case we are interested in estimating an appropriate denominator degrees of freedom for $F$ assuming $q$ numerator degrees of freedom. 
 
 Following Fai and Cornelius (1996) [6] we eigen-decompose the variance-covariance matrix of $L\hat\beta$:
-$$\mathsf V_\hat\tau(L\hat\beta) = L \mathsf V_\hat\tau(\hat\beta)L^\top = PDP^\top$$
+$$\mathsf{V}_{\hat\tau}(L\hat\beta) = L \mathsf{V}_{\hat\tau}(\hat\beta) L^{\top} = PDP^{\top}$$
 such that we may write
-$$\begin{align} qF\equiv Q & = (L\hat\beta)^\top P D^{-1}P^\top (L\hat\beta) & \\
- & = \hat\beta^\top L^\top P D^{-1}P^\top L\hat\beta & \\
- & = (P^\top L \hat\beta)^\top D^{-1} (P^\top L \hat\beta) & \\
- & =  \sum_{m=1}^q \frac{(P^\top L \hat\beta)_m^2}{d_m} = \sum_{m=1}^q t_m^2 & \\
-\end{align}$$ 
+$$\begin{aligned} qF\equiv Q & = (L \hat\beta)^{\top} P D^{-1}P^{\top} (L \hat\beta) & \\ & = \hat\beta^{\top} L^{\top} P D^{-1}P^{\top} L \hat\beta & \\ & = (P^{\top} L \hat\beta)^{\top} D^{-1} (P^{\top} L \hat\beta) & \\ & =  \sum_{m=1}^{q} \frac{(P^{\top} L \hat\beta)_{m}^{2}}{d_{m}} = \sum_{m=1}^{q} t_{m}^{2} \\ \end{aligned}$$
+
 where $(P^\top L \hat\beta)_m$ denotes the $m$'th element of the $q$-vector $P^\top L \hat\beta$ ($P^\top$ is an orthonormal $q\times q$ rotation matrix), and $d_m$ is the $m$'th diagonal element of $D$; the diagonal matrix of eigenvalues.
 
 Thus $Q$ is being rewritten as a sum of $q$ independent variables that have the form of the square of $t$-statistics each on one "numerator-degree of freedom". 
 
 In equivalence with (and multidimensional extension of) the 1D case above let
-$$f(\hat\tau) \equiv P^\top L \mathsf V_\hat\tau(\hat\beta) L^\top P = \tilde L \mathsf V_\hat\tau(\hat\beta) \tilde L^\top = D, \quad \mathrm{with} \quad \tilde L = P^\top L$$
-be the diagonal matrix of eigenvalues (of $\mathsf V_\hat\tau(L\hat\beta)$) and let $f(\hat\tau)_m = d_m$ denote the $m$'th eigenvalue. 
+$$f(\hat\tau) \equiv P^\top L \mathsf V_{\hat\tau}(\hat\beta) L^\top P = \tilde L \mathsf V_{\hat\tau}(\hat\beta) \tilde L^\top = D, \quad \mathrm{with} \quad \tilde L = P^\top L$$
+be the diagonal matrix of eigenvalues (of $\mathsf V_{\hat\tau}(L\hat\beta)$) and let $f(\hat\tau)_m = d_m$ denote the $m$'th eigenvalue. 
 
 Note also that the $m$th diagonal element of $f(\hat\tau)$ can be written
 <!-- $\tilde L \mathsf V_\tau(\hat\beta) \tilde L^\top$ is $\tilde L_m \mathsf V_\tau(\hat\beta) \tilde L_m^\top$ -->
@@ -376,15 +373,15 @@ Considering the example above, we start by defining the contrast matrix, $L$ and
 L <- rbind(c(0, 1, 0, 0),
            c(0, 0, 1, 0))
 (Lbeta <- drop(L %*% parlist$beta))
-## [1] -0.7049069  0.3800059
+## [1] -0.6619655  0.2010220
 ```
-and compute the variance of the contrasts $\mathsf V_\hat\tau (L\hat\beta) = L \mathsf V_\hat\tau (\hat\beta) L^\top$:
+and compute the variance of the contrasts $\mathsf{V}_{\hat\tau} (L\hat\beta) = L \mathsf{V}_{\hat\tau} (\hat\beta) L^\top$:
 
 ```r
 cov_Lbeta <- L %*% cov_beta %*% t(L) # Var(contrast) = Var(Lbeta)
 ```
 
-We then compute the eigen-decomposition $\mathsf V(L\hat\beta) = P^\top D P$ and extract the rank, eigenvectors and eigenvalues:
+We then compute the eigen-decomposition $\mathsf{V}(L\hat\beta) = P^\top D P$ and extract the rank, eigenvectors and eigenvalues:
 
 ```r
 # Get eigen decomposition of vcov(Lbeta):
@@ -392,11 +389,11 @@ eig_VLbeta <- eigen(cov_Lbeta)
 positive <- eig_VLbeta$values > 1e-8
 q <- sum(positive) # rank(VLbeta)
 (P <- eig_VLbeta$vectors)
-##            [,1]       [,2]
-## [1,] -0.7078991  0.7063136
-## [2,] -0.7063136 -0.7078991
+##           [,1]       [,2]
+## [1,] 0.7058316 -0.7083797
+## [2,] 0.7083797  0.7058316
 (d <- eig_VLbeta$values)
-## [1] 0.09299887 0.02956529
+## [1] 0.08984076 0.02975399
 ```
 
 The new contrast vectors are then $\tilde L = P^\top L$
@@ -428,7 +425,7 @@ nu_m <- vapply(1:2, function(m) {
   2*(d[m])^2 / denom # 2d_m^2 / g'Ag
 }, numeric(1L))
 nu_m
-## [1] 522.1259 452.9268
+## [1] 501.4952 494.6459
 ```
 
 From $\mathsf E(Q)$ we then evaluate the estimated denominator degrees of freedom for the $F$-statistic:
@@ -436,7 +433,7 @@ From $\mathsf E(Q)$ we then evaluate the estimated denominator degrees of freedo
 ```r
 EQ <- sum(nu_m / (nu_m - 2))
 (ddf <- 2 * EQ / (EQ - q)) # nu
-## [1] 485.0607
+## [1] 498.0469
 ```
 
 In summary we have the following approximate $F$-test:
@@ -445,8 +442,8 @@ In summary we have the following approximate $F$-test:
 pvalue <- pf(q=Fvalue, df1=q, df2=ddf, lower.tail=FALSE)
 data.frame('F value'=Fvalue, ndf=q, ddf=ddf, 'p-value'=pvalue, 
            check.names = FALSE)
-##    F value ndf      ddf     p-value
-## 1 10.23206   2 485.0607 4.44075e-05
+##    F value ndf      ddf    p-value
+## 1 6.856825   2 498.0469 0.00115446
 ```
 
 

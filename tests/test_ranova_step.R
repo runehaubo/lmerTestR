@@ -69,11 +69,13 @@ step(fm1)
 lm2 <- lm(Reaction ~ Days, sleepstudy)
 (an1 <- ranova(fm1))
 (an2 <- anova(fm1, lm2))
+j <- grep("Chi Df|Df", colnames(an2))
 stopifnot(
   all.equal(an1[2, "LRT"], an2[2, "Chisq"], tolerance=TOL),
-  all.equal(an1[2, "Df"], an2[2, "Df"], tolerance=TOL),
+  all.equal(an1[2, "Df"], an2[2, j[length(j)]], tolerance=TOL),
   all.equal(an1[1:2, "logLik"], an2[2:1, "logLik"], tolerance=TOL)
 )
+## Note that lme4 version <1.1-22 use "Chi Df" while >=1.1-22 use "Df"
 
 # Expect warnings when old (version < 3.0-0) arguments are used:
 assertWarning(step(fm, reduce.fixed = FALSE, reduce.random = FALSE,
