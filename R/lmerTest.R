@@ -89,7 +89,7 @@
 #'
 #' \code{lmerTest::lmer} roughly amounts to calling \code{lme4::lmer} followed by
 #' \code{lmerTest::as_lmerModLmerTest}, so for computationally intensive model
-#' fits it can make sense to use \code{lme4::lmer} rather than \code{lmerTest:lmer}
+#' fits it can make sense to use \code{lme4::lmer} rather than \code{lmerTest::lmer}
 #' if computational time is an issue and summary tables and anova tables will
 #' not be needed.
 #'
