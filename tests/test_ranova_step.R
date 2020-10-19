@@ -313,3 +313,19 @@ m <- lmer(Informed.liking ~ Product*Information+
 (step_res <- step(m, reduce.random = FALSE, keep="Information"))
 (step_res <- step(m, reduce.random = FALSE, keep="Product:Information"))
 
+
+###########################
+## Test that `step` works even if all random terms are reduced away:
+set.seed(101)
+test <- data.frame(TM = factor(rep(rep(c("org","min"),each=3),3)),
+                   dep = runif(18,0,20),
+                   ind = runif(18,0,7),
+                   dorp = factor(rep(1:3,each=6)))
+full.model <- lmer(dep ~ TM + ind + (1 | dorp),  data=test)
+res <- step(full.model)
+# res$random
+# res$fixed
+# attr(res, "model")
+# attr(res, "drop1")
+
+
