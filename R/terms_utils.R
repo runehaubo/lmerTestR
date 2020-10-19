@@ -180,7 +180,6 @@ get_fac_list <- function(model) {
 
 get_num_list <- function(model, FUN=mean) { # FUN=function(x) mean(x, na.rm=TRUE)) {
   # Extract named list of mean/FUN values of numeric variables in model
-  deparse2 <- function(x) paste(safeDeparse(x), collapse = " ")
   Terms <- terms(model)
   mf <- model.frame(model)
   xvars <- sapply(attr(Terms, "variables"), deparse2)[-1L]

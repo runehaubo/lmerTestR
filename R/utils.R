@@ -28,7 +28,7 @@
 # qform
 # rbindall
 # cond
-# safeDeparse
+# safeDeparse, deparse2
 # waldCI
 #
 
@@ -79,6 +79,8 @@ safeDeparse <- function(expr, width.cutoff=500L, backtick = mode(expr) %in%
   deparse(expr=expr, width.cutoff=width.cutoff, backtick=backtick,
           control=control, nlines=nlines)
 }
+
+deparse2 <- function(x) paste(safeDeparse(x), collapse = " ")
 
 ##############################################
 ######## waldCI

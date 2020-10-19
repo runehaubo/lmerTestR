@@ -137,7 +137,7 @@ drop1.lmerModLmerTest <- function(object, scope, ddf=c("Satterthwaite", "Kenward
                    "Kenward-Roger" = "Kenward-Roger's")
   attr(aov, "heading") <-
     c(paste("Single term deletions using", method, "method:"),
-      "\nModel:", deparse(formula(object)))
+      "\nModel:", deparse2(formula(object)))
   attr(aov, "hypotheses") <- Llist
   attr(aov, "ddf") <- ddf
   class(aov) <- c("anova", "data.frame")

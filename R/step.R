@@ -219,7 +219,7 @@ print.step_list <- function(x, digits = max(getOption("digits") - 2L, 3L),
   print(x[["random"]])
   cat("\n")
   print(x[["fixed"]])
-  cat("\nModel found:", deparse(formula(attr(x, "model"))), sep="\n")
+  cat("\nModel found:", deparse2(formula(attr(x, "model"))), sep="\n")
   invisible(x)
 }
 
@@ -347,7 +347,7 @@ ranova_lm <- function(model, REML=TRUE) {
   aov <- mk_LRtab(get_logLik(model, REML=REML))
   rownames(aov) <- "<none>"
   head <- c("ANOVA-like table for random-effects: Single term deletions",
-            "\nModel:", deparse(formula(model)))
+            "\nModel:", deparse2(formula(model)))
   # attr(aov, "formulae") <- new_forms
   structure(aov, heading = head, class = c("anova", "data.frame"))
 }

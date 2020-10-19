@@ -164,8 +164,8 @@ ranova <- function(model, reduce.terms=TRUE, ...) {
     stop("Model should have at least one random-effects term")
 
   # Reconstruct formula - needed for terms like (1 | g1 / g2):
-  fe_rhs <- safeDeparse(nobars(orig_rhs))
-  reforms <- lapply(findbars(orig_rhs), safeDeparse) # random-effect forms
+  fe_rhs <- deparse2(nobars(orig_rhs))
+  reforms <- lapply(findbars(orig_rhs), deparse2) # random-effect forms
   re_rhs <- lapply(reforms, function(rf) paste0("(", rf, ")"))
   full_rhs <- paste(c(list(fe_rhs), re_rhs), collapse=" + ")
   full_form <- update(orig_form, paste0(". ~", full_rhs))
@@ -193,7 +193,7 @@ ranova <- function(model, reduce.terms=TRUE, ...) {
   aov <- mk_LRtab(ll)
   rownames(aov) <- c("<none>", names(new_forms))
   head <- c("ANOVA-like table for random-effects: Single term deletions",
-            "\nModel:", deparse(full_form))
+            "\nModel:", deparse2(full_form))
   attr(aov, "formulae") <- new_forms
   structure(aov, heading = head, class = c("anova", "data.frame"))
 }
@@ -263,7 +263,7 @@ get_newforms <- function(form, full_formula) {
     ll <- lapply(scope, function(scp) { # scp <- scope
       # If there are no other terms in lhs than scp set new_lhs to just ~1:
       new_lhs <- if(setequal(attr(terms(lhs), "term.labels"), scp)) "1" else {
-        tmp <- safeDeparse(update.formula(lhs, paste("~.-", scp)))
+        tmp <- deparse2(update.formula(lhs, paste("~.-", scp)))
         gsub("~", "", tmp, fixed=TRUE)
       }
       new_form <- paste0("(", new_lhs, " | ", rhs, ")")
@@ -311,7 +311,7 @@ mk_LRtab <- function(x) {
 
 has_ranef <- function(form) {
   # Determine if formula 'form' contain random effect terms.
-  if(is.character(form)) form <- safeDeparse(form)
+  if(is.character(form)) form <- deparse2(form)
   length(grep("|", form, fixed=TRUE)) > 0
 }
 
@@ -322,7 +322,7 @@ has_terms <- function(form) {
 
 get_lhs <- function(ranef_term) {
   # Extract lhs in (lhs | rhs)
-  if(!is.character(ranef_term)) ranef_term <- safeDeparse(ranef_term)
+  if(!is.character(ranef_term)) ranef_term <- deparse2(ranef_term)
   lhs <- trimws(gsub("\\|.*$", "", ranef_term))
   form <- as.formula(paste0("~", lhs))
   form
@@ -334,6 +334,6 @@ get_lhs <- function(ranef_term) {
 
 get_rhs <- function(ranef_term) {
   # Extract rhs in (lhs | rhs)
-  if(!is.character(ranef_term)) ranef_term <- safeDeparse(ranef_term)
+  if(!is.character(ranef_term)) ranef_term <- deparse2(ranef_term)
   trimws(gsub("^.*\\|", "", ranef_term))
 }
