@@ -271,7 +271,7 @@ get_rdX <- function(model, do.warn=TRUE) {
   }
   colnames(rdX) <- param_names
   # Warn/message if there are cells without data:
-  is_zero <- which(colSums(rdX) == 0)
+  is_zero <- which(apply(rdX, 2, function(x) all(x == 0)))
   if(do.warn && length(is_zero)) {
     txt <- sprintf("Missing cells for: %s. ",
                    paste(param_names[is_zero], collapse = ", "))
