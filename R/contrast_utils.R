@@ -347,7 +347,7 @@ get_yates_contrast <- function(model, which=NULL) {
   # Compute LS-means contrast:
   Llist <- lapply(which, function(term) {
     Lt <- model.matrix(formula(paste0("~ 0 + ", term)), data=grid)
-    wts <- 1/colSums(Lt)
+    wts <- 1/colSums(Lt) # Yates' weights
     # Lt * c(Lt %*% wts)
     # L <- diag(wts) %*% t(Lt)
     L <- t(sweep(Lt, 2, wts, "*"))
