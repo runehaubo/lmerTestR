@@ -112,7 +112,8 @@ fm0 <- lmer(Reaction ~ Days + (1|Subject), sleepstudy)
 step(fm0)
 (an2 <- anova(fm1, fm0, refit=FALSE))
 stopifnot(
-  an2[2L, "Pr(>Chisq)"] == 1
+  (packageVersion("lme4")<="1.1.23" && an2[2L, "Pr(>Chisq)"] == 1) ||
+  is.na(an2[2L, "Pr(>Chisq)"])
 )
 ranova(fm1, reduce.terms = FALSE)
 
