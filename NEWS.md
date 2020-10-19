@@ -1,3 +1,8 @@
+lmerTest 3.1-3 (October 2020)
+------------------
+
+- Update a test to accomodate `lme4::anova` reporting `NA` instead of `1` for p-value when df=0.
+
 lmerTest 3.1-2 (April 2020)
 ------------------
 
