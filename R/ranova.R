@@ -151,7 +151,7 @@
 #' fm2 <- lmer(Coloursaturation ~ TVset * Picture + (1 | TVset:Assessor), data=TVbo)
 #' anova(fm, fm2, refit=FALSE)
 #' # fm and fm2 has essentially the same fit to data but fm uses 5 parameters
-#' # more than fm.
+#' # more than fm2.
 #'
 ranova <- function(model, reduce.terms=TRUE, ...) {
   if(!inherits(model, "lmerMod"))
@@ -253,7 +253,7 @@ get_newforms <- function(form, full_formula) {
   #
   rhs <- get_rhs(form) # rhs of random term: (lhs | rhs)
   lhs <- get_lhs(form) # lhs of random term: (lhs | rhs)
-  scope <- drop.scope(lhs) # Detemine terms to drop from lhs
+  scope <- drop.scope(lhs) # Determine terms to drop from lhs
   # Determine list of updates to 'form'
   update_forms <- if(!has_terms(lhs) || length(scope) == 0L) {# length(scope) >= 1
     # Remove entire re-term if lhs is '1':
