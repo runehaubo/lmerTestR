@@ -1,15 +1,15 @@
 lmerTest 3.1-3 (October 2020)
 ------------------
 
-- Update a test to accomodate `lme4::anova` reporting `NA` instead of `1` for p-value when df=0.
+- Update a test to accommodate `lme4::anova` reporting `NA` instead of `1` for p-value when df=0.
 - No longer print message about missing cells with mean centered covariates for type III anova tables (issue #19)
 - Fix step such that fixed effects are reduced even if all random effects are reduced away (issue #23).
 
 lmerTest 3.1-2 (April 2020)
 ------------------
 
-- Remove argument "..." to accomodate new version of `lme4` (from version `1.1-22`)
-- Minor fix to tests to accomodate new version of `lme4` (from version `1.1-22`)
+- Remove argument "..." to accommodate new version of `lme4` (from version `1.1-22`)
+- Minor fix to tests to accommodate new version of `lme4` (from version `1.1-22`)
 
 lmerTest 3.1-1
 ------------------
@@ -103,7 +103,7 @@ contrast with the name "l" changed to "l.lmerTest.private.contrasts"
 2.0-7 changes:
 
 - in utils calcSatterth changed: solve of 0 dim matrix now catches in tryCatch - example MAMex.R in tests is added to check the bug
-- messages are printed if some computational errors occurr in anova or summary and the ones from lme4 are returned (bugSummary.R for testing)
+- messages are printed if some computational errors occur in anova or summary and the ones from lme4 are returned (bugSummary.R for testing)
 
 2.0.6 changes:
 
@@ -117,7 +117,7 @@ contrast with the name "l" changed to "l.lmerTest.private.contrasts"
 - fixed bug for summary from Cyrus
 - added in manual notes regarding random coefficient models simplification
 - Rune changed solve to chol2inv in lmerTestFunctions.R
-- changed updateModel function so that the bugs with the environmentgs are solved
+- changed updateModel function so that the bugs with the environments are solved
 
 2.0.4 new:
 
@@ -128,4 +128,4 @@ contrast with the name "l" changed to "l.lmerTest.private.contrasts"
 Modifications in lmerTest 2.0.1
 
 - The elim.num column now has KEEP instead of 0
-- X'X deficiancy was fixed by Rune, lmerTest was fixed accordingly 
+- X'X deficiency was fixed by Rune, lmerTest was fixed accordingly 
