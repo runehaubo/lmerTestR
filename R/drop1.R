@@ -70,6 +70,8 @@
 #' @export
 #'
 #' @importFrom stats drop1 drop.scope terms formula
+#' @importFrom reformulas nobars
+#' 
 #' @examples
 #'
 #' # Basic usage:

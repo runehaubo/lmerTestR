@@ -200,6 +200,7 @@ difflsmeans.lmerModLmerTest <- function(model, which=NULL, level=0.95,
 ##############################################
 ######## lsmeans_contrasts()
 ##############################################
+#' @importFrom reformulas nobars
 lsmeans_contrasts <- function(model, which=NULL) {
   stopifnot(inherits(model, "lmerModLmerTest"))
   factor_terms <- attr(terms(model), "term.labels")[!numeric_terms(model)]

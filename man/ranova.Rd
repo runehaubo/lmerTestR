@@ -60,7 +60,7 @@ is reduced (if \code{reduce.terms = TRUE}) to \code{(1 | gr)}.
 
 A random-effect term of the form \code{(1 | gr1/gr2)} is automatically
 expanded to two terms: \code{(1 | gr2:gr1)} and \code{(1 | gr1)} using
-\code{\link[lme4]{findbars}}.
+\code{\link[reformulas]{findbars}}.
 
 In this exposition it is immaterial whether \code{f1} and \code{f2} are
 factors or continuous variables.
@@ -114,7 +114,7 @@ ranova(fm)
 fm2 <- lmer(Coloursaturation ~ TVset * Picture + (1 | TVset:Assessor), data=TVbo)
 anova(fm, fm2, refit=FALSE)
 # fm and fm2 has essentially the same fit to data but fm uses 5 parameters
-# more than fm.
+# more than fm2.
 
 }
 \seealso{

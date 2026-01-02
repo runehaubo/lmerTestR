@@ -71,7 +71,7 @@
 #'
 #' A random-effect term of the form \code{(1 | gr1/gr2)} is automatically
 #' expanded to two terms: \code{(1 | gr2:gr1)} and \code{(1 | gr1)} using
-#' \code{\link[lme4]{findbars}}.
+#' \code{\link[reformulas]{findbars}}.
 #'
 #' In this exposition it is immaterial whether \code{f1} and \code{f2} are
 #' factors or continuous variables.
@@ -114,7 +114,8 @@
 #' fixed-effect terms and
 #' \code{\link{anova}} for usual anova tables for fixed-effect terms.
 #' @importFrom stats formula nobs update
-#' @importFrom lme4 getME findbars nobars
+#' @importFrom lme4 getME 
+#' @importFrom reformulas findbars nobars
 #'
 #' @examples
 #'
@@ -218,6 +219,7 @@ rand <- ranova
 #' them.
 #'
 #' @importFrom stats update.formula
+#' @noRd
 #' @keywords internal
 rm_complete_terms <- function(terms, full_formula, random=TRUE) {
   # Remove random-effect formula terms from original model formula (full_formula)
