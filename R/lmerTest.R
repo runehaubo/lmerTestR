@@ -102,7 +102,8 @@
 #'   \emph{Journal of Statistical Software}, 82(13), 1--26. doi:10.18637/jss.v082.i13
 #'
 #'
-#' @docType package
+#' @keywords internal 
+"_PACKAGE"
 #' @name lmerTest-package
 #' @aliases lmerTest
 #'

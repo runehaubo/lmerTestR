@@ -28,7 +28,5 @@ Show Tests Generic Function and Default Method
 }
 \author{
 Rune Haubo B. Christensen
-
-Rune Haubo B. Christensen
 }
 \keyword{internal}

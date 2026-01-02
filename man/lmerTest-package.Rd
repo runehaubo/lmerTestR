@@ -143,6 +143,15 @@ Alexandra Kuznetsova, Per B. Brockhoff and Rune H. B. Christensen (2017)
   lmerTest Package: Tests in Linear Mixed Effects Models.
   \emph{Journal of Statistical Software}, 82(13), 1--26. doi:10.18637/jss.v082.i13
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/runehaubo/lmerTestR}
+  \item Report bugs at \url{https://github.com/runehaubo/lmerTestR/issues}
+}
+
+}
 \author{
 Alexandra Kuznetsova, Per Bruun Brockhoff, Rune Haubo Bojesen Christensen
 }
+\keyword{internal}
