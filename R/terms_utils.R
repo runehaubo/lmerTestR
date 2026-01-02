@@ -130,6 +130,7 @@ numeric_terms <- function(model) {
 #'
 #' @return the model (or 'design') matrix.
 #' @keywords internal
+#' @noRd
 #' @author Rune Haubo B Christensen
 get_model_matrix <- function(model, type=c("extract", "remake"),
                              contrasts="restore") {

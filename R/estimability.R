@@ -54,6 +54,7 @@
 #'
 #' @author Rune Haubo B. Christensen
 #' @keywords internal
+#' @noRd
 #' @examples
 #'
 #' # FIXME: We need some examples here
@@ -120,6 +121,7 @@ is_estimable <- function(contrast, nullspace=NULL, X=NULL,
 #' @author Rune Haubo B. Christensen
 #'
 #' @keywords internal
+#' @noRd
 #' @examples
 #'
 #' # FIXME: We need some examples here

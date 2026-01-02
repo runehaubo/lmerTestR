@@ -152,6 +152,7 @@ anova.lmerModLmerTest <- function(object, ..., type = c("III", "II", "I", "3", "
 #' @importFrom stats model.matrix terms formula
 #' @author Rune Haubo B. Christensen
 #'
+#' @noRd
 #' @keywords internal
 single_anova <- function(object,
                          type = c("III", "II", "I", "3", "2", "1", "yates", "marginal", "2b"),

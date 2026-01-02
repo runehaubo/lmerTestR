@@ -45,6 +45,7 @@
 #'
 #' @return list of contrast matrices.
 #' @importFrom stats terms
+#' @noRd
 #' @keywords internal
 get_contrasts_type3 <- function(model, which=NULL) {
   term_names <- attr(terms(model), "term.labels")
@@ -120,6 +121,7 @@ get_contrasts_type2_unfolded <- function(model, which=NULL) {
 #' @author Rune Haubo B. Christensen
 #'
 #' @keywords internal
+#' @noRd
 get_contrasts_type1 <- function(model) {
   terms <- terms(model)
   X <- model.matrix(model)

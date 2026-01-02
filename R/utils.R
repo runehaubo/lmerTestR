@@ -46,6 +46,7 @@
 #' @param A a symmetric numeric matrix
 #'
 #' @return a numerical scalar
+#' @noRd
 #' @keywords internal
 qform <- function(x, A) {
   sum(x * (A %*% x)) # quadratic form: x'Ax
@@ -60,6 +61,7 @@ qform <- function(x, A) {
 #' @param ... objects to be \code{rbind}'ed - typically matrices or vectors
 #'
 #' @keywords internal
+#' @noRd
 rbindall <- function(...) do.call(rbind, ...)
 
 cbindall <- function(...) do.call(cbind, ...)
