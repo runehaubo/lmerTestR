@@ -55,9 +55,13 @@ lmer(
     nonlinear optimizer, see the \code{*lmerControl} documentation for
     details.}
 
-\item{start}{a named \code{\link{list}} of starting values for the
-    parameters in the model.  For \code{lmer} this can be a numeric
-    vector or a list with one component named \code{"theta"}.}
+\item{start}{a numeric vector or a named \link{list} with one optional
+    component named \code{par} or \code{theta}, giving starting values
+    for covariance parameters.  Numeric \code{start} is equivalent to
+    \code{list(par = start)}.  Parameters corresponding to unstructured
+    covariance matrices are on the scale of the Cholesky factor of the
+    relative covariance matrix.  By default, all relative covariance
+    matrices are identity matrices.}
 
 \item{verbose}{integer scalar.  If \code{> 0} verbose output is
     generated during the optimization of the parameter estimates.  If
