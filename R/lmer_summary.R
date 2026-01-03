@@ -119,7 +119,7 @@ summary.lmerModLmerTest <- function(object, ...,
       return(summary(object))
     }
   }
-  summ <- summary(as(object, "lmerMod"), ...)
+  summ <- summary(lmerModLmerTest_to_lmerMod(object), ...)
   if(ddf == "lme4") return(summ)
   summ$coefficients <- get_coefmat(object, ddf=ddf)
   ddf_nm <- switch(ddf, "Satterthwaite" = "Satterthwaite's",
@@ -145,3 +145,4 @@ get_coefmat <- function(model, ddf=c("Satterthwaite", "Kenward-Roger")) {
   rownames(tab) <- names(fixef(model))
   as.matrix(tab)
 }
+

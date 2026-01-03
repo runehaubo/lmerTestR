@@ -162,15 +162,20 @@ if(getRversion() < "3.3") {
 ##############################################
 ######## as_lmerModLT()
 ##############################################
+#' @importFrom utils packageVersion
 as_lmerModLT <- function(model, devfun, tol=1e-8) {
   is_reml <- getME(model, "is_REML")
+  if(packageVersion("lme4") >= "2.0.0") {
+    model_upper <- attr(model, "upper")
+    model_reCovs <- attr(model, "reCovs")
+  }
   # Coerce 'lme4-model' to 'lmerModLmerTest':
   res <- as(model, "lmerModLmerTest")
   # Set relevant slots of the new model object:
   res@sigma <- sigma(model)
   res@vcov_beta <- as.matrix(vcov(model))
-  varpar_opt <- unname(c(res@theta, res@sigma))
   # Compute Hessian:
+  varpar_opt <- getVarPar(model)
   h <- numDeriv::hessian(func=devfun_vp, x=varpar_opt, devfun=devfun,
                          reml=is_reml)
   # Eigen decompose the Hessian:
@@ -203,9 +208,25 @@ as_lmerModLT <- function(model, devfun, tol=1e-8) {
   # Compute Jacobian of cov(beta) for each varpar and save in list:
   Jac <- numDeriv::jacobian(func=get_covbeta, x=varpar_opt, devfun=devfun)
   res@Jac_list <- lapply(1:ncol(Jac), function(i)
-    array(Jac[, i], dim=rep(length(res@beta), 2))) # k-list of jacobian matrices
+    array(Jac[, i], dim=rep(length(res@beta), 2))) # k-list of Jacobian matrices
+  # Ensure that the reCovs and upper attributes are set on the model object
+  # that are required by the >= 2.0 version lme4:
+  if(packageVersion("lme4") >= "2.0.0") {
+    attr(res, "upper") <- model_upper
+    attr(res, "reCovs") <- model_reCovs
+    # res <- forceNewMerMod(res)
+  }
   res
 }
+
+getOptPar <- function(object) {
+  if(packageVersion("lme4") >= "2.0.0") object@optinfo$val else 
+    unname(getME(object, "theta"))
+}
+getVarPar <- function(object) {
+  unname(c(getOptPar(object), sigma(object)))
+}
+
 
 ##############################################
 ######## as_lmerModLmerTest()
@@ -256,7 +277,7 @@ as_lmerModLmerTest <- function(model, tol=1e-8) {
   mc <- getCall(model)
   args <- c(as.list(mc), devFunOnly=TRUE)
   # if 'control' is not set we suppress potential message about rank deficient X
-  # when evaulating devfun:
+  # when evaluating devfun:
   if(!"control" %in% names(as.list(mc)))
     args$control <- lme4::lmerControl(check.rankX = "silent.drop.cols")
   Call <- as.call(c(list(quote(lme4::lmer)), args[-1]))
@@ -296,6 +317,7 @@ as_lmerModLmerTest <- function(model, tol=1e-8) {
 #'
 #' @return the REML or ML deviance.
 #' @author Rune Haubo B. Christensen
+#' @noRd
 #' @keywords internal
 devfun_vp <- function(varpar, devfun, reml) {
   nvarpar <- length(varpar)
@@ -325,6 +347,7 @@ devfun_vp <- function(varpar, devfun, reml) {
 #'
 #' @return cov(beta) at supplied varpar values.
 #' @author Rune Haubo B. Christensen
+#' @noRd
 #' @keywords internal
 get_covbeta <- function(varpar, devfun) {
   nvarpar <- length(varpar)
@@ -381,3 +404,18 @@ update.lmerModLmerTest <- function(object, formula., ..., evaluate = TRUE) {
       as_lmerModLmerTest(res) else res
   } else call
 }
+
+
+##############################################
+######## lmerModLmerTest_to_lmerMod
+##############################################
+lmerModLmerTest_to_lmerMod <- function(object) {
+  ## This replaces a simple "as(object, "lmerMod")"
+  res <- as(object, "lmerMod")
+  if(!is.null(attr(object, "upper")))
+    attr(res, "upper") <- attr(object, "upper")
+  if(!is.null(attr(object, "reCovs")))
+    attr(res, "reCovs") <- attr(object, "reCovs")
+  res
+}
+
