@@ -88,8 +88,8 @@ lmerModLmerTest <-
 #' for \code{lme4::lmer} and all the usual \code{lmer}-methods work.
 #'
 #' For details about \code{lmer} see \code{\link[lme4]{lmer}}
-#' (\code{help(lme4::lmer)}). The description of all arguments is taken
-#' unedited from the \pkg{lme4}-package.
+#' (\code{help(lme4::lmer)}). The description of all arguments below is taken
+#' verbatim and unedited from the \pkg{lme4}-package.
 #'
 #' In cases when a valid \code{lmer}-object
 #' (\code{lmerMod}) is produced, but when the computations needed for

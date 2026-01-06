@@ -25,14 +25,36 @@ lmer(
     response on the left of a \code{~} operator and the terms, separated
     by \code{+} operators, on the right.  Random-effects terms are
     distinguished by vertical bars (\code{|}) separating expressions
-    for design matrices from grouping factors.  Two vertical bars
-    (\code{||}) can be used to specify multiple uncorrelated random
-    effects for the same grouping variable. %----------
-    (Because of the way it is implemented, the \code{||}-syntax \emph{works
-       only for design matrices containing numeric (continuous) predictors};
-     to fit models with independent categorical effects, see \code{\link[lme4]{dummy}}
-     or the \code{lmer_alt} function from the \href{https://CRAN.R-project.org/package=afex}{\pkg{afex}} package.)
-}
+    for design matrices from grouping factors. By default, non-scalar
+    random effects (where the design matrix has more than one column,
+    e.g. \code{(1+x|f)}) are fitted with \emph{unstructured} (general
+    positive semidefinite) covariance matrices.
+    \itemize{
+      \item Two vertical bars
+      (\code{||}) can be used to specify multiple uncorrelated random
+      effects for the same grouping variable. %----------
+      With default settings, the \code{||}-syntax \emph{works
+	only for design matrices containing numeric (continuous) predictors};
+      to fit models with independent categorical effects, use
+      \code{diag(f|g)} or set \code{options(lme4.doublevert.default = "diag_special")} (see
+      \code{\link[lme4]{getDoublevertDefault}}).
+      \item Tags preceding a random effect term specify covariance
+      structure:
+      \itemize{
+	\item \code{us} (default: \code{us(f|g)} is equivalent to \code{(f|g)}):
+	unstructured, positive semi-definite
+	\item \code{diag}: diagonal (all correlations set to zero).
+	Specify \code{diag(f|g, hom = TRUE)}
+	to fit a homogeneous diagonal covariance matrix
+	\item \code{cs}: compound symmetric (all pairwise correlations
+	set identical). Specify \code{cs(f|g, hom = TRUE)} for homogeneous
+	variances.
+	\item \code{ar1}: autoregressive order 1. Note that AR1 models
+	are homogeneous by default; specify \code{ar1(f|g, hom = FALSE)}
+	for heterogeneous variances.
+      } % itemize (cov struct types)
+    } % itemize (cov struct info)
+  }
 
 \item{data}{an optional data frame containing the variables named in
     \code{formula}.  By default the variables are taken from the
