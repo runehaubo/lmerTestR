@@ -220,7 +220,7 @@ as_lmerModLT <- function(model, devfun, tol=1e-8) {
 }
 
 getOptPar <- function(object) {
-  if(packageVersion("lme4") >= "2.0.0") object@optinfo$val else 
+  if(packageVersion("lme4") >= "2.0.0") unname(getME(object, "par")) else 
     unname(getME(object, "theta"))
 }
 getVarPar <- function(object) {
