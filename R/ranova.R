@@ -179,10 +179,25 @@ ranova <- function(model, reduce.terms=TRUE, ...) {
 
   for(nform in new_forms) { # For each new formula. nform <- new_forms[[1]]
     newfit <- if(!has_ranef(nform)) { # If no random effects: fit with lm
-      lm_call <- get_lm_call(model, nform)
-      eval.parent(as.call(lm_call))
+      lm_call <- as.call(get_lm_call(model, nform))
+      ## Evaluate linear model trying various environments:
+      ff <- environment(formula(model))
+      pf <- parent.frame()  ## save parent frame in case we need it
+      sf <- sys.frames()[[1]]
+      ff2 <- environment(model)
+      res <- tryCatch(eval(lm_call, envir=pf),
+                         error=function(e) {
+                           tryCatch(eval(lm_call, envir=ff),
+                                    error=function(e) {
+                                      tryCatch(eval(lm_call, envir=ff2),
+                                               error=function(e) {
+                                                 tryCatch(eval(lm_call, envir=sf),
+                                                          error=function(e) {
+                                                            "error" })})})})
+      if(is.character(res) && res == "res")
+        stop("Unable to evaluate model without random effects using 'lm'")
+      res
     } else eval.parent(update(model, formula=nform))
-  # } else eval.parent(update(model, formula=nform, ...))
     # Check that models were fit to the same number of observations:
     nobs_newfit <- nobs(newfit)
     if(all(is.finite(c(nobs_model, nobs_newfit))) && nobs_newfit != nobs_model)

@@ -182,6 +182,20 @@ stopifnot(
         colnames(step_res$fixed))
 )
 
+###########################
+# Evaluation in function without the formula:
+# Reported by Uwe Ligges 2025-01-16.
+f <- function(data) {
+  lmer(Petal.Length ~ Sepal.Length + (1|Species), data=data)
+}
+
+res <- f(iris)
+ranova(res) # used to fail - now it works
+
+data <- iris
+ranova(res) # now it works
+###########################
+
 # Check that step works when form is a character vector
 m <- lmer(form, data=ham)
 step_res <- step(m)
