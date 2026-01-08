@@ -1,3 +1,9 @@
+lmerTest 3.2-0 (January 2026)
+------------------
+
+- Update lmerTest to accommodate the new lme4-2.0.0
+- Fixed scoping issue reported by Uwe Ligges.
+
 lmerTest 3.1-3 (October 2020)
 ------------------
 
