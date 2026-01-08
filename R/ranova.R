@@ -171,7 +171,7 @@ ranova <- function(model, reduce.terms=TRUE, ...) {
   if(!has_ranef(orig_rhs))
     stop("Model should have at least one random-effects term")
 
-  # Reconstruct formula - needed for terms like (1 | g1 / g2):
+  # Reconstruct formula:
   orig_lhs <- orig_form[[2]]
   fe_rhs <- deparse2(nobars(orig_rhs))
   reforms <- findbars_x(orig_rhs, default.special = NULL, 
@@ -192,7 +192,6 @@ ranova <- function(model, reduce.terms=TRUE, ...) {
       res <- paste0(res, ")")
     res
   })
-  ## has_double_bar <- grepl("||", deparse2(orig_rhs), fixed = TRUE)
   full_rhs <- paste(c(list(fe_rhs), reforms_chr), collapse=" + ")
   full_form <- as.formula(paste0(orig_lhs, "~", full_rhs))
   
@@ -204,11 +203,7 @@ ranova <- function(model, reduce.terms=TRUE, ...) {
       environment(new_form) <- environment(orig_form)
       new_form
     })
-    # rm_complete_terms(reforms_chr, full_form)
   } else { ## Reduce each of the RE terms in turn:
-    # reforms_chr <- lapply(reforms_chr, function(x) gsub("^us\\(", "(", x))
-    # full_rhs <- paste(c(list(fe_rhs), reforms_chr), collapse=" + ")
-    # full_form <- as.formula(paste0(orig_lhs, "~", full_rhs))
     unlist(lapply(reforms_chr, get_newforms, full_formula=full_form))
   }
   
@@ -284,19 +279,6 @@ rm_complete_terms <- function(terms, full_formula) {
   forms
 }
 
-# rm_complete_terms <- function(terms, full_formula) {
-#   # Remove random-effect formula terms from original model formula (full_formula)
-#   # terms <- reforms_chr; full_formula <- full_form
-#   forms <- lapply(terms, function(reform) { # reform <- reforms_chr[[1]]
-#     form <- update.formula(full_formula, paste0("~.- ", reform))
-#     environment(form) <- environment(full_formula)
-#     form
-#   })
-#   names(forms) <- terms
-#   forms
-# }
-
-
 #' @importFrom stats getCall
 get_lm_call <- function(object, formula) {
   # object: lmerMod object
@@ -308,9 +290,6 @@ get_lm_call <- function(object, formula) {
   Call[[1]] <- as.name("lm")
   Call
 }
-
-# form <- reforms_nopar[[2]]
-# full_formula <- full_form
 
 #' @importFrom stats update.formula drop.scope
 get_newforms <- function(form, full_formula) {
