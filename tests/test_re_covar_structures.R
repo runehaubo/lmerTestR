@@ -1,11 +1,6 @@
 # test_re_covar_structure.R
 library(lmerTest)
 
-# library(devtools)
-# r2path <- "~/GitHub/lmerTestR/lmerTest"
-# load_all(r2path)
-
-
 # WRE says "using if(requireNamespace("pkgname")) is preferred, if possible."
 # even in tests:
 assertError <- function(expr, ...)
@@ -69,7 +64,7 @@ if(has_pkgs && is_lme4_2_0_0) {
                         fm1.bv)
   ## Run various methods on all models:
   for(model in ltmodels) {
-    # model <- ltmodels[[7]]
+    # model <- ltmodels[[5]]
     print(model)
     print(summary(model))
     # model
@@ -93,16 +88,6 @@ if(has_pkgs && is_lme4_2_0_0) {
     (dlsm <- difflsmeans(model))
     show_tests(dlsm)
   }
-  
-  
-  ## FIXME:
-  fm1.bv <- lmer(Reaction ~ Days + (Days || Subject), sleepstudy)
-  ranova(fm1.bv, reduce.terms = FALSE)
-  ## It seems to me that here ranova should drop the whole term. Much like it 
-  ## correctly does with the diag-model:
-  ranova(fm1.diag, reduce.terms = FALSE)
-  ## Even here the printing is off as 'diag' appears to be dropped.
-  
 }
 
 ####################################
