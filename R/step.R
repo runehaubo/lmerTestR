@@ -379,7 +379,7 @@ reduce_fixed <- function(model, ddf=c("Satterthwaite", "Kenward-Roger"), alpha=0
   above <- (!is.na(pvals) & pvals > alpha)
   if(any(above)) while(any(above)) {
     remove <- consider[which.max(pvals)]
-    newform <- rm_complete_terms(remove, orig_form, random = FALSE)[[1L]]
+    newform <- rm_complete_terms(remove, orig_form)[[1L]]
     reduced <- rbind(reduced, aov[remove, ])
     newfit <- eval.parent(update(newfit, formula = newform))
     # newfit <- update(newfit, formula = newform)
