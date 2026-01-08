@@ -58,12 +58,18 @@ simply removed.
 A random-effect term of the form \code{(0 + f1 | gr)} or \code{(-1 + f1 | gr)}
 is reduced (if \code{reduce.terms = TRUE}) to \code{(1 | gr)}.
 
-A random-effect term of the form \code{(1 | gr1/gr2)} is automatically
-expanded to two terms: \code{(1 | gr2:gr1)} and \code{(1 | gr1)} using
-\code{\link[reformulas]{findbars}}.
-
 In this exposition it is immaterial whether \code{f1} and \code{f2} are
 factors or continuous variables.
+
+A random-effect term of the form \code{(1 | gr1/gr2)} is automatically
+expanded to two terms: \code{(1 | gr2:gr1)} and \code{(1 | gr1)} using
+\code{\link[reformulas]{findbars_x}}.
+
+If the model contains structured covariance matrices 
+(introduced with \pkg{lme4} version 2.0-0, cf. \code{\link[lme4]{Covariance-class}}) 
+other than \code{us} (eg. terms such as
+\code{diag(0 + gr1 | gr2)}, \code{cs(gr1 | gr2)} etc.) \code{ranova} behaves 
+as if \code{reduce.terms = FALSE}, ie. terms are removed rather than reduced.
 }
 \note{
 Note that \code{anova} can be used to compare two models and will often

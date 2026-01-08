@@ -69,12 +69,18 @@
 #' A random-effect term of the form \code{(0 + f1 | gr)} or \code{(-1 + f1 | gr)}
 #' is reduced (if \code{reduce.terms = TRUE}) to \code{(1 | gr)}.
 #'
-#' A random-effect term of the form \code{(1 | gr1/gr2)} is automatically
-#' expanded to two terms: \code{(1 | gr2:gr1)} and \code{(1 | gr1)} using
-#' \code{\link[reformulas]{findbars}}.
-#'
 #' In this exposition it is immaterial whether \code{f1} and \code{f2} are
 #' factors or continuous variables.
+#'
+#' A random-effect term of the form \code{(1 | gr1/gr2)} is automatically
+#' expanded to two terms: \code{(1 | gr2:gr1)} and \code{(1 | gr1)} using
+#' \code{\link[reformulas]{findbars_x}}.
+#' 
+#' If the model contains structured covariance matrices 
+#' (introduced with \pkg{lme4} version 2.0-0, cf. \code{\link[lme4]{Covariance-class}}) 
+#' other than \code{us} (eg. terms such as
+#' \code{diag(0 + gr1 | gr2)}, \code{cs(gr1 | gr2)} etc.) \code{ranova} behaves 
+#' as if \code{reduce.terms = FALSE}, ie. terms are removed rather than reduced.
 #'
 #' @note Note that \code{anova} can be used to compare two models and will often
 #' be able to produce the same tests as \code{ranova}. This is, however, not always the
@@ -113,9 +119,9 @@
 #' @seealso \code{\link[=drop1.lmerModLmerTest]{drop1}} for tests of marginal
 #' fixed-effect terms and
 #' \code{\link{anova}} for usual anova tables for fixed-effect terms.
-#' @importFrom stats formula nobs update
+#' @importFrom stats formula nobs update as.formula
 #' @importFrom lme4 getME 
-#' @importFrom reformulas findbars nobars
+#' @importFrom reformulas nobars splitForm findbars_x
 #'
 #' @examples
 #'
@@ -159,24 +165,53 @@ ranova <- function(model, reduce.terms=TRUE, ...) {
     stop("'model' should be an lmer-fit: \"inherits(model, 'lmerMod')\" is not TRUE")
   isREML <- getME(model, "is_REML")
   nobs_model <- nobs(model)
+  ll <- get_logLik(model) # store df and logLik
   orig_form <- formula(model)
   orig_rhs <- orig_form[[length(orig_form)]]
   if(!has_ranef(orig_rhs))
     stop("Model should have at least one random-effects term")
 
   # Reconstruct formula - needed for terms like (1 | g1 / g2):
+  orig_lhs <- orig_form[[2]]
   fe_rhs <- deparse2(nobars(orig_rhs))
-  reforms <- lapply(findbars(orig_rhs), deparse2) # random-effect forms
-  re_rhs <- lapply(reforms, function(rf) paste0("(", rf, ")"))
-  full_rhs <- paste(c(list(fe_rhs), re_rhs), collapse=" + ")
-  full_form <- update(orig_form, paste0(". ~", full_rhs))
-
-  # Compute new model formulae with reduced ranef formulae:
-  new_forms <- if(!reduce.terms)
-    rm_complete_terms(reforms, full_form) else
-      unlist(lapply(reforms, get_newforms, full_formula=full_form))
-  ll <- get_logLik(model) # store df and logLik
-
+  reforms <- findbars_x(orig_rhs, default.special = NULL, 
+                         specials = .known_specials,
+                         expand_doublevert_method = "split")
+  specials <- vapply(reforms, function(ref) splitForm(ref)$reTrmClasses, 
+                      character(1L))
+  has_specials <- any(!specials %in% c("", "us"))
+  reforms_chr <- lapply(seq_along(reforms), function(i) { # i <- 1
+    ## Coerce RE formula expressions to character and ensure that they either
+    ## have a 'special' (eg. 'diag(g | f)') or parentheses '(g | f)' rather
+    ## than being naked, 'g | f', and remove the 'us'-special:
+    res <- deparse2(reforms[[i]])
+    res <- gsub("^us\\(", "\\(", res) # remove us special if present
+    if(specials[i] %in% c("us", "") && !grepl("^\\(", res))
+      res <- paste0("(", res)
+    if(specials[i] %in% c("us", "") && !grepl("\\)$", res))
+      res <- paste0(res, ")")
+    res
+  })
+  ## has_double_bar <- grepl("||", deparse2(orig_rhs), fixed = TRUE)
+  full_rhs <- paste(c(list(fe_rhs), reforms_chr), collapse=" + ")
+  full_form <- as.formula(paste0(orig_lhs, "~", full_rhs))
+  
+  new_forms <- if(!reduce.terms || has_specials) { # || has_double_bar) {
+    ## Remove each of the RE terms in turn:
+    lapply(setNames(seq_along(reforms_chr), unlist(reforms_chr)), function(i) {
+      new_rhs <- paste(c(list(fe_rhs), reforms_chr[-i]), collapse=" + ")
+      new_form <- as.formula(paste0(orig_lhs, "~", new_rhs))
+      environment(new_form) <- environment(orig_form)
+      new_form
+    })
+    # rm_complete_terms(reforms_chr, full_form)
+  } else { ## Reduce each of the RE terms in turn:
+    # reforms_chr <- lapply(reforms_chr, function(x) gsub("^us\\(", "(", x))
+    # full_rhs <- paste(c(list(fe_rhs), reforms_chr), collapse=" + ")
+    # full_form <- as.formula(paste0(orig_lhs, "~", full_rhs))
+    unlist(lapply(reforms_chr, get_newforms, full_formula=full_form))
+  }
+  
   for(nform in new_forms) { # For each new formula. nform <- new_forms[[1]]
     newfit <- if(!has_ranef(nform)) { # If no random effects: fit with lm
       lm_call <- as.call(get_lm_call(model, nform))
@@ -222,6 +257,8 @@ rand <- ranova
 ######## ranova utility functions below
 ##############################################
 
+.known_specials <- c("us", "cs", "diag", "ar1")
+
 #' Remove Terms from Formula
 #'
 #' Remove fixef or ranef terms from formula, return a list of modified formulae
@@ -230,23 +267,34 @@ rand <- ranova
 #' @param terms character vector (or list) of terms to remove from
 #' \code{full_formula}
 #' @param full_formula formula
-#' @param random if \code{TRUE} names of the return list have parentheses around
-#' them.
 #'
 #' @importFrom stats update.formula
 #' @noRd
 #' @keywords internal
-rm_complete_terms <- function(terms, full_formula, random=TRUE) {
+rm_complete_terms <- function(terms, full_formula) {
   # Remove random-effect formula terms from original model formula (full_formula)
   forms <- lapply(terms, function(reform) {
-    form <- update.formula(full_formula, paste0("~.- (", reform, ")"))
+    form <- update.formula(full_formula, paste0("~.- ", reform))
     environment(form) <- environment(full_formula)
     form
   })
-  names(forms) <- if(!random) terms else
-    sapply(terms, function(form) paste0("(", form, ")"))
+  names(forms) <- terms
+  # names(forms) <- if(!random) terms else
+  #   sapply(terms, function(form) paste0("(", form, ")"))
   forms
 }
+
+# rm_complete_terms <- function(terms, full_formula) {
+#   # Remove random-effect formula terms from original model formula (full_formula)
+#   # terms <- reforms_chr; full_formula <- full_form
+#   forms <- lapply(terms, function(reform) { # reform <- reforms_chr[[1]]
+#     form <- update.formula(full_formula, paste0("~.- ", reform))
+#     environment(form) <- environment(full_formula)
+#     form
+#   })
+#   names(forms) <- terms
+#   forms
+# }
 
 
 #' @importFrom stats getCall
@@ -261,6 +309,9 @@ get_lm_call <- function(object, formula) {
   Call
 }
 
+# form <- reforms_nopar[[2]]
+# full_formula <- full_form
+
 #' @importFrom stats update.formula drop.scope
 get_newforms <- function(form, full_formula) {
   # Update full_formula by reducing the random-effect structure of 'form'
@@ -268,6 +319,7 @@ get_newforms <- function(form, full_formula) {
   # form: a deparse'd random-effect formula term
   # full_formula: the original model formula with lhs, fixed and random terms
   #
+  form <- gsub("^\\(|\\)$", "", trimws(form))
   rhs <- get_rhs(form) # rhs of random term: (lhs | rhs)
   lhs <- get_lhs(form) # lhs of random term: (lhs | rhs)
   scope <- drop.scope(lhs) # Determine terms to drop from lhs
