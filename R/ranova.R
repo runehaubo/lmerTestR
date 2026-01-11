@@ -77,7 +77,7 @@
 #' \code{\link[reformulas]{findbars_x}}.
 #' 
 #' If the model contains structured covariance matrices 
-#' (introduced with \pkg{lme4} version 2.0-0, cf. \code{\link[lme4]{Covariance-class}}) 
+#' (introduced with \pkg{lme4} version 2.0-0, cf. \code{help(Covariance-class})) 
 #' other than \code{us} (eg. terms such as
 #' \code{diag(0 + gr1 | gr2)}, \code{cs(gr1 | gr2)} etc.) \code{ranova} behaves 
 #' as if \code{reduce.terms = FALSE}, ie. terms are removed rather than reduced.

@@ -159,16 +159,19 @@ if(getRversion() < "3.3") {
   }
 }
 
+#' @importFrom utils packageVersion
+#' @rawNamespace
+#' if (utils::packageVersion("lme4") >= "2.0-0")
+#'   importFrom(lme4, forceNewMerMod)
+if (utils::packageVersion("lme4") < "2.0-0")
+  forceNewMerMod <- function(object, reference) object
+
+
 ##############################################
 ######## as_lmerModLT()
 ##############################################
-#' @importFrom utils packageVersion
 as_lmerModLT <- function(model, devfun, tol=1e-8) {
   is_reml <- getME(model, "is_REML")
-  if(packageVersion("lme4") >= "2.0.0") {
-    model_upper <- attr(model, "upper")
-    model_reCovs <- attr(model, "reCovs")
-  }
   # Coerce 'lme4-model' to 'lmerModLmerTest':
   res <- as(model, "lmerModLmerTest")
   # Set relevant slots of the new model object:
@@ -210,15 +213,13 @@ as_lmerModLT <- function(model, devfun, tol=1e-8) {
   res@Jac_list <- lapply(1:ncol(Jac), function(i)
     array(Jac[, i], dim=rep(length(res@beta), 2))) # k-list of Jacobian matrices
   # Ensure that the reCovs and upper attributes are set on the model object
-  # that are required by the >= 2.0 version lme4:
-  if(packageVersion("lme4") >= "2.0.0") {
-    attr(res, "upper") <- model_upper
-    attr(res, "reCovs") <- model_reCovs
-    # res <- forceNewMerMod(res)
-  }
+  # that are required by the >= 2.0-0 version lme4:
+  res <- forceNewMerMod(res, reference = model)
   res
 }
 
+#' @importFrom utils packageVersion
+#' @importFrom lme4 getME
 getOptPar <- function(object) {
   if(packageVersion("lme4") >= "2.0.0") unname(getME(object, "par")) else 
     unname(getME(object, "theta"))
@@ -403,19 +404,5 @@ update.lmerModLmerTest <- function(object, formula., ..., evaluate = TRUE) {
     if(inherits(res, "lmerMod") && !inherits(res, "lmerModLmerTest"))
       as_lmerModLmerTest(res) else res
   } else call
-}
-
-
-##############################################
-######## lmerModLmerTest_to_lmerMod
-##############################################
-lmerModLmerTest_to_lmerMod <- function(object) {
-  ## This replaces a simple "as(object, "lmerMod")"
-  res <- as(object, "lmerMod")
-  if(!is.null(attr(object, "upper")))
-    attr(res, "upper") <- attr(object, "upper")
-  if(!is.null(attr(object, "reCovs")))
-    attr(res, "reCovs") <- attr(object, "reCovs")
-  res
 }
 
