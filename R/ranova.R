@@ -274,8 +274,6 @@ rm_complete_terms <- function(terms, full_formula) {
     form
   })
   names(forms) <- terms
-  # names(forms) <- if(!random) terms else
-  #   sapply(terms, function(form) paste0("(", form, ")"))
   forms
 }
 
