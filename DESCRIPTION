@@ -5,7 +5,8 @@ Version: 3.2-0
 Authors@R: c(person("Alexandra", "Kuznetsova", role = c("aut")),
                    person("Per", "Bruun Brockhoff", role = c("aut", "ths")),
                    person("Rune", "Haubo Bojesen Christensen", role =  c("aut", "cre"),
-                   email = "Rune.Haubo@gmail.com"),
+                   email = "Rune.Haubo@gmail.com", 
+                   comment = c(ORCID = "0000-0002-4494-3399")),
                    person("Sofie", "Pødenphant Jensen", role=c("ctb")))
 Depends:
     R (>= 3.2.5),
