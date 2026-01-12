@@ -37,7 +37,7 @@ lmer(
 	only for design matrices containing numeric (continuous) predictors};
       to fit models with independent categorical effects, use
       \code{diag(f|g)} or set \code{options(lme4.doublevert.default = "diag_special")} (see
-      \code{\link[lme4]{getDoublevertDefault}}).
+      \code{help(getDoublevertDefault)} in \pkg{lme4} version \code{2.0-0} or higher).
       \item Tags preceding a random effect term specify covariance
       structure:
       \itemize{
