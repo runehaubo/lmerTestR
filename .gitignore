@@ -8,4 +8,8 @@
 *~
 revdep
 revdep_archive
+revdep
+revdep_*
+pkgs_revdep
+
 .DS_store
