@@ -163,8 +163,10 @@ if(getRversion() < "3.3") {
 #' @rawNamespace
 #' if (utils::packageVersion("lme4") >= "2.0-0")
 #'   importFrom(lme4, forceNewMerMod)
-if (utils::packageVersion("lme4") < "2.0-0")
-  forceNewMerMod <- function(object, reference) object
+
+
+# if (utils::packageVersion("lme4") < "2.0-0")
+#   forceNewMerMod <- function(object, reference) object
 
 
 ##############################################
