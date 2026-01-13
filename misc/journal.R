@@ -2,7 +2,7 @@
 
 library(devtools)
 # has_devel()
-r2path <- "~/GitHub/lmerTestR/package"
+r2path <- "~/GitHub/lmerTestR/lmerTest"
 # document(pkg=r2path, roclets = c("namespace", "rd"))
 document(pkg=r2path)
 load_all(r2path)
@@ -13,12 +13,1046 @@ load_all(r2path)
 # sessionInfo()
 
 #####################################################################
+## Install development version of lme4:
+
+
+# devtools::install_github("lme4/lme4",dependencies=TRUE)
+# library(lme4)
+# sessionInfo()
+
+# remove.packages("lme4")
+# install.packages("lme4")
+
+#####################################################################
+## Run reverse dependency checks:
+
+## Install the revdepcheck package:
+
+## Restart R!
+# install.packages("pak")
+# pak::pkg_install("r-lib/revdepcheck")
+
+## In a terminal (eg. in RStudio), do the following:
+## 1. cd to the root of the package
+## 2. Start R by writing "R" -> Enter
+## 3. Run the following code:
+##      library(revdepcheck)
+##      revdep_check(dependencies = "Depends", num_workers = 4)
+##      revdep_check(dependencies = c("Depends", "Imports"), num_workers = 4)
+##      revdep_check(num_workers = 4)
+##    This will run reverse dependency check only on packages that depends on 
+##    pkg = "lmerTest". Extend to 'dependencies = c("Depends", "Imports")' to 
+##    run on more packages or even 'revdep_check()' to run all.
+## 4. In 'this' (the usual) R-session run 
+##      r2path <- "~/GitHub/lmerTestR/lmerTest"
+##      revdep_summary(pkg=r2path) 
+##    to get a status on the reverse dependency checks, and, say,
+##      revdep_details(pkg=r2path, revdep = "AssumpSure")
+##    to get details on a revdep-package.
+## 5. When the revdep_check() is done use
+##      revdep_report(pkg=r2path)
+##    to generate humanly readable .md files under lmerTest/revdep.
+
+
+library(revdepcheck)
+?revdep_check()
+
+r2path <- "~/GitHub/lmerTestR/lmerTest"
+revdep_summary(pkg=r2path)  
+revdep_report(pkg=r2path)
+revdep_details(pkg=r2path, revdep = "sosta")
+revdepcheck::revdep_details(, "variancePartition")
+
+#####################################################################
+## 2026-01-11
+
+##  --no-manual --no-build-vignettes
+install.packages("NCC", dependencies = TRUE)
+
+library(devtools)
+
+r2path <- "~/GitHub/lmerTestR/lmerTest"
+check(pkg="~/GitHub/lmerTestR/lmerTest_3.2-0.tar.gz")
+check(pkg="~/GitHub/lmerTestR/pkgs_revdep/variancePartition", 
+      build_args = "--no-build-vignettes",
+      args="--no-manual --no-build-vignettes")
+
+install.packages("variancePartition", dependencies = TRUE)
+?BiocManager::install("variancePartition")
+
+pak::pkg_install("variancePartition", dependencies = TRUE)
+
+# Your NAMESPACE would do
+
+importFrom(utils, packageVersion)
+if (utils::packageVersion("lme4") >= "2.0-0")
+  importFrom(lme4, forceNewMerMod)
+
+# and your '.onLoad' would do:
+  
+ns <- parent.env(environment())
+if (packageVersion("lme4") < "2.0-0")
+  assign("forceNewMerMod", envir = ns, inherits = FALSE,
+         function(object, reference) object)
+
+
+# ##############################################
+# ######## lmerModLmerTest_to_lmerMod
+# ##############################################
+# lmerModLmerTest_to_lmerMod <- function(object) {
+#   ## This replaces a simple "as(object, "lmerMod")"
+#   res <- as(object, "lmerMod")
+#   if(!is.null(attr(object, "upper")))
+#     attr(res, "upper") <- attr(object, "upper")
+#   if(!is.null(attr(object, "reCovs")))
+#     attr(res, "reCovs") <- attr(object, "reCovs")
+#   res
+# }
+
+
+
+#####################################################################
+## 2026-01-08
+model <- lmer(Preference ~ sens2 + Homesize + Gender +
+                (Gender+Homesize|Consumer), data=carrots)
+ranova(model)
+drop1(model)
+step(model)
+
+forceNewMerMod
+isNewMerMod
+lme4:::.anyStructured
+
+#####################################################################
+## 2026-01-07
+library(reformulas)
+
+model <- lmer(Depth ~ Picture + diag(TVset | Assessor), TVbo)
+model
+ranova(model, reduce.terms = FALSE)
+ranova(model, reduce.terms = TRUE)
+
+findbars(orig_rhs)
+splitForm(orig_rhs)$reTrmClasses
+
+reforms[[1]]
+full_form
+
+get_newforms(reforms[[1]], special = "diag", full_formula = full_form)
+
+?splitForm(Depth ~ Picture + cs(1 + Assessor | TVset, hom=TRUE) + (1 | Assessor), 
+          defaultTerm = "", )
+
+###################
+orig_form <- Depth ~ Picture + diag(TVset | Assessor) + (1 | Assessor)
+splitForm(orig_form)
+splitForm(orig_form)$reTrmFormulas
+(specials <- splitForm(orig_form)$reTrmClasses)
+.known_specials <- c("us", "cs", "diag", "ar1")
+(has_specials <- any(!splitForm(orig_form)$reTrmClasses %in% c("", "us")))
+
+(orig_rhs <- orig_form[[length(orig_form)]])
+(orig_lhs <- orig_form[[2]])
+# Reconstruct formula - needed for terms like (1 | g1 / g2):
+(fe_rhs <- deparse2(nobars(orig_rhs)))
+findbars_x(orig_form, debug = FALSE, default.special = "us",
+           specials=c("us", "diag"))
+findbars_x(orig_form, debug = FALSE, default.special = "us",
+           specials=.known_specials)
+
+(reforms <- lapply(findbars_x(orig_rhs, default.special = "us", 
+                              specials = .known_specials), deparse2)) 
+
+(re_rhs <- lapply(reforms, function(rf) paste0("(", rf, ")")))
+(full_rhs <- paste(c(list(fe_rhs), re_rhs), collapse=" + "))
+(full_rhs <- paste(c(list(fe_rhs), reforms), collapse=" + "))
+(full_form <- update.formula(orig_form, paste0(". ~", full_rhs)))
+(full_form <- as.formula(paste0(orig_lhs, "~", full_rhs)))
+
+rm_complete_terms(reforms, full_form)
+
+(reform <- reforms[[1]])
+
+#####################
+## Pruned code:
+
+####
+# Test reduction of (Days | Subject) to (1 | Subject):
+fm1 <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy)
+ranova(fm1) # 2 df test
+
+# This test can also be achieved with anova():
+fm2 <- lmer(Reaction ~ Days + (1|Subject), sleepstudy)
+anova(fm1, fm2, refit=FALSE)
+
+# Illustrate reduce.test argument:
+# Test removal of (Days | Subject):
+ranova(fm1, reduce.terms = FALSE) # 3 df test
+
+# The likelihood ratio test statistic is in this case:
+fm3 <- lm(Reaction ~ Days, sleepstudy)
+2*c(logLik(fm1, REML=TRUE) - logLik(fm3, REML=TRUE)) # LRT
+
+# anova() is not always able to perform the same tests as ranova(),
+# for example:
+anova(fm1, fm3, refit=FALSE) # compares REML with ML and should not be used
+anova(fm1, fm3, refit=TRUE) # is a test of ML fits and not what we seek
+
+# Also note that the lmer-fit needs to come first - not an lm-fit:
+# anova(fm3, fm1) # does not work and gives an error
+
+# ranova() may not generate all relevant test:
+# For the following model ranova() indicates that we should not reduce
+# (TVset | Assessor):
+fm <- lmer(Coloursaturation ~ TVset * Picture + (TVset | Assessor), data=TVbo)
+ranova(fm)
+# However, a more appropriate model is:
+fm2 <- lmer(Coloursaturation ~ TVset * Picture + (1 | TVset:Assessor), data=TVbo)
+anova(fm, fm2, refit=FALSE)
+# fm and fm2 has essentially the same fit to data but fm uses 5 parameters
+# more than fm2.
+
+####
+
+orig_form <- Reaction ~ Days + (Days || Subject)
+orig_form <- Depth ~ Picture + diag(TVset | Assessor, hom=TRUE) + (1 | Assessor)
+orig_form <- Depth ~ Picture + diag(TVset | Assessor) + (1 | Assessor)
+orig_form <- Depth ~ Picture + diag(1 | Assessor / TVset) + (1 | TVset)
+orig_form <- Reaction ~ Daysf + ar1(0 + Daysf | Subject, hom = TRUE)
+
+
+sleepstudy$Daysf <- factor(sleepstudy$Days, ordered = TRUE)
+model <- lmer(Reaction ~ Daysf + ar1(0 + Daysf | Subject, hom = TRUE), data=sleepstudy)
+ranova(model)
+model <- lmer(Reaction ~ Days + diag(Days | Subject), data=sleepstudy)
+ranova(model)
+model <- lmer(Depth ~ Picture + diag(TVset | Assessor, hom=TRUE) + (1 | Assessor), 
+              data=TVbo)
+ranova(model)
+model <- lmer(Depth ~ Picture + (0 +  TVset | Assessor), 
+              data=TVbo)
+ranova(model)
+ranova(model, reduce.terms = FALSE)
+
+model <- lmer(Depth ~ Picture + diag(TVset | Assessor) + (1 | Assessor), 
+              data=TVbo)
+ranova(model)
+model <- lmer(Depth ~ Picture + diag(1 | Assessor / TVset) + (1 | TVset), 
+              data=TVbo)
+ranova(model)
+model <- lmer(Depth ~ Picture + (1 | Assessor / TVset) + (1 | TVset), 
+              data=TVbo)
+ranova(model)
+model <- lmer(Depth ~ Picture + us(1 | Assessor / TVset) + (1 | TVset), 
+              data=TVbo)
+ranova(model)
+model <- lmer(Reaction ~ Days + (Days | Subject), data=sleepstudy)
+ranova(model)
+model <- lmer(Reaction ~ Days + us(Days | Subject), data=sleepstudy)
+ranova(model)
+model <- lmer(Reaction ~ Days + (Days || Subject), data=sleepstudy)
+ranova(model)
+ranova(model, reduce.terms = FALSE)
+
+ranova(model)
+summary(model)
+slotNames(model)
+model@call
+str(model, max.level = 2)
+
+
+(orig_rhs <- orig_form[[length(orig_form)]])
+(orig_lhs <- orig_form[[2]])
+# Reconstruct formula - needed for terms like (1 | g1 / g2):
+(fe_rhs <- deparse2(nobars(orig_rhs)))
+# findbars_x(orig_form, default.special = "us", specials=.known_specials,
+#            , expand_doublevert_method = "split")
+
+has_double_bar <- grepl("||", deparse2(orig_rhs), fixed = TRUE)
+(reforms <- findbars_x(orig_rhs, default.special = "us", 
+                       specials = .known_specials,
+                       expand_doublevert_method = "split")) 
+(reforms_chr <- lapply(reforms, deparse2))
+# expandDoubleVerts()
+# splitForm(orig_form)
+# splitForm(orig_form)$reTrmFormulas
+(specials <- vapply(reforms, function(ref) splitForm(ref)$reTrmClasses, 
+                    character(1L)))
+.known_specials <- c("us", "cs", "diag", "ar1")
+(has_specials <- any(!specials %in% c("", "us")))
+(has_unknown_specials <- has_specials && !all(specials %in% .known_specials))
+
+# (re_rhs <- lapply(reforms, function(rf) paste0("(", rf, ")")))
+# (full_rhs <- paste(c(list(fe_rhs), re_rhs), collapse=" + "))
+(full_rhs <- paste(c(list(fe_rhs), reforms), collapse=" + "))
+# (full_form <- update.formula(orig_form, paste0(". ~", full_rhs)))
+(full_form <- as.formula(paste0(orig_lhs, "~", full_rhs)))
+
+(res_forms <- rm_complete_terms(reforms_chr, full_form))
+
+get_newforms()
+
+res_forms[[2]]
+lmer(res_forms[[2]], data=TVbo)
+
+# (reform <- reforms[[1]])
+rm_complete_terms <- function(terms, full_formula, random=TRUE) {
+  # Remove random-effect formula terms from original model formula (full_formula)
+  forms <- lapply(terms, function(reform) {
+    form <- update.formula(full_formula, paste0("~.- ", reform))
+    environment(form) <- environment(full_formula)
+    form
+  })
+  names(forms) <- terms
+  forms
+}
+
+#####################################################################
+## 2026-01-07
+
+?TVbo
+data("TVbo")
+all(complete.cases(TVbo))
+
+fm1 <- lmer(Depth ~ Picture + (1|Assessor:TVset) + 
+              (1 | Assessor) + (1 | TVset), TVbo)
+fm1
+summary(fm1)
+
+fm2 <- lmer(Coloursaturation ~ Picture + us(1 + TVset | Assessor), TVbo)
+summary(fm2)
+
+fm3 <- lmer(Coloursaturation ~ Picture + cs(1 + TVset | Assessor, hom=TRUE), TVbo)
+fm3
+
+fm4 <- lmer(Coloursaturation ~ Picture + cs(1 + TVset | Assessor, hom=FALSE), TVbo)
+summary(fm4)
+
+fm5 <- lme4::lmer(Depth ~ Picture + cs(1 + Assessor | TVset, hom=TRUE) + (1 | Assessor), TVbo)
+fm5
+summary(fm5)
+
+fm6 <- lmer(Coloursaturation ~ Picture + cs(1 + Assessor | TVset, hom=FALSE), TVbo)
+summary(fm6)
+
+library(data.table)
+fm1
+fm5
+varcor <- VarCorr(fm1) |> as.data.frame() |> as.data.table()
+vars <- varcor[1:2, vcov]
+sum(vars) |> sqrt()
+
+
+VarCorr(fm5) |> as.data.frame()
+REMLcrit(fm1)
+REMLcrit(fm5)
+
+sqrt(0.69631660)
+s1 <- 0.69631660
+s2 <- 0.05747056
+
+s1 / (s1 + s2) |> sqrt()
+s2 / (s1 + s2)
+
+######################################
+## There appears to be an error here:
+remotes::install_github("bbolker/reformulas")
+
+library(lme4)
+data("TVbo", package="lmerTest")
+fm5 <- lmer(Depth ~ Picture + cs(Assessor | TVset, hom=TRUE) + (1 | Assessor), TVbo)
+fm5
+
+######################################
+
+#####################################################################
+## 2026-01-06
+## Fix scoping issue in ranova():
+
+library(lmerTest)
+f <- function(data) {
+  lmer(Petal.Length ~ Sepal.Length + (1|Species), data=data)
+}
+
+res <- f(iris)
+res
+ranova(res) # fails
+
+data <- iris
+ranova(res) # now it works
+
+# A model with ||-notation:
+f2 <- function(data) {
+  lmer(Reaction ~ Days + (Days||Subject), data)
+}
+res <- f2(sleepstudy)
+res
+ranova(res)
+
+# A model with multiple RE terms:
+f3 <- function(data) {
+  lmer(Coloursaturation ~ TVset*Picture + (1|Assessor:TVset) + (1|Assessor), data)
+}
+res <- f3(TVbo)
+res
+ranova(res)
+
+fm <- lmer(Coloursaturation ~ TVset*Picture + (1|Assessor:TVset) + (1|Assessor),
+           data=TVbo)
+step(fm)
+(an1 <- ranova(fm))
+
+#####################################################################
+
+library(reformulas)
+?findbars
+RHSForm(y ~ x + (1|g))
+anySpecial(~diag(1))
+anySpecial(~diag)
+anySpecial(~diag[[1]])
+anySpecial(~diag[1])
+anySpecial(~s)
+anySpecial(~s(hello+goodbye,whatever))
+reformulas:::findReTrmClasses()
+
+
+f <- y ~ 1 + x
+RHSForm(f) <- quote(2+x^2)
+print(f)
+reOnly(~ 1 + x + y + (1|f) + (1|g))
+addForm0(y~x,~1)
+addForm0(~x,~y)
+ff <- findbars_x(y~1+(x|f/g))
+expandAllGrpVar(ff)
+expandAllGrpVar(quote(1|(f/g)/h))
+expandAllGrpVar(quote(1|f/g/h))
+expandAllGrpVar(quote(1|f*g))
+expandAllGrpVar(quote(1|f+g))
+expandAllGrpVar(quote(a+b|f+g+h*i))
+expandAllGrpVar(quote(s(log(d), k = 4)))
+expandAllGrpVar(quote(s(log(d+1))))
+splitForm(quote(us(x,n=2)))
+findbars_x(~ 1 + (x + y || g), expand_doublevert_method = "diag_special")
+findbars_x(~ 1 + (x + y || g), expand_doublevert_method = "split")
+findbars_x(~ 1 + (1 | f) + (1 | g))
+findbars_x(~ 1 + (1 | f) + (1 | g))
+findbars_x(~ 1 + (1|h) + (x + y || g), expand_doublevert_method = "split")
+findbars_x(~ 1 + (1|Subject))
+findbars_x(~ (1||Subject))
+findbars_x(~ (1|Subject) + diag(1 | g))
+findbars_x(~ diag(1|Subject), default.special = NULL, specials = c("diag"))
+findbars_x(~ 1 + x)
+findbars_x(~ s(x, bs = "tp"))
+findbars_x(y ~ a + log(b) + s(x, bs = "tp") + s(y, bs = "gp"),
+           target = "s", default.special = NULL)
+findbars(~ 1 + (x + y || g))
+findbars(~ 1 + diag(1 | f) + (1 | g))
+findbars_x(~ 1 + (1|h) + (x + y || g), expand_doublevert_method = "split")
+findbars(~ 1 + (1|Subject))
+findbars(~  1 + (1||Subject))
+findbars(~ (1||Subject))
+findbars(~ 1 + x)
+inForm(z~.,quote(.))
+inForm(z~y,quote(.))
+inForm(z~a+b+c,quote(c))
+inForm(z~a+b+(d+e),quote(c))
+f <- ~ a + offset(x)
+f2 <- z ~ a
+inForm(f,quote(offset))
+inForm(f2,quote(offset))
+extractForm(~a+offset(b),quote(offset))
+extractForm(~c,quote(offset))
+extractForm(~a+offset(b)+offset(c),quote(offset))
+extractForm(~offset(x),quote(offset))
+dropHead(~a+offset(b),quote(offset))
+dropHead(~a+poly(x+z,3)+offset(b),quote(offset))
+drop.special(x~a + b+ offset(z))
+
+replaceForm(quote(a(b+x*c(y,z))),quote(y),quote(R))
+
+ss <- ~(1 | cask:batch) + (1 | batch)
+replaceForm(ss,quote(cask:batch),quote(batch:cask))
+replaceForm(ss, quote(`:`), quote(`%:%`))
+
+replaceForm(quote(Depth ~ Picture + diag(1 | TVset:Assessor) + diag(1 | Assessor)), 
+            quote(diag(1 | TVset:Assessor)), as.name(" "))
+
+substitute(A ~ B + C, list(C = quote(D)))
+?quote
+parse(text=quote(D))
+
+full_form
+
+
+removeForm <- function(term, target) {
+  if (identical(term, target)) 
+    return(repl)
+  if (!inForm(term, target)) 
+    return(term)
+  if (length(term) == 2) {
+    return(substitute(OP(x), list(OP = replaceForm(term[[1]], target, repl), 
+                                  x = replaceForm(term[[2]], target, repl))))
+  }
+  return(substitute(OP(x, y), list(OP = replaceForm(term[[1]], target, repl), 
+                                   x = replaceForm(term[[2]], target, repl), 
+                                   y = replaceForm(term[[3]], target, repl))))
+  
+}
+
+formula(reform)
+as.name(reform)
+?quote
+
+expandGrpVar(quote(x*y))
+expandGrpVar(quote(x/y))
+findReTrmClasses()
+
+## (silly/impractical formula, for illustration only)
+form <- mpg ~ 1 + (1|gear) + (factor(cyl)|gear) + (1 + hp | carb)
+fr <- model.frame(subbars(form), data = mtcars)
+findbars(form)
+rterms <- mkReTrms(findbars(form), fr)
+names(rterms)
+## block sizes (latent variables per block) of each term
+(nperblock <- lengths(rterms$cnms))
+## latent variables per term
+(nperterm <- diff(rterms$Gp))
+with(rterms, identical(unname(nl*nperblock), nperterm))
+## illustrate reordering of terms
+dd <- expand.grid(a = 1:7, b = 1:3, c = 1:5, d = 1:9)
+dd$y <- 1
+form2 <- y ~ 1 + (1|a) + (1|b) + (1|c) + (1|d)
+rterms2 <- mkReTrms(findbars(form2), dd, reorder.terms = TRUE)
+## reorder elements into original formula order
+with(rterms2, cnms[order(ord)])
+## reorder splitForm output to match mkReTrms components
+ss <- splitForm(form2)
+ss$reTrmFormulas[rterms2$ord]
+
+findbars_x(~ 1 + s(x) + (f|g) + diag(x|y))
+no_specials(findbars_x(~ 1 + s(x) + (f|g) + diag(x|y)))
+no_specials(~us(f|g))
+no_specials(~us(f|g, extra_arg))
+
+nobars(Reaction ~ Days + (Days|Subject))
+nobars_(Reaction ~ Days + (Days|Subject))
+
+f <- ~ 1 + a  + b + (1 | f) +  (0 + a | f) + (1 + a | g) + (a + b | h ) + (1 + a + b | i)
+randint(f)
+
+
+?splitForm(~x+y)                     ## no specials or RE
+splitForm(~x+y+(f|g))               ## no specials
+splitForm(~x+y+diag(f|g))           ## one special
+splitForm(~x+y+(diag(f|g)))         ## 'hidden' special
+splitForm(~x+y+(f|g)+cs(1|g))       ## combination
+splitForm(~x+y+(1|f/g))             ## 'slash'; term
+splitForm(~x+y+(1|f/g/h))             ## 'slash'; term
+splitForm(~x+y+(1|(f/g)/h))             ## 'slash'; term
+splitForm(~x+y+(f|g)+cs(1|g)+cs(a|b,stuff))  ## complex special
+splitForm(~(((x+y))))               ## lots of parentheses
+splitForm(~1+kr(f|g,n=2))
+splitForm(~1+s(x, bs = "tp"))
+
+noSpecials(y~1+us(1|f))
+noSpecials(y~1+us(1|f),delete=FALSE)
+noSpecials(y~us(1|f))
+noSpecials(y~us(1|f), delete=FALSE)
+noSpecials(y~us(1|f), debug=TRUE)
+noSpecials(y~us+1)  ## should *not* delete unless head of a function
+noSpecials(~us(1|f)+1)   ## should work on a one-sided formula!
+noSpecials(~s(stuff) + a + b, specials = "s")
+noSpecials(cbind(b1, 20-b1) ~ s(x, bs = "tp"))
+
+sub_specials( ~ s(a, k=4))
+sub_specials( ~ (1|x) + (a + b || y) + s(a, k=4))
+sub_specials(Reaction ~ s(Days) + (1 + Subject))
+sub_specials(~ s(cos((y^2*3)/2), bs = "tp"))
+
+subbars(Reaction ~ Days + (Days|Subject)) ## => Reaction ~ Days + (Days + Subject)
+
+#####################################################################
+## 2026-01-03
+
+########################
+## Does something get stuck in the evaluation of devfun?
+## This appears to happen if illegal parameter values are applied.
+model <- lme4::lmer(Reaction ~ Days + cs(Days | Subject), sleepstudy)
+devfun <- update(model, devFunOnly=TRUE)
+(optpar <- model@optinfo$val)
+getME(model, "par")
+
+attr(model, "upper")
+model@lower
+devfun(optpar)
+optpar3 <- c(1, .2, 1.1)
+devfun(optpar3) # NaN understandable
+devfun(optpar) # NaN ??
+
+########################
+
+
+has_new_covs <- function(x) {
+  covs <- lme4:::getReCovs(x)
+  any(vapply(covs, function(x) !inherits(x, "Covariance.us"),
+             FUN.VALUE = logical(1)))
+}
+
+
+fm0 <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy)
+fm1 <- lmer(Reaction ~ Days + diag(Days|Subject), sleepstudy)
+
+has_new_covs(fm0)
+has_new_covs(fm1)
+
+lme4:::getReCovs(fm0)
+lme4:::getReCovs(fm1)
+
+?`Covariance-class`
+
+getPar(fm0)
+
+
+## Check out KR in comparison to Satterthwaite:
+fm <- lmer(Reaction ~ Days + (Days | Subject), sleepstudy)
+fm <- lmer(Reaction ~ Days + us(Days | Subject), sleepstudy)
+anova(fm, ddf="Sat")
+anova(fm, ddf="Ken")
+
+fm <- lmer(Reaction ~ Days + cs(Days | Subject), sleepstudy)
+anova(fm, ddf="Sat")
+anova(fm, ddf="Ken")
+
+fm <- lmer(Reaction ~ Days + diag(Days | Subject, hom = TRUE), sleepstudy)
+anova(fm, ddf="Sat")
+anova(fm, ddf="Ken")
+
+fm <- lmer(Reaction ~ Days + ar1(Days | Subject), sleepstudy)
+lme4:::getReCovs(fm)
+getME(fm, "theta")
+fm@theta
+
+
+anova(fm, ddf="Sat")
+an <- anova(fm, ddf="Ken")
+show_tests(an)
+
+L <- c(0, 1)
+model <- fm
+?getME
+
+pbkrtest::KRmodcomp(model, L, betaH=0)$test
+pbkrtest::SATmodcomp(model, L, betaH=0)
+contestMD(model, drop(L), rhs=0, confint=FALSE)
+
+library(pbkrtest)
+(fm0 <- lmer(Reaction ~ diag(Days|Subject, hom=TRUE), sleepstudy))
+(fm1 <- lmer(Reaction ~ Days + diag(Days|Subject, hom=TRUE), sleepstudy))
+(fm2 <- lmer(Reaction ~ Days + I(Days^2) + diag(Days|Subject, hom=TRUE), sleepstudy))
+
+## Test for no effect of Days in fm1, i.e. test fm0 under fm1
+SATmodcomp(fm1, "Days")
+SATmodcomp(fm1, ~.-Days)
+L1 <- cbind(0, 1) 
+contestMD(fm1, L1)
+## SATmodcomp(fm1, L1) ## FIXME
+SATmodcomp(fm1, fm0)
+
+KRmodcomp(fm1, "Days")
+KRmodcomp(fm1, ~.-Days)
+L1 <- cbind(0, 1) 
+KRmodcomp(fm1, L1) ## FIXME
+KRmodcomp(fm1, fm0)
+
+## Could we walk through all the lme4models with specials and check the 
+## ddf computed by KR and Sat? 
+## Also check using another categorical re-model possibly with unbalanced data.
+
+
+
+
+
+mk_Ftable(Fvalue=x["FtestU", "stat"], ndf=x[1L, "ndf"],
+          ddf=x[1L, "ddf"], sigma=sigma(model),
+          Fscale=x["Ftest", "F.scaling"])
+#####################################################################
+## 2026-01-02
+
+fm <- lmer(Reaction ~ Days + us(Days | Subject), sleepstudy)
+fm
+summary(fm)
+anova(fm, type="I")
+anova(fm, ddf="lme4")
+
+object@optinfo$val
+
+# library(lme4)
+sessionInfo()
+
+sleepstudy$Daysf <- factor(sleepstudy$Days, ordered = TRUE)
+fm1.ar1 <- lme4::lmer(Reaction ~ Daysf + ar1(0 + Daysf | Subject, hom = TRUE), 
+                      sleepstudy)
+fm1.ar1
+fm1.ar1@optinfo$val
+fm1.ar1@theta
+getME(fm1.ar1, "theta")
+lme4:::getReCovs(fm1.ar1)
+lme4:::getPar(fm1.ar1)
+devFun <- update(fm1.ar1, devFunOnly=TRUE)
+devFun(fm1.ar1@optinfo$val) 
+fm1.ar1@devcomp$cmp["REML"]
+varpar <- getVarPar(fm1.ar1)
+devfun_vp(varpar, devFun, reml=TRUE)
+
+
+fm1.us <- lme4::lmer(Reaction ~ Days + us(Days | Subject), sleepstudy)
+model <- fm1.us
+model@optinfo$val
+model@theta
+devfun <- update(model, devFunOnly=TRUE)
+devfun(model@optinfo$val)
+varpar_opt <- getVarPar(model)
+varpar <- getVarPar(model)
+
+devfun_vp(varpar_opt, devFun, reml=TRUE)
+
+as_lmerModLT(model, devFun)
+
+fm1.cs <- lme4::lmer(Reaction ~ Days + cs(Days | Subject), 
+                         sleepstudy)
+fm1.cs.lt <- lmer(Reaction ~ Days + cs(Days | Subject), 
+                  sleepstudy)
+model <- fm1.cs
+model <- fm1.ar1
+model <- fm1.cs.lt
+devFun <- update(model, devFunOnly=TRUE)
+devFun(model@optinfo$val) 
+model@devcomp$cmp["REML"]
+
+varpar_opt <- unname(c(model@optinfo$val, sigma(model)))
+devfun_vp(varpar_opt, devFun, reml=TRUE)
+
+?lme4::getME()
+?lme4::modular
+?`Covariance-class`
+methods(class = "merMod")
+
+## Unstructured
+fm1.us <- lme4::lmer(Reaction ~ Days + us(Days | Subject), sleepstudy)
+## Diagional
+fm1.diag <- lme4::lmer(Reaction ~ Days + diag(Days | Subject), sleepstudy)
+fm1.diag.hom <- lme4::lmer(Reaction ~ Days + diag(Days | Subject, hom = TRUE), 
+                     sleepstudy)
+## Compound symmetry
+fm1.cs <- lme4::lmer(Reaction ~ Days + cs(Days | Subject), sleepstudy)
+fm1.cs.hom <- lme4::lmer(Reaction ~ Days + cs(Days | Subject, hom = TRUE), 
+                   sleepstudy)
+## Auto-regressive order 1
+sleepstudy$Daysf <- factor(sleepstudy$Days, ordered = TRUE)
+fm1.ar1 <- lme4::lmer(Reaction ~ Daysf + ar1(0 + Daysf | Subject, hom = TRUE), 
+                sleepstudy, REML = TRUE)
+
+lme4models <- namedList(fm1.us,
+                        fm1.diag, 
+                        fm1.diag.hom,
+                        fm1.cs, 
+                        fm1.cs.hom, 
+                        fm1.ar1)
+
+model <- lme4models[[1]]
+## Native devfun:
+devfun <- update(model, devFunOnly=TRUE)
+## Evaluate native devfun at optimum:
+devfun(getOptPar(model))
+## Check that devfun returns the same value as that saved in the model object:
+stopifnot(
+  all.equal(unname(getME(model, "devcomp")$cmp["REML"]), 
+            devfun(getOptPar(model)), tolerance=1e-6) # TRUE
+)
+## Get varpar (including residual SD):
+(varpar <- getVarPar(model))
+## Evaluate devfun_vp at the optimum:
+devfun_vp(varpar, devfun, reml=TRUE)
+## Check that devfun_vp returns the same value as native devfun:
+stopifnot(
+  all.equal(unname(getME(model, "devcomp")$cmp["REML"]), 
+            devfun(getOptPar(model))) # TRUE
+)
+## Here we also want to check that devfun and and devfun_vp returns the same 
+## value at non-optimum values of varpar.
+## Hmm. Because sigma is profiled out of devfun this cannot be done right away.
+## Maybe we can optimize over the sigma param to get the right thing? 
+## No, we would need to optimize over all parameters to get equivalence.
+## Though we should be able to set one of the parameters in common to a 
+## particular value and optimize the rest. 
+
+model <- lme4models[[6]]
+devfun <- update(model, devFunOnly=TRUE)
+(optpar <- getOptPar(model))
+(varpar <- getVarPar(model))
+(optpar2 <- optpar * 1.1)
+(varpar2 <- c(optpar2, varpar[length(varpar)]))
+
+## Evaluate gradients to ensure that devfun and devfun_vp are both 
+## functions with optima at optpar and varpar respectively:
+library(numDeriv)
+(g_devfun <- grad(devfun, optpar))
+(g_devfun_vp <- grad(devfun_vp, varpar, devfun=devfun, reml=TRUE))
+stopifnot(
+  all(abs(g_devfun) < 1e-3),
+  all(abs(g_devfun_vp) < 1e-3)
+)
+## These are not zero as expected:
+(g_devfun <- grad(devfun, optpar2))
+(g_devfun_vp <- grad(devfun_vp, varpar2, devfun=devfun, reml=TRUE)) 
+## Try optimizing devfun_vp:
+x <- nlminb(start=varpar2, objective = devfun_vp, devfun=devfun, reml=TRUE,
+            control=list(trace=1))
+## Check that the optimum is re-achieved:
+stopifnot(
+  all(abs(varpar - x$par) < 1e-4),
+  abs(devfun_vp(varpar, devfun=devfun, reml=TRUE) - 
+        devfun_vp(x$par, devfun=devfun, reml=TRUE)) < 1e-6
+)
+
+## Optimize devfun and devfun_vp over all but one of the parameters in turn to
+## check that devfun and devfun_vp gives the same deviance and parameter values
+## for settings away from the REML optimum. This is to build confidence that
+## devfun_vp is a valid implementation of the deviance function from LLMs.
+for(j in seq_along(optpar)) { # j <- 1
+  ## Check that all parameters are within bounds:
+  stopifnot(
+    model@lower < optpar,
+    optpar < attr(model, "upper"),
+    model@lower < optpar2,
+    optpar2 < attr(model, "upper")
+  )
+  ## Evaluate deviance function at optimum (for safety):
+  devfun(optpar)
+  ## Optimize devfun over all but the j'th parameter:
+  (startpar <- optpar[-j])
+  res <- nlminb(start=startpar, objective = function(p) {
+    (Par <- optpar2)
+    (Par[-j] <- p)
+    devfun(Par) 
+    }, control = list(trace=1),
+    lower = model@lower[-j], 
+    upper = attr(model, "upper")[-j])
+  ## Evaluate devfun_vp:
+  devfun_vp(varpar, devfun=devfun, reml=TRUE)
+  ## Optimize devfun_vp over all but the j'th parameter:
+  (startpar_vp <- varpar[-j])
+  (np <- length(startpar_vp))
+  res_vp <- nlminb(start=startpar_vp, objective = function(p) {
+    (Par <- optpar2)
+    (Par[-j] <- p[-np])
+    Par <- c(Par, p[np])
+    devfun_vp(Par, devfun=devfun, reml=TRUE) 
+  }, control = list(trace=1),
+  lower = c(model@lower[-j], 0), 
+  upper = c(attr(model, "upper")[-j], Inf))
+  ## Compare parameter estimates (except for sigma):
+  res$objective - res_vp$objective
+  res$par - res_vp$par[seq_along(res$par)]
+  ## Check that parameter estimates and deviance values agree:
+  stopifnot(
+    abs(res$objective - res_vp$objective) < 1e-8,
+    all(abs(res$par - res_vp$par[seq_along(res$par)]) < 1e-4)
+  )
+}
+
+########################
+## Does something get stuck in the evaluation of devfun?
+## This appears to happen if illegal parameter values are applied.
+model <- lme4::lmer(Reaction ~ Days + cs(Days | Subject), sleepstudy)
+devfun <- update(model, devFunOnly=TRUE)
+(optpar <- model@optinfo$val)
+attr(model, "upper")
+model@lower
+devfun(optpar)
+optpar3 <- c(1, .2, 1.1)
+devfun(optpar3) # NaN
+devfun(optpar) # NaN ??
+
+########################
+
+nlminb(start=varpar[-(1:2)], objective = function(p) {
+  devfun_vp(c(1, .02, p), devfun=devfun, reml=TRUE) })
+nlminb(start=optpar[-(1:2)], objective = function(p) {
+  devfun(c(1, .02, p)) })
+
+
+hessian(devfun, optpar)
+hessian(devfun_vp, varpar, devfun=devfun, reml=TRUE)
+
+optimize(function(sig) -devfun_vp(c(allpar[, 1], sig), devfun = devfun, reml=TRUE), 
+         interval=c(20, 30)) 
+
+i <- 2
+devfun(allpar[-length(varpar), i])
+devfun_vp(allpar[, i], devfun, reml = TRUE)
+
+
+
+model@optinfo$val
+model@theta
+getOptPar(model)
+(varpar <- getVarPar(model))
+devfun <- update(model, devFunOnly=TRUE)
+devfun(getOptPar(model))
+unname(model@devcomp$cmp["REML"]) - devfun(getOptPar(model)) # 0
+all.equal(unname(model@devcomp$cmp["REML"]), 
+          devfun(getOptPar(model))) # TRUE
+devfun_vp(varpar, devfun, reml=TRUE)
+unname(model@devcomp$cmp["REML"]) - devfun_vp(varpar, devfun, reml=TRUE) # 0
+all.equal(unname(model@devcomp$cmp["REML"]), 
+          devfun_vp(varpar, devfun, reml=TRUE)) # TRUE
+
+fm_lt <- as_lmerModLT(model, devfun)
+print(fm_lt)
+summary(fm_lt)
+summary(fm_lt, ddf="Ken")
+anova(fm_lt)
+anova(fm_lt, ddf = "Ken")
+lme4::VarCorr(model)
+VarCorr
+
+lapply(lme4models, VarCorr)
+
+fm <- lme4::lmer(Reaction ~ Daysf + diag(1 + Daysf | Subject, hom=TRUE), 
+                 sleepstudy, REML = FALSE)
+fm <- lme4::lmer(Reaction ~ Daysf + diag(1 | Subject, hom=TRUE), 
+                 sleepstudy, REML = FALSE)
+VarCorr(fm)
+logLik(fm, REML=TRUE)
+deviance(fm)
+
+#####################################################################
+## 2026-01-01
+
+## Try out this version:
+forceNewMerMod <-
+  function (object, reference = object) {
+    if (is.null(attr(object, "upper")))
+      attr(object, "upper") <- getUpper(reference)
+    if (is.null(attr(object, "reCovs")))
+      attr(object, "reCovs") <- getReCovs(reference)
+    object
+  }
+
+
+## From: ?`Covariance-class`
+## Unstructured
+fm1.us <- lmer(Reaction ~ Days + us(Days | Subject), sleepstudy)
+fm1.us
+## Diagional
+fm1.diag <- lmer(Reaction ~ Days + diag(Days | Subject), sleepstudy)
+fm1.diag
+fm1.diag.hom <- lmer(Reaction ~ Days + diag(Days | Subject, hom = TRUE), 
+                     sleepstudy)
+fm1.diag.hom
+
+## Compound symmetry
+fm1.cs <- lme4::lmer(Reaction ~ Days + cs(Days | Subject), sleepstudy)
+
+eigen(fm1.cs@optinfo$derivs$Hessian)
+
+
+fm1.cs.hom <- lmer(Reaction ~ Days + cs(Days | Subject, hom = TRUE), 
+                   sleepstudy)
+fm1.cs.hom
+
+## Auto-regressive order 1
+sleepstudy$Daysf <- factor(sleepstudy$Days, ordered = TRUE)
+fm1.ar1 <- lme4::lmer(Reaction ~ Daysf + ar1(0 + Daysf | Subject, hom = TRUE), 
+                      sleepstudy, REML = FALSE)
+fm1.ar1
+devFun <- update(fm1.ar1, devFunOnly=TRUE)
+devFun(fm1.ar1@theta) # Why does this not work?
+# [1] NaN
+# Warning message:
+#   In sqrt(1 - rho2) : NaNs produced
+
+## Works fine for other covariance-structures, for example:
+fm1.cs.hom <- lme4::lmer(Reaction ~ Days + cs(Days | Subject, hom = TRUE), 
+                         sleepstudy)
+fm1.cs.hom
+devFun <- update(fm1.cs.hom, devFunOnly=TRUE)
+devFun(fm1.cs.hom@theta) 
+
+
+model <- fm1.cs
+devFun <- update(model, devFunOnly=TRUE)
+devFun(model@theta)
+model@devcomp$cmp["REML"]
+
+varpar_opt <- unname(c(model@theta, sigma(model)))
+devfun_vp(varpar_opt, devFun, reml=TRUE)
+model@devcomp$cmp["REML"]
+
+# Compute Hessian:
+h <- numDeriv::hessian(func=devfun_vp, x=varpar_opt, devfun=devfun,
+                       reml=is_reml)
+
+
+
+
+
+m <- lme4::lmer(Reaction ~ Days + (Days | Subject), sleepstudy)
+bm <- as_lmerModLmerTest(m)
+slotNames(bm)
+attr(m, "reCovs")
+attr(m, "upper")
+
+lme4:::getReCovs(m)
+lme4:::getReCovs(bm)
+lme4:::getUpper(m)
+lme4:::getUpper(bm)
+
+attr(bm, "reCovs")
+attr(bm, "upper")
+
+fm0 <- lme4::lmer(Reaction ~ Days + diag(Days|Subject), sleepstudy)
+fm0
+(fm0_reCovs <- attr(fm0, "reCovs"))
+attr(fm0, "reCovs") <- NULL
+attr(fm0, "reCovs") # now NULL
+fm0 # Fails (expected)
+lme4:::getReCovs(fm0) # Fails - unexpected
+lme4:::getUpper(fm0) # OK
+forceNewMerMod(fm0) # Fails -> unexpected.
+
+attr(fm0, "reCovs") <- fm0_reCovs
+attr(fm0, "reCovs") # non-NULL
+fm0 # Now works
+
+lme4:::getReCovs(fm0)
+devfun <- update(fm0, devfunonly)
+
+as_lmerModLmerTest(fm0)
+
+fm1 <- lmer(Reaction ~ Days + diag(Days|Subject), sleepstudy)
+fm1  ## Fail - now OK :-)
+summary(fm1) ## Fail - now OK :-)
+summary(fm1, ddf="lme4")
+
+summary(fm1, ddf="lme4")
+lme4:::getReCovs(fm1)
+lme4:::upReCovs(lme4:::getReCovs(fm1), fm1@theta)
+getAnywhere("summary.merMod")
+VarCorr(fm1)
+
+attr(fm1, "reCovs")
+
+
+#####################################################################
 ## 2025-12-30
 
 #################################
 ## Look into ranova behavior with lme4-2.0-0
 library(lmerTest)
 library(lme4)
+packageVersion("lmerTest")
 packageVersion("lme4") == "2.0.0"
 
 fm1 <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy)
@@ -29,10 +1063,12 @@ fm1 <- lmer(Reaction ~ Days + cs(Days|Subject), sleepstudy)
 fm1
 ranova(fm1, reduce.terms = FALSE)
 fm1 <- lmer(Reaction ~ Days + diag(Days|Subject), sleepstudy)
-fm1  ## Fail
-summary(fm1) ## Fail
+attr(fm1, "reCovs")
+fm1  ## Fail - now ok
+summary(fm1) ## Fail - now ok
 ranova(fm1, reduce.terms = FALSE)
 fm1 <- lme4::lmer(Reaction ~ Days + diag(Days|Subject), sleepstudy)
+attr(fm1, "reCovs")
 fm1 ## OK
 summary(fm1) ## OK
 ranova(fm1, reduce.terms = FALSE)
@@ -40,6 +1076,8 @@ ranova(fm1, reduce.terms = TRUE)
 
 fm7 <- lmer(Reaction ~ Days + ar1(Days|Subject), sleepstudy)
 fm7
+summary(fm7)
+ranova(fm7)
 str(fm7, max.level = 2)
 fm7@reCovs
 fm7@upper
