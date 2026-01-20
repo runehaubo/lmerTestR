@@ -1,5 +1,5 @@
 #############################################################################
-#    Copyright (c) 2013-2020 Alexandra Kuznetsova, Per Bruun Brockhoff, and
+#    Copyright (c) 2013-2026 Alexandra Kuznetsova, Per Bruun Brockhoff, and
 #    Rune Haubo Bojesen Christensen
 #
 #    This file is part of the lmerTest package for R (*lmerTest*)
@@ -120,12 +120,10 @@ anova.lmerModLmerTest <- function(object, ..., type = c("III", "II", "I", "3", "
   models <- if(length(dots))
     sapply(dots, is, "lmerModLmerTest") | sapply(dots, is, "merMod") |
     sapply(dots, is, "lm") else logical(0)
-  if(any(models)) return(NextMethod()) # return(anova(as(object, "lmerMod"), ...))
+  if(any(models)) return(NextMethod()) 
   # Note: Need 'NextMethod' here to get printing from anova.merMod right.
   ddf <- match.arg(ddf)
-  # Commented since we need to pass 'hidden' type options to single_anova
-  # type <- match.arg(type)
-  if(ddf=="lme4") return(anova(as(object, "lmerMod"), ...)) # return(NextMethod())
+  if(ddf=="lme4") return(anova(forceNewMerMod(as(object, "lmerMod"), object), ...))
   # FIXME: Warn that 'type' is ignored when ddf="lme4"?
   single_anova(object=object, type=type, ddf=ddf)
 }
@@ -152,6 +150,7 @@ anova.lmerModLmerTest <- function(object, ..., type = c("III", "II", "I", "3", "
 #' @importFrom stats model.matrix terms formula
 #' @author Rune Haubo B. Christensen
 #'
+#' @noRd
 #' @keywords internal
 single_anova <- function(object,
                          type = c("III", "II", "I", "3", "2", "1", "yates", "marginal", "2b"),

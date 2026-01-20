@@ -43,8 +43,8 @@ stopifnot(
 #######################################
 ## Tests for fm1:
 
-an1new <- anova(fm1)
-sfm1new <- summary(fm1)
+(an1new <- anova(fm1))
+(sfm1new <- summary(fm1))
 
 stopifnot(
   isTRUE(all.equal(an1new, an1, check.attributes=FALSE, tol=TOL)),
@@ -74,8 +74,8 @@ resid(fm1)
 
 #######################################
 ## Tests for fm2:
-an2new <- anova(fm2)
-sfm2new <- summary(fm2)
+(an2new <- anova(fm2))
+(sfm2new <- summary(fm2))
 
 stopifnot(
   isTRUE(all.equal(an2new, an2, check.attributes=FALSE, tol=TOL)),

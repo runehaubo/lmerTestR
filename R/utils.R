@@ -1,5 +1,5 @@
 #############################################################################
-#    Copyright (c) 2013-2020 Alexandra Kuznetsova, Per Bruun Brockhoff, and
+#    Copyright (c) 2013-2026 Alexandra Kuznetsova, Per Bruun Brockhoff, and
 #    Rune Haubo Bojesen Christensen
 #
 #    This file is part of the lmerTest package for R (*lmerTest*)
@@ -46,6 +46,7 @@
 #' @param A a symmetric numeric matrix
 #'
 #' @return a numerical scalar
+#' @noRd
 #' @keywords internal
 qform <- function(x, A) {
   sum(x * (A %*% x)) # quadratic form: x'Ax
@@ -60,6 +61,7 @@ qform <- function(x, A) {
 #' @param ... objects to be \code{rbind}'ed - typically matrices or vectors
 #'
 #' @keywords internal
+#' @noRd
 rbindall <- function(...) do.call(rbind, ...)
 
 cbindall <- function(...) do.call(cbind, ...)

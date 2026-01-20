@@ -1,5 +1,5 @@
 #############################################################################
-#    Copyright (c) 2013-2020 Alexandra Kuznetsova, Per Bruun Brockhoff, and
+#    Copyright (c) 2013-2026 Alexandra Kuznetsova, Per Bruun Brockhoff, and
 #    Rune Haubo Bojesen Christensen
 #
 #    This file is part of the lmerTest package for R (*lmerTest*)
@@ -130,6 +130,7 @@ numeric_terms <- function(model) {
 #'
 #' @return the model (or 'design') matrix.
 #' @keywords internal
+#' @noRd
 #' @author Rune Haubo B Christensen
 get_model_matrix <- function(model, type=c("extract", "remake"),
                              contrasts="restore") {

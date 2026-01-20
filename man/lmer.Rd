@@ -25,14 +25,36 @@ lmer(
     response on the left of a \code{~} operator and the terms, separated
     by \code{+} operators, on the right.  Random-effects terms are
     distinguished by vertical bars (\code{|}) separating expressions
-    for design matrices from grouping factors.  Two vertical bars
-    (\code{||}) can be used to specify multiple uncorrelated random
-    effects for the same grouping variable. %----------
-    (Because of the way it is implemented, the \code{||}-syntax \emph{works
-       only for design matrices containing numeric (continuous) predictors};
-     to fit models with independent categorical effects, see \code{\link[lme4]{dummy}}
-     or the \code{lmer_alt} function from the \href{https://CRAN.R-project.org/package=afex}{\pkg{afex}} package.)
-}
+    for design matrices from grouping factors. By default, non-scalar
+    random effects (where the design matrix has more than one column,
+    e.g. \code{(1+x|f)}) are fitted with \emph{unstructured} (general
+    positive semidefinite) covariance matrices.
+    \itemize{
+      \item Two vertical bars
+      (\code{||}) can be used to specify multiple uncorrelated random
+      effects for the same grouping variable. %----------
+      With default settings, the \code{||}-syntax \emph{works
+	only for design matrices containing numeric (continuous) predictors};
+      to fit models with independent categorical effects, use
+      \code{diag(f|g)} or set \code{options(lme4.doublevert.default = "diag_special")} (see
+      \code{help(getDoublevertDefault)} in \pkg{lme4} version \code{2.0-0} or higher).
+      \item Tags preceding a random effect term specify covariance
+      structure:
+      \itemize{
+	\item \code{us} (default: \code{us(f|g)} is equivalent to \code{(f|g)}):
+	unstructured, positive semi-definite
+	\item \code{diag}: diagonal (all correlations set to zero).
+	Specify \code{diag(f|g, hom = TRUE)}
+	to fit a homogeneous diagonal covariance matrix
+	\item \code{cs}: compound symmetric (all pairwise correlations
+	set identical). Specify \code{cs(f|g, hom = TRUE)} for homogeneous
+	variances.
+	\item \code{ar1}: autoregressive order 1. Note that AR1 models
+	are homogeneous by default; specify \code{ar1(f|g, hom = FALSE)}
+	for heterogeneous variances.
+      } % itemize (cov struct types)
+    } % itemize (cov struct info)
+  }
 
 \item{data}{an optional data frame containing the variables named in
     \code{formula}.  By default the variables are taken from the
@@ -55,9 +77,13 @@ lmer(
     nonlinear optimizer, see the \code{*lmerControl} documentation for
     details.}
 
-\item{start}{a named \code{\link{list}} of starting values for the
-    parameters in the model.  For \code{lmer} this can be a numeric
-    vector or a list with one component named \code{"theta"}.}
+\item{start}{a numeric vector or a named \link{list} with one optional
+    component named \code{par} or \code{theta}, giving starting values
+    for covariance parameters.  Numeric \code{start} is equivalent to
+    \code{list(par = start)}.  Parameters corresponding to unstructured
+    covariance matrices are on the scale of the Cholesky factor of the
+    relative covariance matrix.  By default, all relative covariance
+    matrices are identity matrices.}
 
 \item{verbose}{integer scalar.  If \code{> 0} verbose output is
     generated during the optimization of the parameter estimates.  If
@@ -114,8 +140,8 @@ for \code{lme4::lmer} and all the usual \code{lmer}-methods work.
 }
 \details{
 For details about \code{lmer} see \code{\link[lme4]{lmer}}
-(\code{help(lme4::lmer)}). The description of all arguments is taken
-unedited from the \pkg{lme4}-package.
+(\code{help(lme4::lmer)}). The description of all arguments below is taken
+verbatim and unedited from the \pkg{lme4}-package.
 
 In cases when a valid \code{lmer}-object
 (\code{lmerMod}) is produced, but when the computations needed for

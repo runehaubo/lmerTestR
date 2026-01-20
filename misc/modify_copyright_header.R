@@ -2,9 +2,9 @@
 ########################################################
 ## Change or modify copyright header in R-files:
 
-cp_header <- readLines("~/GitHub/lmerTestR/package/misc/copyright_header.txt")
+cp_header <- readLines("~/GitHub/lmerTestR/lmerTest/misc/copyright_header.txt")
 
-folder <- "~/GitHub/lmerTestR/package/R"
+folder <- "~/GitHub/lmerTestR/lmerTest/R"
 filenames <- list.files(folder)
 
 # fn <- filenames[1] # for tests

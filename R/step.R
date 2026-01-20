@@ -1,5 +1,5 @@
 #############################################################################
-#    Copyright (c) 2013-2020 Alexandra Kuznetsova, Per Bruun Brockhoff, and
+#    Copyright (c) 2013-2026 Alexandra Kuznetsova, Per Bruun Brockhoff, and
 #    Rune Haubo Bojesen Christensen
 #
 #    This file is part of the lmerTest package for R (*lmerTest*)
@@ -379,7 +379,7 @@ reduce_fixed <- function(model, ddf=c("Satterthwaite", "Kenward-Roger"), alpha=0
   above <- (!is.na(pvals) & pvals > alpha)
   if(any(above)) while(any(above)) {
     remove <- consider[which.max(pvals)]
-    newform <- rm_complete_terms(remove, orig_form, random = FALSE)[[1L]]
+    newform <- rm_complete_terms(remove, orig_form)[[1L]]
     reduced <- rbind(reduced, aov[remove, ])
     newfit <- eval.parent(update(newfit, formula = newform))
     # newfit <- update(newfit, formula = newform)

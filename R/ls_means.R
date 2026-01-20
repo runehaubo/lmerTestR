@@ -1,5 +1,5 @@
 #############################################################################
-#    Copyright (c) 2013-2020 Alexandra Kuznetsova, Per Bruun Brockhoff, and
+#    Copyright (c) 2013-2026 Alexandra Kuznetsova, Per Bruun Brockhoff, and
 #    Rune Haubo Bojesen Christensen
 #
 #    This file is part of the lmerTest package for R (*lmerTest*)
@@ -200,6 +200,7 @@ difflsmeans.lmerModLmerTest <- function(model, which=NULL, level=0.95,
 ##############################################
 ######## lsmeans_contrasts()
 ##############################################
+#' @importFrom reformulas nobars
 lsmeans_contrasts <- function(model, which=NULL) {
   stopifnot(inherits(model, "lmerModLmerTest"))
   factor_terms <- attr(terms(model), "term.labels")[!numeric_terms(model)]

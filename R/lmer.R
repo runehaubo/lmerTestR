@@ -1,5 +1,5 @@
 #############################################################################
-#    Copyright (c) 2013-2020 Alexandra Kuznetsova, Per Bruun Brockhoff, and
+#    Copyright (c) 2013-2026 Alexandra Kuznetsova, Per Bruun Brockhoff, and
 #    Rune Haubo Bojesen Christensen
 #
 #    This file is part of the lmerTest package for R (*lmerTest*)
@@ -88,8 +88,8 @@ lmerModLmerTest <-
 #' for \code{lme4::lmer} and all the usual \code{lmer}-methods work.
 #'
 #' For details about \code{lmer} see \code{\link[lme4]{lmer}}
-#' (\code{help(lme4::lmer)}). The description of all arguments is taken
-#' unedited from the \pkg{lme4}-package.
+#' (\code{help(lme4::lmer)}). The description of all arguments below is taken
+#' verbatim and unedited from the \pkg{lme4}-package.
 #'
 #' In cases when a valid \code{lmer}-object
 #' (\code{lmerMod}) is produced, but when the computations needed for
@@ -159,6 +159,16 @@ if(getRversion() < "3.3") {
   }
 }
 
+#' @importFrom utils packageVersion
+#' @rawNamespace
+#' if (utils::packageVersion("lme4") >= "2.0-0")
+#'   importFrom(lme4, forceNewMerMod)
+
+
+# if (utils::packageVersion("lme4") < "2.0-0")
+#   forceNewMerMod <- function(object, reference) object
+
+
 ##############################################
 ######## as_lmerModLT()
 ##############################################
@@ -169,8 +179,8 @@ as_lmerModLT <- function(model, devfun, tol=1e-8) {
   # Set relevant slots of the new model object:
   res@sigma <- sigma(model)
   res@vcov_beta <- as.matrix(vcov(model))
-  varpar_opt <- unname(c(res@theta, res@sigma))
   # Compute Hessian:
+  varpar_opt <- getVarPar(model)
   h <- numDeriv::hessian(func=devfun_vp, x=varpar_opt, devfun=devfun,
                          reml=is_reml)
   # Eigen decompose the Hessian:
@@ -203,9 +213,23 @@ as_lmerModLT <- function(model, devfun, tol=1e-8) {
   # Compute Jacobian of cov(beta) for each varpar and save in list:
   Jac <- numDeriv::jacobian(func=get_covbeta, x=varpar_opt, devfun=devfun)
   res@Jac_list <- lapply(1:ncol(Jac), function(i)
-    array(Jac[, i], dim=rep(length(res@beta), 2))) # k-list of jacobian matrices
+    array(Jac[, i], dim=rep(length(res@beta), 2))) # k-list of Jacobian matrices
+  # Ensure that the reCovs and upper attributes are set on the model object
+  # that are required by the >= 2.0-0 version lme4:
+  res <- forceNewMerMod(res, reference = model)
   res
 }
+
+#' @importFrom utils packageVersion
+#' @importFrom lme4 getME
+getOptPar <- function(object) {
+  if(packageVersion("lme4") >= "2.0.0") unname(getME(object, "par")) else 
+    unname(getME(object, "theta"))
+}
+getVarPar <- function(object) {
+  unname(c(getOptPar(object), sigma(object)))
+}
+
 
 ##############################################
 ######## as_lmerModLmerTest()
@@ -256,7 +280,7 @@ as_lmerModLmerTest <- function(model, tol=1e-8) {
   mc <- getCall(model)
   args <- c(as.list(mc), devFunOnly=TRUE)
   # if 'control' is not set we suppress potential message about rank deficient X
-  # when evaulating devfun:
+  # when evaluating devfun:
   if(!"control" %in% names(as.list(mc)))
     args$control <- lme4::lmerControl(check.rankX = "silent.drop.cols")
   Call <- as.call(c(list(quote(lme4::lmer)), args[-1]))
@@ -296,6 +320,7 @@ as_lmerModLmerTest <- function(model, tol=1e-8) {
 #'
 #' @return the REML or ML deviance.
 #' @author Rune Haubo B. Christensen
+#' @noRd
 #' @keywords internal
 devfun_vp <- function(varpar, devfun, reml) {
   nvarpar <- length(varpar)
@@ -325,6 +350,7 @@ devfun_vp <- function(varpar, devfun, reml) {
 #'
 #' @return cov(beta) at supplied varpar values.
 #' @author Rune Haubo B. Christensen
+#' @noRd
 #' @keywords internal
 get_covbeta <- function(varpar, devfun) {
   nvarpar <- length(varpar)
@@ -381,3 +407,4 @@ update.lmerModLmerTest <- function(object, formula., ..., evaluate = TRUE) {
       as_lmerModLmerTest(res) else res
   } else call
 }
+

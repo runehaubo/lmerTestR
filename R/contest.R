@@ -1,5 +1,5 @@
 #############################################################################
-#    Copyright (c) 2013-2020 Alexandra Kuznetsova, Per Bruun Brockhoff, and
+#    Copyright (c) 2013-2026 Alexandra Kuznetsova, Per Bruun Brockhoff, and
 #    Rune Haubo Bojesen Christensen
 #
 #    This file is part of the lmerTest package for R (*lmerTest*)
@@ -497,6 +497,7 @@ contestMD.lmerModLmerTest <- function(model, L, rhs=0,
 #' @author Rune Haubo B. Christensen
 #'
 #' @return the denominator df; a numerical scalar
+#' @noRd
 #' @keywords internal
 get_Fstat_ddf <- function(nu, tol=1e-8) {
   # Computes denominator df for an F-statistic that is derived from a sum of

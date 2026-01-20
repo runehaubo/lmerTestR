@@ -182,6 +182,35 @@ stopifnot(
         colnames(step_res$fixed))
 )
 
+###########################
+# Evaluation in function without the formula:
+# Reported by Uwe Ligges 2025-01-16.
+f <- function(data) {
+  lmer(Petal.Length ~ Sepal.Length + (1|Species), data=data)
+}
+
+res <- f(iris)
+ranova(res) # used to fail - now it works
+
+data <- iris
+ranova(res) # now it works
+###########################
+# Evaluation in function without the formula(2):
+# A model with ||-notation:
+f2 <- function(data) {
+  lmer(Reaction ~ Days + (Days||Subject), data)
+}
+res <- f2(sleepstudy)
+ranova(res)
+
+# A model with multiple RE terms:
+f3 <- function(data) {
+  lmer(Coloursaturation ~ TVset*Picture + (1|Assessor:TVset) + (1|Assessor), data)
+}
+res <- f3(TVbo)
+ranova(res)
+###########################
+
 # Check that step works when form is a character vector
 m <- lmer(form, data=ham)
 step_res <- step(m)

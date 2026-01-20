@@ -1,5 +1,5 @@
 #############################################################################
-#    Copyright (c) 2013-2020 Alexandra Kuznetsova, Per Bruun Brockhoff, and
+#    Copyright (c) 2013-2026 Alexandra Kuznetsova, Per Bruun Brockhoff, and
 #    Rune Haubo Bojesen Christensen
 #
 #    This file is part of the lmerTest package for R (*lmerTest*)
@@ -70,6 +70,8 @@
 #' @export
 #'
 #' @importFrom stats drop1 drop.scope terms formula
+#' @importFrom reformulas nobars
+#' 
 #' @examples
 #'
 #' # Basic usage:
@@ -119,7 +121,7 @@ drop1.lmerModLmerTest <- function(object, scope, ddf=c("Satterthwaite", "Kenward
     if(!is.null(attr(X, "col.dropped")) || force_get_contrasts) {
       # Compute L directly if model is rank deficient or force_get_contrasts is TRUE:
       orig_form <- formula(object)
-      new_forms <- lapply(rm_complete_terms(scope, orig_form, random=FALSE), nobars)
+      new_forms <- lapply(rm_complete_terms(scope, orig_form), nobars)
       # Compute list of contrast matrices as 'diffs' to orig. X:
       Llist <- if(!length(new_forms)) list() else
         lapply(new_forms, function(form) {

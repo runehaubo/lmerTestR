@@ -1,5 +1,5 @@
 #############################################################################
-#    Copyright (c) 2013-2020 Alexandra Kuznetsova, Per Bruun Brockhoff, and
+#    Copyright (c) 2013-2026 Alexandra Kuznetsova, Per Bruun Brockhoff, and
 #    Rune Haubo Bojesen Christensen
 #
 #    This file is part of the lmerTest package for R (*lmerTest*)
@@ -128,7 +128,7 @@
 #' Alternative methods for combining design variables and consumer preference
 #' with information about attitudes and demographics in conjoint analysis,
 #' \emph{Food Quality and Preference}, 10-4, 368-378, ISSN 0950-3293,
-#' \url{https://doi.org/10.1016/j.foodqual.2009.09.004}.
+#' \doi{10.1016/j.foodqual.2009.09.004}.
 #'
 #' @examples
 #'

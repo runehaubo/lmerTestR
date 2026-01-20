@@ -18,3 +18,14 @@
 #    <https://www.r-project.org/Licenses/> and/or
 #    <http://www.gnu.org/licenses/>.
 #############################################################################
+#
+# zzz.R - .onLoad
+
+.onLoad <- function(libname, pkgname) {
+
+  ns <- parent.env(environment())
+  if (packageVersion("lme4") < "2.0-0")
+    assign("forceNewMerMod", envir = ns, inherits = FALSE,
+           function(object, reference) object)
+  
+}

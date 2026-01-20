@@ -1,5 +1,5 @@
 #############################################################################
-#    Copyright (c) 2013-2020 Alexandra Kuznetsova, Per Bruun Brockhoff, and
+#    Copyright (c) 2013-2026 Alexandra Kuznetsova, Per Bruun Brockhoff, and
 #    Rune Haubo Bojesen Christensen
 #
 #    This file is part of the lmerTest package for R (*lmerTest*)
@@ -45,6 +45,7 @@
 #' @return a list with one element for each term in the model. Each element/term
 #' is a character vector of terms that the term is contained in.
 #' @importFrom stats terms setNames
+#' @noRd
 #' @keywords internal
 containment <- function(object) { # lm or merMod
   # For all terms 'T' in object compute the terms
@@ -90,6 +91,7 @@ containment <- function(object) { # lm or merMod
 #' @return a logical vector indicating for each term in \code{term_names} if
 #' it contains \code{term}.
 #' @importFrom stats setNames
+#' @noRd
 #' @keywords internal
 term_contain <- function(term, factors, dataClasses, term_names) {
   get_vars <- function(term)
@@ -150,6 +152,7 @@ term_contain <- function(term, factors, dataClasses, term_names) {
 #' \item{L}{lower-left unit-triangular matrix}
 #' \item{U}{upper-right triangular matrix (\emph{not} unit-triangular)}
 #'
+#' @noRd
 #' @keywords internal
 doolittle <- function(x, eps = 1e-6) {
   if(!is.matrix(x) || ncol(x) != nrow(x) || !is.numeric(x))
@@ -203,6 +206,7 @@ doolittle <- function(x, eps = 1e-6) {
 #' is \code{FALSE}.
 #'
 #' @return A design matrix in which redundant columns are dropped
+#' @noRd
 #' @keywords internal
 ensure_full_rank <- function(X, tol = 1e-7, silent = FALSE, test.ans = FALSE) {
   ### works if ncol(X) >= 0 and nrow(X) >= 0
@@ -246,6 +250,7 @@ ensure_full_rank <- function(X, tol = 1e-7, silent = FALSE, test.ans = FALSE) {
 #'
 #' @return the rank-deficien design matrix
 #' @author Rune Haubo B. Christensen
+#' @noRd
 #' @keywords internal
 #'
 #' @importFrom stats as.formula model.frame terms model.matrix

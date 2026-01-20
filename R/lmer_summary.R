@@ -1,5 +1,5 @@
 #############################################################################
-#    Copyright (c) 2013-2020 Alexandra Kuznetsova, Per Bruun Brockhoff, and
+#    Copyright (c) 2013-2026 Alexandra Kuznetsova, Per Bruun Brockhoff, and
 #    Rune Haubo Bojesen Christensen
 #
 #    This file is part of the lmerTest package for R (*lmerTest*)
@@ -119,7 +119,7 @@ summary.lmerModLmerTest <- function(object, ...,
       return(summary(object))
     }
   }
-  summ <- summary(as(object, "lmerMod"), ...)
+  summ <- summary(forceNewMerMod(as(object, "lmerMod"), object), ...)
   if(ddf == "lme4") return(summ)
   summ$coefficients <- get_coefmat(object, ddf=ddf)
   ddf_nm <- switch(ddf, "Satterthwaite" = "Satterthwaite's",
@@ -145,3 +145,4 @@ get_coefmat <- function(model, ddf=c("Satterthwaite", "Kenward-Roger")) {
   rownames(tab) <- names(fixef(model))
   as.matrix(tab)
 }
+
