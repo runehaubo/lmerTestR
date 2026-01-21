@@ -2,7 +2,7 @@
 
 library(devtools)
 # has_devel()
-r2path <- "~/GitHub/lmerTestR/lmerTest"
+r2path <- "C:/Users/RCHR0155/OneDrive - Region Hovedstaden/github/lmerTestR/lmerTest" # "~/GitHub/lmerTestR/lmerTest"
 # document(pkg=r2path, roclets = c("namespace", "rd"))
 document(pkg=r2path)
 load_all(r2path)
@@ -16,7 +16,7 @@ load_all(r2path)
 ## Install development version of lme4:
 
 
-# devtools::install_github("lme4/lme4",dependencies=TRUE)
+# devtools::install_github("lme4/lme4",dependencies=TRUE, force=TRUE)
 # library(lme4)
 # sessionInfo()
 
