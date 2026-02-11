@@ -137,6 +137,9 @@ lmer <- function(formula, data = NULL, REML = TRUE,
   return(res)
 }
 
+##############################################
+######## sigma()
+##############################################
 #' @rawNamespace
 #' if(getRversion() >= "3.3.0") {
 #'   importFrom("stats", sigma)
@@ -159,7 +162,9 @@ if(getRversion() < "3.3") {
   }
 }
 
-
+##############################################
+######## forceNewMerMod_safe()
+##############################################
 #' @importFrom utils getFromNamespace
 forceNewMerMod_safe <- function(object, reference) {
   if (exists("forceNewMerMod", envir = asNamespace("lme4"), inherits = FALSE)) {
