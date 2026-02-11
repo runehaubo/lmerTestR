@@ -159,15 +159,15 @@ if(getRversion() < "3.3") {
   }
 }
 
-#' @importFrom utils packageVersion
-#' @rawNamespace
-#' if (utils::packageVersion("lme4") >= "2.0-0")
-#'   importFrom(lme4, forceNewMerMod)
 
-
-# if (utils::packageVersion("lme4") < "2.0-0")
-#   forceNewMerMod <- function(object, reference) object
-
+#' @importFrom utils getFromNamespace
+forceNewMerMod_safe <- function(object, reference) {
+  if (exists("forceNewMerMod", envir = asNamespace("lme4"), inherits = FALSE)) {
+    getFromNamespace("forceNewMerMod", "lme4")(object, reference)
+  } else {
+    object
+  }
+}
 
 ##############################################
 ######## as_lmerModLT()
@@ -216,7 +216,7 @@ as_lmerModLT <- function(model, devfun, tol=1e-8) {
     array(Jac[, i], dim=rep(length(res@beta), 2))) # k-list of Jacobian matrices
   # Ensure that the reCovs and upper attributes are set on the model object
   # that are required by the >= 2.0-0 version lme4:
-  res <- forceNewMerMod(res, reference = model)
+  res <- forceNewMerMod_safe(res, reference = model)
   res
 }
 

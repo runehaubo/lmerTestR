@@ -123,7 +123,7 @@ anova.lmerModLmerTest <- function(object, ..., type = c("III", "II", "I", "3", "
   if(any(models)) return(NextMethod()) 
   # Note: Need 'NextMethod' here to get printing from anova.merMod right.
   ddf <- match.arg(ddf)
-  if(ddf=="lme4") return(anova(forceNewMerMod(as(object, "lmerMod"), object), ...))
+  if(ddf=="lme4") return(anova(forceNewMerMod_safe(as(object, "lmerMod"), object), ...))
   # FIXME: Warn that 'type' is ignored when ddf="lme4"?
   single_anova(object=object, type=type, ddf=ddf)
 }
