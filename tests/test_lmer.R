@@ -2,6 +2,8 @@
 
 stopifnot(!"lmerTest" %in% .packages()) # ensure that lmerTest is NOT attached
 data("sleepstudy", package="lme4")
+lmerTest::lmer(Reaction ~ 1 + (1|Subject), sleepstudy)
+
 f <- function(form, data) lmerTest::lmer(form, data=data)
 form <- "Reaction ~ Days + (Days|Subject)"
 fm <- f(form, data=sleepstudy)
