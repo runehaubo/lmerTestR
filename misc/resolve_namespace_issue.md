@@ -1,4 +1,3 @@
----
 
 # Question (2026-02-11)
 
@@ -31,8 +30,6 @@ with the error:
 ". 
 
 How can I fix lmerTest such that the package works regardless of install sequence while I am not prepared to make lmerTest depend on the version of lme4 by adding something like `Depends: lme4 (>= 2.0-0)` in the `DESCRIPTION` file? 
-
----
 
 # Answer from ChatGPT-5.2
 
