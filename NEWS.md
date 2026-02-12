@@ -19,8 +19,8 @@ lmerTest 3.1-3 (October 2020)
 lmerTest 3.1-2 (April 2020)
 ------------------
 
-- Remove argument "..." to accommodate new version of `lme4` (from version `1.1-22`)
-- Minor fix to tests to accommodate new version of `lme4` (from version `1.1-22`)
+- Remove argument "..." in `lmer` to accommodate new version of `lme4` (from version `1.1-22`)
+s- Minor fix to tests to accommodate new version of `lme4` (from version `1.1-22`)
 
 lmerTest 3.1-1
 ------------------
