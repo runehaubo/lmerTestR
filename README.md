@@ -2,7 +2,6 @@
 
 This is the repo for the _new_ **lmerTest** package, the old package is available [here](https://github.com/runehaubo/lmerTest).
 
-[![Build Status](https://travis-ci.org/runehaubo/lmerTestR.svg?branch=master)](https://travis-ci.org/runehaubo/lmerTestR)
 [![cran version](http://www.r-pkg.org/badges/version/lmerTest)](https://cran.r-project.org/package=lmerTest)
 [![downloads](https://cranlogs.r-pkg.org/badges/lmerTest)](https://cran.r-project.org/package=lmerTest)
 [![total downloads](http://cranlogs.r-pkg.org/badges/grand-total/lmerTest)](http://cranlogs.r-pkg.org/badges/grand-total/lmerTest)
@@ -45,20 +44,18 @@ Please raise a new issue! Preferably add code that illustrates the problem using
 Basically there are two options for installing **lmerTest**:
 
 1. Released (stable version) from CRAN: in **R** run `install.packages("lmerTest")`.
-2. Development version from GitHub: First load the **devtools** package (and install it if you do not have it) and install the default (master) branch:
+2. Development version from GitHub: in **R** run
 ```
-library("devtools")
-install_github("runehaubo/lmerTestR")
+remotes::install_github("runehaubo/lmerTestR")
 ```
+If you don't have the **remotes** package, you will have to install it first using `install.packages("remotes")` for this to work.
+
 If you haven't already installed a previous version of **lmerTest** you need to also install dependencies (other packages that **lmerTest** depends on and requires you to install to function properly). We recommend that you install **lmerTest** from CRAN (using `install.packages("lmerTest")`) before installing from GitHub as described above. 
 
 An alternative is to use 
 ```
-library("devtools")
-install_github("runehaubo/lmerTestR", dependencies=TRUE)
+remotes::install_github("runehaubo/lmerTestR", dependencies=TRUE)
 ```
-but that requires you to install all dependent packages from source (which only works if you have the correct compilers installed and set up correctly); installing the pre-compiled packages from CRAN is usually easier.
+but that may require you to install some dependent packages from source (which only works if you have the correct compilers installed and set up correctly); installing the pre-compiled packages from CRAN is usually easier.
 
-
-  
 
