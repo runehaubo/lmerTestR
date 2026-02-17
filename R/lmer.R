@@ -38,6 +38,7 @@
 #
 # --- utility functions: ---
 #
+# forceNewMerMod_safe
 # as_lmerModLT
 # devfun_vp
 # get_covbeta
@@ -159,18 +160,6 @@ if(getRversion() < "3.3") {
         "sigmaREML"
         else "sigmaML"]]
     else 1
-  }
-}
-
-##############################################
-######## forceNewMerMod_safe()
-##############################################
-#' @importFrom utils getFromNamespace
-forceNewMerMod_safe <- function(object, reference) {
-  if (exists("forceNewMerMod", envir = asNamespace("lme4"), inherits = FALSE)) {
-    getFromNamespace("forceNewMerMod", "lme4")(object, reference)
-  } else {
-    object
   }
 }
 
@@ -309,6 +298,17 @@ as_lmerModLmerTest <- function(model, tol=1e-8) {
   as_lmerModLT(model, devfun, tol=tol)
 }
 
+##############################################
+######## forceNewMerMod_safe()
+##############################################
+#' @importFrom utils getFromNamespace
+forceNewMerMod_safe <- function(object, reference) {
+  if (exists("forceNewMerMod", envir = asNamespace("lme4"), inherits = FALSE)) {
+    getFromNamespace("forceNewMerMod", "lme4")(object, reference)
+  } else {
+    object
+  }
+}
 
 ##############################################
 ######## devfun_vp()
