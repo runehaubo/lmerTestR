@@ -1,7 +1,12 @@
+lmerTest 3.2-1 (February 2026)
+------------------
+
+- Resolve install sequence problems with `lme4` CRAN (`1.1-38`) and new version (`2.0.0`) (issue #61)
+
 lmerTest 3.2-0 (January 2026)
 ------------------
 
-- Update lmerTest to accommodate the new lme4-2.0.0
+- Accommodate the new `lme4-2.0.0`
 - Fixed scoping issue reported by Uwe Ligges.
 
 lmerTest 3.1-3 (October 2020)
@@ -14,8 +19,8 @@ lmerTest 3.1-3 (October 2020)
 lmerTest 3.1-2 (April 2020)
 ------------------
 
-- Remove argument "..." to accommodate new version of `lme4` (from version `1.1-22`)
-- Minor fix to tests to accommodate new version of `lme4` (from version `1.1-22`)
+- Remove argument "..." in `lmer` to accommodate new version of `lme4` (from version `1.1-22`)
+s- Minor fix to tests to accommodate new version of `lme4` (from version `1.1-22`)
 
 lmerTest 3.1-1
 ------------------

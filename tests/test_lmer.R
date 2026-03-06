@@ -1,7 +1,10 @@
 # test_lmer.R
 
-stopifnot(!"lmerTest" %in% .packages()) # ensure that lmerTest is NOT attached
+if(isNamespaceLoaded("lmerTest")) unloadNamespace("lmerTest")
 data("sleepstudy", package="lme4")
+lmerTest::lmer(Reaction ~ 1 + (1|Subject), sleepstudy)
+
+if(isNamespaceLoaded("lmerTest")) unloadNamespace("lmerTest")
 f <- function(form, data) lmerTest::lmer(form, data=data)
 form <- "Reaction ~ Days + (Days|Subject)"
 fm <- f(form, data=sleepstudy)
@@ -9,12 +12,16 @@ anova(fm)
 summary(fm)
 
 # cf. GitHub issue #2:
+if(isNamespaceLoaded("lmerTest")) unloadNamespace("lmerTest")
 test <- function() {
   tmp <- sleepstudy
   m <- lmerTest::lmer(Reaction ~ Days + (Days | Subject), data = tmp)
   summary(m)
 }
 test()
+
+if(isNamespaceLoaded("lmerTest")) unloadNamespace("lmerTest")
+if(isNamespaceLoaded("lme4")) unloadNamespace("lme4")
 test <- function() {
   tmp <- sleepstudy
   m <- lme4::lmer(Reaction ~ Days + (Days | Subject), data = tmp)

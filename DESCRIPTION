@@ -1,7 +1,7 @@
 Package: lmerTest
 Type: Package
 Title: Tests in Linear Mixed Effects Models
-Version: 3.2-0
+Version: 3.2-1
 Authors@R: c(person("Alexandra", "Kuznetsova", role = c("aut")),
                    person("Per", "Bruun Brockhoff", role = c("aut", "ths")),
                    person("Rune", "Haubo Bojesen Christensen", role =  c("aut", "cre"),
@@ -50,4 +50,3 @@ Collate:
     'step.R'
     'terms_utils.R'
     'utils.R'
-    'zzz.R'
