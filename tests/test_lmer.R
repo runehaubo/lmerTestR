@@ -87,8 +87,24 @@ m <- lmer(form, data=ham)
 class(m)
 class(update(m, ~.- Product))
 stopifnot(inherits(update(m, ~.- Product), "lmerModLmerTest"))
-
 # In version < 3.0-1.9002 class(update(m, ~.- Product)) was "lmerMod"
+
+stopifnot(inherits(getCall(m)$formula, "formula"))
+
+test_call_formula <- function() {
+  data("sleepstudy", package="lme4")
+  sleepstudy$new_response <- sleepstudy$Reaction
+  m <- lmerTest::lmer("Reaction ~ Days + (Days | Subject)", data=sleepstudy)
+  call <- getCall(m)
+  stopifnot(inherits(call$formula, "formula"))
+  call$formula[[2L]] <- quote(new_response)
+  refit <- eval(call)
+  stopifnot(inherits(refit, "lmerModLmerTest"),
+            identical(formula(refit)[[2L]], quote(new_response)),
+            isTRUE(all.equal(fixef(m), fixef(refit), tolerance=TOL)))
+}
+test_call_formula()
+
 #####################################################################
 # Test error message from as_lmerModLmerTest:
 data("sleepstudy", package="lme4")

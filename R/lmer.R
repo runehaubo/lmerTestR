@@ -133,7 +133,8 @@ lmer <- function(formula, data = NULL, REML = TRUE,
   Call <- as.call(c(list(quote(lme4::lmer)), args[-1]))
   devfun <- eval.parent(Call)
   res <- as_lmerModLT(model, devfun)
-  # Restore the right 'call' in model:
+  # Keep the caller's function name and lme4's normalized formula:
+  orig_call$formula <- getCall(model)$formula
   res@call <- orig_call
   return(res)
 }
