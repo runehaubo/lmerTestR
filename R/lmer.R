@@ -290,10 +290,19 @@ as_lmerModLmerTest <- function(model, tol=1e-8) {
                                            error=function(e) {
                                              tryCatch(eval(Call, envir=sf),
                                                       error=function(e) {
-                                                        "error" })})})})
-  if((is.character(devfun) && devfun == "error") ||
-     !is.function(devfun))
-    # !is.function(devfun) || names(formals(devfun)[1]) != "theta")
+                                                        NULL })})})})
+  if(!is.function(devfun)) {
+    # The original call may refer to data from a previous session.
+    devfun <- tryCatch({
+      fitted_devfun <- getME(model, "devfun")
+      devfun_env <- environment(fitted_devfun)
+      # Derivative evaluations modify these objects in place.
+      devfun_env$pp <- devfun_env$pp$copy(shallow=FALSE)
+      devfun_env$resp <- devfun_env$resp$copy(shallow=FALSE)
+      fitted_devfun
+    }, error=function(e) NULL)
+  }
+  if(!is.function(devfun))
     stop("Unable to extract deviance function from model fit")
   as_lmerModLT(model, devfun, tol=tol)
 }
