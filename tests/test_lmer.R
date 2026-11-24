@@ -90,15 +90,26 @@ stopifnot(inherits(update(m, ~.- Product), "lmerModLmerTest"))
 
 # In version < 3.0-1.9002 class(update(m, ~.- Product)) was "lmerMod"
 #####################################################################
-# Test error message from as_lmerModLmerTest:
+# Coerce fits whose original call cannot be evaluated:
 data("sleepstudy", package="lme4")
 myfit <- function(formula, data) {
   lme4::lmer(formula = formula, data = data)
 }
 fm2 <- myfit(Reaction ~ Days + (Days|Subject), sleepstudy)
-m <- assertError(as_lmerModLmerTest(fm2))
+wrapped <- as_lmerModLmerTest(fm2)
+original_data <- sleepstudy
+fm2 <- lme4::lmer(Reaction ~ Days + (Days|Subject), data=original_data)
+expected <- as_lmerModLmerTest(fm2)
+saved <- serialize(fm2, NULL)
+rm(original_data)
+restored <- unserialize(saved)
+fitted_before <- serialize(fitted(restored), NULL)
+converted <- as_lmerModLmerTest(restored)
 stopifnot(
-  grepl("Unable to extract deviance function from model fit", m[[1]], fixed=TRUE)
+  inherits(converted, "lmerModLmerTest"),
+  all.equal(coef(summary(wrapped)), coef(summary(expected)), tolerance=TOL),
+  all.equal(coef(summary(converted)), coef(summary(expected)), tolerance=TOL),
+  identical(serialize(fitted(restored), NULL), fitted_before)
 )
 
 #####################################################################
