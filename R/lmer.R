@@ -240,6 +240,10 @@ getVarPar <- function(object) {
 #' @param tol tolerance for determining of eigenvalues are negative, zero or
 #' positive
 #'
+#' @details For functions that require an object of class \code{lmerMod},
+#' convert an existing \code{lmerModLmerTest} fit with
+#' \code{methods::as(model, "lmerMod")}.
+#'
 #' @return an object of class \code{'lmerModLmerTest'} which sets the following
 #' slots:
 #' \item{vcov_varpar}{the asymptotic covariance matrix of the variance parameters
@@ -264,6 +268,9 @@ getVarPar <- function(object) {
 #' m <- lme4::lmer(Reaction ~ Days + (Days | Subject), sleepstudy)
 #' bm <- as_lmerModLmerTest(m)
 #' slotNames(bm)
+#'
+#' m_back <- methods::as(bm, "lmerMod")
+#' class(m_back)
 #'
 as_lmerModLmerTest <- function(model, tol=1e-8) {
   if(!inherits(model, "lmerMod"))
