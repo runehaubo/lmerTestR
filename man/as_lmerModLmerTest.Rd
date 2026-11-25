@@ -30,10 +30,18 @@ of class 'lmerModLmerTest' involves computing the covariance
 matrix of the variance parameters and the gradient (Jacobian) of cov(beta)
 with respect to the variance parameters.
 }
+\details{
+For functions that require an object of class \code{lmerMod},
+convert an existing \code{lmerModLmerTest} fit with
+\code{methods::as(model, "lmerMod")}.
+}
 \examples{
 m <- lme4::lmer(Reaction ~ Days + (Days | Subject), sleepstudy)
 bm <- as_lmerModLmerTest(m)
 slotNames(bm)
+
+m_back <- methods::as(bm, "lmerMod")
+class(m_back)
 
 }
 \seealso{
